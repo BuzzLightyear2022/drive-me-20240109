@@ -9,6 +9,15 @@ import { VehicleAttributes, CarCatalog, ReservationData } from "../@types/types"
 import dotenv from "dotenv";
 dotenv.config();
 
+const makeImageFileName = (vehicleAttributes: VehicleAttributes): string => {
+    const carModel: string = vehicleAttributes.carModel;
+    const licensePlateNumber: string = vehicleAttributes.licensePlateNumber;
+    const modelCode: string = vehicleAttributes.modelCode;
+    const timestamp: number = new Date().getTime();
+    const imageFileName = `${carModel}${licensePlateNumber}${modelCode}${timestamp}.jpeg`;
+    return imageFileName;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const WebSocket = require("ws");
 
@@ -161,28 +170,34 @@ ipcMain.handle("sqlSelect:reservationDataById", async (event: Electron.IpcMainIn
     }
 });
 
-ipcMain.handle("sqlInsert:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent, data: VehicleAttributes): Promise<string | unknown> => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlInsert/VehicleAttributes`;
-    const formData: VehicleAttributes = data;
+ipcMain.handle("sqlInsert:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent, vehicleAttributes: VehicleAttributes): Promise<string | unknown> => {
+    const serverEndPoint = `http://${serverHost}:${port}/sqlInsert/vehicleAttributes`;
 
     const postData: FormData = new FormData();
 
-    const carModel: string = formData.carModel;
-    const licensePlateNumber: string = formData.licensePlateNumber;
-    const modelCode: string = formData.modelCode;
-    const timestamp: number = new Date().getTime();
-    const imageFileName = `${carModel}${licensePlateNumber}${modelCode}${timestamp}.jpeg`;
-    const imageUrl: string | undefined = formData.imageFileName;
+    const imageFileName = makeImageFileName(vehicleAttributes);
+    const imageUrl: string | undefined = vehicleAttributes.imageFileName;
     if (imageUrl) {
         const base64Image: string = imageUrl.split(";base64").pop() as string;
         const bufferImage: Buffer = Buffer.from(base64Image, "base64");
         postData.append("imageUrl", bufferImage, imageFileName);
     }
 
-    const textData: { [key in keyof VehicleAttributes]: string | boolean | null | undefined } = {} as { [key in keyof VehicleAttributes]: string | boolean | null };
-    for (const key in formData) {
+    const textData: {
+        [key in keyof VehicleAttributes]:
+        | string
+        | boolean
+        | null
+    } = {} as {
+        [key in keyof VehicleAttributes]:
+        | string
+        | boolean
+        | null
+    };
+
+    for (const key in vehicleAttributes) {
         if (key !== "imageFileName") {
-            textData[key as keyof VehicleAttributes] = formData[key as keyof VehicleAttributes];
+            textData[key as keyof VehicleAttributes] = vehicleAttributes[key as keyof VehicleAttributes];
         }
     }
 
@@ -199,6 +214,53 @@ ipcMain.handle("sqlInsert:vehicleAttributes", async (event: Electron.IpcMainInvo
         return response.status;
     } catch (error: unknown) {
         return "Failed to send image data: " + error;
+    }
+});
+
+ipcMain.on("sqlUpdate:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent, vehicleAttributes: VehicleAttributes) => {
+    const serverEndPoint = `http://${serverHost}:${port}/sqlUpdate/vehicleAttributes`;
+
+    const postData: FormData = new FormData();
+
+    const imageFileName: string = makeImageFileName(vehicleAttributes);
+    const imageUrl: string | null = vehicleAttributes.imageFileName;
+    if (imageUrl) {
+        const base64Image: string = imageUrl.split(";base64").pop();
+        const bufferImage: Buffer = Buffer.from(base64Image, "base64");
+        postData.append("imageUrl", bufferImage, imageFileName);
+    }
+
+    const textData: {
+        [key in keyof VehicleAttributes]:
+        | string
+        | boolean
+        | null
+    } = {} as {
+        [key in keyof VehicleAttributes]:
+        | string
+        | boolean
+        | null
+    };
+
+    for (const key in vehicleAttributes) {
+        if (key !== "imageFileName") {
+            textData[key as keyof VehicleAttributes] = vehicleAttributes[key as keyof VehicleAttributes];
+        }
+    }
+
+    postData.append("data", JSON.stringify(textData));
+
+    try {
+        const response: AxiosResponse = await axios.post(serverEndPoint, postData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+                ...postData.getHeaders()
+            }
+        });
+
+        return response.status;
+    } catch (error: unknown) {
+        return "Failed to send vehicleAttributes data: " + error;
     }
 });
 
@@ -269,8 +331,9 @@ socket.on("open", () => {
     console.log("WebSocket connection established");
 });
 
-socket.on("message", async () => {
-    await WindowHandler.windows.displayReservationWindow.send("sqlUpdate:reservationData");
+socket.on("message", async (message: string) => {
+    const recievedMessage: string = String(message);
+    await WindowHandler.windows.displayReservationWindow.send(recievedMessage);
 });
 
 socket.on("close", () => {

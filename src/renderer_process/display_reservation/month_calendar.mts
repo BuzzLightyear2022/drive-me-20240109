@@ -152,6 +152,10 @@ const MonthCalendar = class {
         await this.appendScheduleBars();
     }
 
+    updateVehicleAttributes = async () => {
+        
+    }
+
     getCalendarInfo() {
         return this.calendarInfo;
     }

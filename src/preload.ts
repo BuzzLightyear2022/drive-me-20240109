@@ -87,6 +87,9 @@ contextBridge.exposeInMainWorld(
     {
         reservationData: async (reservationData: ReservationData): Promise<void> => {
             ipcRenderer.send("sqlUpdate:reservationData", reservationData);
+        },
+        vehicleAttributes: async (vehicleAttributes: VehicleAttributes): Promise<void> => {
+            ipcRenderer.send("sqlUpdate:vehicleAttributes", vehicleAttributes);
         }
     }
 );
@@ -104,6 +107,11 @@ contextBridge.exposeInMainWorld(
         getVehicleId: (callback: (vehicleId: string) => void) => ipcRenderer.on("contextMenu:getVehicleId", (event: Electron.IpcRendererEvent, vehicleId) => callback(vehicleId)),
         updateReservationData: (callback: () => void) => {
             ipcRenderer.on("sqlUpdate:reservationData", () => {
+                return callback();
+            });
+        },
+        updateVehicleAttributes: (callback: () => void) => {
+            ipcRenderer.on("sqlUpdate:vehicleAttributes", () => {
                 return callback();
             });
         }

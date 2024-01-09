@@ -43,10 +43,10 @@ class WindowHandler {
         });
 
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/insert_vehicleAttributes.html`);
+            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/insert_vehicleAttributes.html`);
             WindowHandler.windows.insertVehicleAttributesWindow = win;
         } else {
-            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/insert_vehicleAttributes.html`));
+            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/insert_vehicleAttributes.html`));
             WindowHandler.windows.insertVehicleAttributesWindow = win;
         }
 
@@ -63,10 +63,10 @@ class WindowHandler {
         });
 
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/insert_reservation.html`);
+            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/insert_reservation.html`);
             WindowHandler.windows.insertReservationWindow = win;
         } else {
-            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/insert_reservation.html`));
+            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/insert_reservation.html`));
             WindowHandler.windows.insertReservationWindow = win;
         }
     }
@@ -81,10 +81,10 @@ class WindowHandler {
         });
 
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/edit_reservation.html`);
+            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_reservation.html`);
             WindowHandler.windows.editReservationWindow = win;
         } else {
-            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/edit_reservation.html`));
+            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_reservation.html`));
             WindowHandler.windows.editReservationWindow = win;
         }
 
@@ -155,10 +155,10 @@ class WindowHandler {
         });
 
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/edit_vehicleAttributes.html`);
+            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_vehicleAttributes.html`);
             WindowHandler.windows.editVehicleAttributesWindow = win;
         } else {
-            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/edit_vehicleAttributes.html`));
+            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_vehicleAttributes.html`));
             WindowHandler.windows.editVehicleAttributesWindow = win;
         }
 

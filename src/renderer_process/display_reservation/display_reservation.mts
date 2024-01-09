@@ -145,4 +145,11 @@ const handleVehicleAttributesItemScroll = (): void => {
         currentMonthCalendar.updateScheduleBars();
         nextMonthCalendar.updateScheduleBars();
     });
+
+    window.contextMenu.updateVehicleAttributes(() => {
+        console.log("update vehicles")
+        while (vehicleAttributesItemContainer.firstChild) {
+            vehicleAttributesItemContainer.removeChild(vehicleAttributesItemContainer.firstChild);
+        }
+    });
 })();

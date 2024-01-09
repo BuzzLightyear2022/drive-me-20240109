@@ -33,7 +33,8 @@ export interface sqlInsert {
 }
 
 export interface sqlUpdate {
-    reservationData: (reservationData: ReservationData) => Promise<void>
+    reservationData: (reservationData: ReservationData) => Promise<void>;
+    vehicleAttributes: (vehicleAttributes: VehicleAttributes) => Promise<void>
 }
 
 export interface contextMenu {
@@ -41,7 +42,8 @@ export interface contextMenu {
     vehicleAttributesItem: (args: { vehicleId: string }) => Promise<void>;
     getReservationId: (callback) => void;
     getVehicleId: (callback) => void;
-    updateReservationData: (callback: (reservationData: ReservationData) => void) => void;
+    updateReservationData: (callback: () => void) => void;
+    updateVehicleAttributes: (callback: () => void) => void;
 }
 
 export interface dialog {

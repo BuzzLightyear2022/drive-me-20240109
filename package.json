@@ -1,8 +1,8 @@
 {
   "name": "drive-me",
   "productName": "drive-me",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "version": "0.1.0",
+  "description": "The \"drive-me\" is a comprehensive tool designed to efficiently manage the operational status and attributes of rental cars. This app provides an intuitive platform for monitoring and organizing vital information related to the fleet of vehicles.",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -11,8 +11,8 @@
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx ."
   },
-  "keywords": [],
-  "author": "coder",
+  "keywords": ["electron", "typescript", "node"],
+  "author": "Takehiro Mizuno",
   "license": "MIT",
   "devDependencies": {
     "@electron-forge/cli": "^7.2.0",

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>drive-me-input-reservation</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net/ data:">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="../src/css/insert_reservation.css">
+</head>
+
+<body>
+    <div id="reservation-input-form" class="form-floating p-3">
+        <h1>予約情報を入力してください</h1>
+        <div class="row">
+            <div class="col-md">
+                <div class="form-floating p-1">
+                    <input type="text" class="form-control" id="reservation-name" placeholder="予約者名">
+                    <label for="reservation-name">予約者名</label>
+                </div>
+            </div>
+            <div class="col-md align-self-center">
+                <div class="p-1" id="rental-category-container">
+                    <input type="radio" class="btn-check" id="general-rental" name="rental-category"
+                        value="general-rental" autocomplete="off" checked>
+                    <label for="general-rental" class="btn btn-outline-primary">一般貸出</label>
+                    <input type="radio" class="btn-check" id="loaner-rental" name="rental-category"
+                        value="loaner-rental" autocomplete="off">
+                    <label for="loaner-rental" class="btn btn-outline-secondary">損保代車</label>
+                    <input type="radio" class="btn-check" id="booking" name="rental-category" value="booking"
+                        autocomplete="off">
+                    <label for="booking" class="btn btn-outline-danger">仮押さえ</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
+                <div class="form-floating p-1">
+                    <select class="form-select" id="departure-store">
+                        <option>本店</option>
+                        <option>駅前店</option>
+                        <option>空港店</option>
+                    </select>
+                    <label for="#departure-store">出発店舗</label>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="form-floating p-1">
+                    <select class="form-select" id="return-store">
+                        <option>本店</option>
+                        <option>駅前店</option>
+                        <option>空港店</option>
+                    </select>
+                    <label for="#return-store">帰着店舗</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
+                <div class="input-group p-1">
+                    <span class="input-group-text" for="#departure-datetime">出発日時</span>
+                    <input class="form-control" id="departure-datetime" type="datetime-local">
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="input-group p-1">
+                    <span class="input-group-text" for="#return-datetime">帰着日時</span>
+                    <input class="form-control" id="return-datetime" type="datetime-local">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
+                <div class="form-floating p-1">
+                    <select class="form-select" id="rental-class-select">
+                    </select>
+                    <label for="rental-class-select">クラス</label>
+                </div>
+            </div>
+            <div class="col-md align-self-center">
+                <div class="p-1" id="non-smoking-container">
+                    <input type="radio" class="btn-check" id="non-smoking-radio" name="non-smoking" value="non-smoking"
+                        autocomplete="off">
+                    <label for="non-smoking-radio" class="btn btn-outline-success">禁煙車</label>
+                    <input type="radio" class="btn-check" id="ok-smoking-radio" name="non-smoking" value="ok-smoking"
+                        autocomplete="off">
+                    <label for="ok-smoking-radio" class="btn btn-outline-danger">喫煙車</label>
+                    <input type="radio" class="btn-check" id="non-smoking-none-specification" name="non-smoking"
+                        value="none-specification" autocomplete="off" checked>
+                    <label for="non-smoking-none-specification" class="btn btn-outline-secondary">指定なし</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-floating p-1">
+            <select id="car-model" class="form-select"></select>
+            <label for="car-model">車種</label>
+        </div>
+        <div class="form-floating p-1">
+            <select id="license-plate" class="form-select"></select>
+            <label for="license-plate">ナンバー</label>
+        </div>
+        <div class="form-floating p-1">
+            <textarea class="form-control" id="comment-textarea" placeholder="連絡事項・その他"></textarea>
+            <label for="comment-textarea">連絡事項・その他</label>
+        </div>
+        <button class="btn btn-primary m-1" id="submit-button">送信</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
+        </script>
+    <script type="module" src="../src/renderer_process/insert_reservation.mts"></script>
+</body>
+
+</html>

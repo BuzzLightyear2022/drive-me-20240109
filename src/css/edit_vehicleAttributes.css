@@ -1,0 +1,24 @@
+#vehicle-input-table {
+    white-space: nowrap;
+}
+
+#image-preview-container {
+    position: relative;
+    display: flex;
+    height: 200px;
+    width: 200px;
+}
+
+#license-plate-code {
+    width: 70px;
+}
+
+#license-plate-number {
+    width: 80px;
+}
+
+#image-preview {
+    object-fit: contain;
+    width: 200px;
+    height: 200px;
+}
