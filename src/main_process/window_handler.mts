@@ -95,6 +95,8 @@ class WindowHandler {
 
     static createDisplayReservationWindow = (): void => {
         const win: BrowserWindow = new BrowserWindow({
+            width: 1000,
+            height: 800,
             webPreferences: {
                 preload: WindowHandler.preloadScript
             },
@@ -131,6 +133,12 @@ class WindowHandler {
                     click: async () => {
                         WindowHandler.createEditVehicleAttributesWindow(vehicleId);
                     }
+                },
+                {
+                    label: "車両削除",
+                    click: () => {
+                        console.log("remove vehicle");
+                    }
                 }
             ]);
             contextMenu.popup(WindowHandler.windows.displayReservationWindow);
@@ -149,6 +157,8 @@ class WindowHandler {
 
     static createEditVehicleAttributesWindow = (vehicleId: string): void => {
         const win: BrowserWindow = new BrowserWindow({
+            width: 1000,
+            height: 800,
             webPreferences: {
                 preload: WindowHandler.preloadScript
             },
@@ -165,8 +175,6 @@ class WindowHandler {
         WindowHandler.windows.editVehicleAttributesWindow.webContents.on("dom-ready", () => {
             WindowHandler.windows.editVehicleAttributesWindow.webContents.send("contextMenu:getVehicleId", vehicleId);
         });
-
-        win.maximize();
     }
 }
 

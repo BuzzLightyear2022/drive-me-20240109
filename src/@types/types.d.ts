@@ -41,6 +41,9 @@ export type VehicleAttributes = {
     hasTelevision: boolean,
     hasExternalInput: boolean,
     hasSpareKey: boolean,
+    hasJAFCard: boolean,
+    JAFCardNumber?: number,
+    JAFCardExp?: Date,
     otherFeatures?: string
 }
 
@@ -49,10 +52,10 @@ export type ReservationData = {
     vehicleId: string,
     reservationName: string,
     rentalCategory: string,
-    departureStore: string,
-    returnStore: string,
-    departureDatetime: Date,
-    returnDatetime: Date,
+    pickupLocation: string,
+    returnLocation: string,
+    pickupDateObject: Date,
+    returnDateObject: Date,
     nonSmoking: string,
     comment?: string
 }
@@ -67,8 +70,10 @@ export type Navigations = {
 }
 
 export type CalendarInfo = {
+    innerVehicleScheduleContainer: HTMLDivElment | undefined;
     year: number | undefined;
     monthIndex: number | undefined;
+    vehicleAttributesArray: VehicleAttributes[];
 }
 
 export type ScheduleBarInfo = {
@@ -77,9 +82,7 @@ export type ScheduleBarInfo = {
     instance
 }
 
-export type VehicleScheduleCellInfo = {
-    vehicleId: string;
-    vehicleScheduleCell: HTMLDivElement;
-    reservationScheduleDiv: HTMLDivElement;
-    maintenanceScheduleDiv: HTMLDivElement;
+export type IntersectObject = {
+    observer: IntersectionObserver;
+    divElement: HTMLDivElement;
 }

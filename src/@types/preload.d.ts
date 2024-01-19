@@ -38,7 +38,7 @@ export interface sqlUpdate {
 }
 
 export interface contextMenu {
-    scheduleBar: (args: { reservationId: string }) => Promise<void>;
+    scheduleBar: (reservationId: string) => Promise<void>;
     vehicleAttributesItem: (args: { vehicleId: string }) => Promise<void>;
     getReservationId: (callback) => void;
     getVehicleId: (callback) => void;

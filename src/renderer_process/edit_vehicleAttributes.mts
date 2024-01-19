@@ -2,7 +2,6 @@ import { CarCatalog, VehicleAttributes, Navigations } from "../@types/types";
 import { appendOptions } from "./common_modules.mjs";
 import NoImagePng from "../assets/NoImage.png";
 import squareAndArrowUpCircleFill from "../assets/square.and.arrow.up.circle.fill@2x.png";
-import { VehicleAttributesItem } from "./display_reservation/vehicle_attributes_item.mjs";
 
 const submitButton: HTMLButtonElement = document.querySelector("#submit-button") as HTMLButtonElement;
 const imagePreview: HTMLImageElement = document.querySelector("#image-preview") as HTMLImageElement;

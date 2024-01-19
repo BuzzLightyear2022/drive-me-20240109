@@ -1,4 +1,4 @@
-#window-container {
+#window-container-div {
     display: grid;
     grid-template-rows: auto 1fr;
     grid-template-columns: auto 1fr;
@@ -12,6 +12,15 @@
     height: 50px;
     grid-column: 1;
     grid-row: 1;
+    border-width: 1px;
+}
+
+#current-month-div {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    font-size: x-large;
+    line-height: 200%;
 }
 
 #vehicle-attributes-item-container-div {
@@ -23,6 +32,10 @@
     grid-row: 2;
 }
 
+#vehicle-attributes-item-container-div::-webkit-scrollbar {
+    display: none;
+}
+
 #calendar-container-div {
     display: flex;
     white-space: nowrap;
@@ -31,7 +44,7 @@
     grid-row: 1;
 }
 
-#calendar-container-div::webkit-scrollbar {
+#calendar-container-div::-webkit-scrollbar {
     display: none;
 }
 

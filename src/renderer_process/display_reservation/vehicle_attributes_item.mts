@@ -14,11 +14,13 @@ const VehicleAttributesItem = class extends HTMLDivElement {
             whiteSpace: "nowrap",
             alignItems: "center",
             border: "solid",
+            borderWidth: "1px",
             width: "300px",
             height: "130px",
             lineHight: "200%",
             cursor: "nomal",
             userSelect: "none",
+            marginTop: "-1px"
         });
 
         (async () => {

@@ -1,65 +1,63 @@
-import { VehicleAttributes, CalendarInfo, ReservationData, VehicleScheduleCellInfo } from "../../@types/types";
+import { VehicleAttributes, ReservationData } from "../../@types/types";
 import { getMonthName } from "../common_modules.mjs";
 import { VehicleScheduleCell } from "./vehicle_schedule_cell.mjs";
 import { ScheduleBar } from "./schedule_bar.mjs";
 
-const MonthCalendar = class {
-    calendarInfo: CalendarInfo;
-    date: Date;
-    reservationDataArray: ReservationData[];
-    vehicleScheduleCells: VehicleScheduleCellInfo[] = [];
+export type MonthCalendarType = InstanceType<typeof MonthCalendar>;
+export type VehicleScheduleCellType = InstanceType<typeof VehicleScheduleCell>;
+
+export const MonthCalendar = class {
+    calendarInfo: {
+        dateObject: Date,
+        monthCalendar: HTMLDivElement,
+        vehicleScheduleCells: VehicleScheduleCellType[],
+        intersectionObserver: IntersectionObserver[],
+        vehicleAttributesArray: VehicleAttributes[],
+        reservationDataArray: ReservationData[],
+        addNext: boolean
+    }
 
     constructor(args: {
         vehicleAttributesArray: VehicleAttributes[],
-        date: Date
+        dateObject: Date,
+        addNext: boolean
     }) {
-        const { date, vehicleAttributesArray } = args;
+        const {
+            dateObject,
+            vehicleAttributesArray,
+            addNext
+        } = args;
 
-        this.date = date;
-        this.calendarInfo = {
-            year: date.getFullYear(),
-            monthIndex: date.getMonth()
-        }
-
-        const calendarContainer: HTMLDivElement = document.querySelector("#calendar-container-div") as HTMLDivElement;
-        const vehicleScheduleContainer: HTMLDivElement = document.querySelector("#vehicle-schedule-container-div") as HTMLDivElement;
-
-        const innerVehicleScheduleContainer: HTMLDivElement = this.innerVehicleScheduleContainer();
-
-        const daysContainer: HTMLDivElement = this.daysContainer({ date: date });
-        calendarContainer.append(daysContainer);
-
-        const daysContainerWidth: number = daysContainer.getBoundingClientRect().width;
-
-        vehicleAttributesArray.forEach((vehicleAttributes: VehicleAttributes) => {
-            const vehicleScheduleCell = new VehicleScheduleCell({
-                vehicleAttributes: vehicleAttributes,
-                vehicleCalendarWidth: `${daysContainerWidth}px`
-            });
-            innerVehicleScheduleContainer.append(vehicleScheduleCell.vehicleScheduleCell);
-            this.vehicleScheduleCells.push(vehicleScheduleCell);
-        });
-
-        vehicleScheduleContainer.append(innerVehicleScheduleContainer);
+        this.calendarInfo.dateObject = dateObject;
+        this.calendarInfo.vehicleAttributesArray = vehicleAttributesArray;
+        this.calendarInfo.addNext = addNext;
     }
 
-    private daysContainer(args: { date: Date }): HTMLDivElement {
-        const { date } = args;
+    daysContainer(): HTMLDivElement {
+        const currentDate: Date = new Date();
 
-        const daysContainer: HTMLDivElement = document.createElement("div");
-        daysContainer.id = "days_container";
-        Object.assign(daysContainer.style, {
-            display: "flex",
-            flexDirection: "row",
-            flexBasis: "auto",
-            flexGrow: 1,
-            flexShrink: 1,
-            whiteSpace: "nowrap"
-        });
+        const calendarYear: number = this.calendarInfo.dateObject.getFullYear();
+        const calendarMonthIndex: number = this.calendarInfo.dateObject.getMonth();
+        const calendarDays: number = new Date(calendarYear, calendarMonthIndex + 1, 0).getDate();
 
-        const daysOfMonth: number = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        const DaysContainer = (): HTMLDivElement => {
+            const daysContainer: HTMLDivElement = document.createElement("div");
+            Object.assign(daysContainer.style, {
+                display: "flex",
+                flexDirection: "row",
+                flexBasis: "auto",
+                flexGrow: 1,
+                flexShrink: 1,
+                whiteSpace: "nowrap",
+                overflow: "visible",
+            });
 
-        for (let i = 1; i <= daysOfMonth; i++) {
+            return daysContainer;
+        }
+
+        const daysContainer: HTMLDivElement = DaysContainer();
+
+        for (let i = 1; i <= calendarDays; i++) {
             const dayCell: HTMLDivElement = document.createElement("div");
             Object.assign(dayCell.style, {
                 display: "flex",
@@ -68,13 +66,13 @@ const MonthCalendar = class {
                 minWidth: "120px",
                 lineHeight: "200%",
                 fontSize: "x-large",
-                border: "solid"
+                border: "solid",
+                borderWidth: "1px 0.5px"
             });
 
-            const monthIndex: number = new Date(date).getMonth();
-            dayCell.textContent = i === 1 ? `${getMonthName({ monthIndex })}${i}日` : `${i}日`;
+            dayCell.textContent = i === 1 ? `${getMonthName(calendarMonthIndex)}${i}日` : `${i}日`;
 
-            if (i === date.getDate() && this.calendarInfo.monthIndex === new Date().getMonth()) {
+            if (calendarYear === currentDate.getFullYear() && calendarMonthIndex === currentDate.getMonth() && i === currentDate.getDate()) {
                 dayCell.style.backgroundColor = "red"
             }
 
@@ -83,18 +81,7 @@ const MonthCalendar = class {
         return daysContainer;
     }
 
-    private innerVehicleScheduleContainer = (): HTMLDivElement => {
-        const vehicleScheduleContainer: HTMLDivElement = document.createElement("div");
-        Object.assign(vehicleScheduleContainer.style, {
-            display: "flex",
-            flexDirection: "column",
-            flexBasis: "content",
-            whiteSpace: "nowrap",
-        });
-        return vehicleScheduleContainer;
-    }
-
-    static backgroundDiv = (): HTMLDivElement => {
+    backgroundDiv = (): HTMLDivElement => {
         const backgroundDiv: HTMLDivElement = document.createElement("div");
         Object.assign(backgroundDiv.style, {
             display: "block",
@@ -108,28 +95,73 @@ const MonthCalendar = class {
         return backgroundDiv;
     }
 
-    async initialize(): Promise<void> {
-        await this.appendScheduleBars();
+    appendScheduleCells = (args: {
+        vehicleAttributesArray: VehicleAttributes[],
+        daysContainerWidth: number,
+        addNext: boolean
+    }): void => {
+        const {
+            vehicleAttributesArray,
+            daysContainerWidth,
+            addNext
+        } = args;
+
+        const calendarContainer: HTMLDivElement = document.querySelector("#calendar-container-div");
+
+        const ScheduleContainer = (): HTMLDivElement => {
+            const calendarScheduleContainer: HTMLDivElement = document.createElement("div");
+            Object.assign(calendarScheduleContainer.style, {
+                display: "flex",
+                flexDirection: "column",
+                flexBasis: "content",
+                whiteSpace: "nowrap"
+            });
+            return calendarScheduleContainer;
+        }
+
+        const scheduleContainer: HTMLDivElement = ScheduleContainer();
+
+        vehicleAttributesArray.forEach((vehicleAttributes: VehicleAttributes) => {
+            const vehicleScheduleCell = new VehicleScheduleCell({
+                vehicleAttributes: vehicleAttributes,
+                vehicleCalendarWidth: daysContainerWidth
+            });
+
+            scheduleContainer.append(vehicleScheduleCell.vehicleScheduleCellInfo.vehicleScheduleCell);
+            this.calendarInfo.vehicleScheduleCells.push(vehicleScheduleCell);
+        });
+
+        this.calendarInfo.monthCalendar = scheduleContainer;
+
+        addNext ? calendarContainer.append(scheduleContainer) : calendarContainer.children[0].before(scheduleContainer);
     }
 
-    private appendScheduleBars = async () => {
-        const start: Date = new Date(this.date.getFullYear(), this.date.getMonth(), 1, 0, 0, 0, 0);
-        const end: Date = new Date(this.date.getFullYear(), this.date.getMonth() + 1, 0, 23, 59, 59, 999);
-        const totalMsOfMonth: number = end.getTime() - start.getTime();
+    appendScheduleBars = async (): Promise<void> => {
+        const calendarYear: number = this.calendarInfo.dateObject.getFullYear();
+        const calendarMonthIndex: number = this.calendarInfo.dateObject.getMonth();
 
-        const reservationData: ReservationData[] = await window.sqlSelect.reservationData({ startDate: start, endDate: end });
-        this.reservationDataArray = reservationData;
+        const startDate: Date = new Date(calendarYear, calendarMonthIndex, 1, 0, 0, 0, 0);
+        const endDate: Date = new Date(calendarYear, calendarMonthIndex + 1, 0, 23, 59, 59, 999);
+        const totalMsOfMonth: number = endDate.getTime() - startDate.getTime();
 
-        this.reservationDataArray.forEach((reservationData: ReservationData) => {
-            this.vehicleScheduleCells.forEach((vehicleScheduleCell) => {
-                const reservationDisplayDiv: HTMLDivElement = vehicleScheduleCell.reservationScheduleDiv;
-                if (reservationData.vehicleId === vehicleScheduleCell.vehicleId) {
-                    const previousScheduleBar: HTMLDivElement | undefined = reservationDisplayDiv.lastElementChild as HTMLDivElement;
+        const monthReservationData: ReservationData[] = await window.sqlSelect.reservationData({
+            startDate: startDate,
+            endDate: endDate
+        });
+
+        this.calendarInfo.reservationDataArray = monthReservationData;
+
+        this.calendarInfo.reservationDataArray.forEach((reservationData: ReservationData) => {
+            this.calendarInfo.vehicleScheduleCells.forEach((vehicleScheduleCell) => {
+                const reservationScheduleDiv: HTMLDivElement = vehicleScheduleCell.vehicleScheduleCellInfo.reservationScheduleDiv;
+
+                if (reservationData.vehicleId === vehicleScheduleCell.vehicleScheduleCellInfo.vehicleId) {
+                    const previousScheduleBar: Element | undefined = reservationScheduleDiv.lastElementChild;
                     const previousScheduleBarWidth: number = previousScheduleBar ? previousScheduleBar.getBoundingClientRect().width : 0;
 
-                    const newScheduleBar = new ScheduleBar({
+                    const scheduleBar = new ScheduleBar({
                         reservationData: reservationData,
-                        startMs: start.getTime(),
+                        calendarStartMs: startDate.getTime(),
                         totalMsOfSchedule: totalMsOfMonth,
                         previousScheduleBarWidth: `${previousScheduleBarWidth}px`,
                         color: "green"
@@ -139,6 +171,23 @@ const MonthCalendar = class {
                 }
             });
         });
+    }
+
+    appendCalendar = async () => {
+        const calendarContainer: HTMLDivElement = document.querySelector("#calendar-container-div");
+
+        const daysContainer: HTMLDivElement = this.daysContainer();
+        this.addNext ? calendarContainer.append(daysContainer) : calendarContainer.children[0].before(daysContainer);
+
+        const daysContainerWidth: number = daysContainer.getBoundingClientRect().width;
+
+        await this.appendVehicleAttributesCells({
+            vehicleAttributesArray: this.calendarInfo.vehicleAttributesArray,
+            daysContainerWidth: daysContainerWidth,
+            addNext: this.addNext
+        });
+
+        await this.appendScheduleBars();
     }
 
     updateScheduleBars = async () => {
@@ -152,13 +201,14 @@ const MonthCalendar = class {
         await this.appendScheduleBars();
     }
 
-    updateVehicleAttributes = async () => {
-        
-    }
-
     getCalendarInfo() {
         return this.calendarInfo;
     }
-}
 
-export { MonthCalendar }
+    updateVehicleAttributesCells = () => {
+        const vehicleScheduleContainer: HTMLDivElement = document.querySelector("#vehicle-schedule-container-div");
+        while (vehicleScheduleContainer.firstChild) {
+            vehicleScheduleContainer.removeChild(vehicleScheduleContainer.firstChild);
+        }
+    }
+}

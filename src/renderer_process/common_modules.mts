@@ -22,8 +22,7 @@ const appendOptions = (
     }
 }
 
-const getMonthName = (args: { monthIndex: number }): string => {
-    const { monthIndex } = args;
+const getMonthName = (monthIndex: number): string => {
     const monthNames: string[] = [
         "1月",
         "2月",
