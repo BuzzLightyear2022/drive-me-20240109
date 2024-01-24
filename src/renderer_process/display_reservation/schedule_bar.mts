@@ -2,18 +2,16 @@ import { MouseInputEvent } from "electron";
 import { ReservationData } from "../../@types/types";
 import { getMonthName } from "../common_modules.mjs";
 
+export type ScheduleBarType = InstanceType<typeof ScheduleBar>;
+
 export const ScheduleBar = class {
     static scheduleBars: {
-        reservationData: ReservationData,
-        divElement: HTMLDivElement
+        schedulebar: ScheduleBarType
     }[] = [];
 
-    scheduleBarInfo: {
-        reservationData: ReservationData,
-        scheduleBarElement: HTMLDivElement,
-        modalBackground: HTMLDivElement | undefined
-    }
-
+    scheduleBarElement: HTMLDivElement;
+    modalBackground: HTMLDivElement;
+    reservationData: ReservationData;
     startMsOfCalendar: number;
     totalMsOfCalendar: number;
     previousScheduleBarWidth: number;
@@ -34,49 +32,19 @@ export const ScheduleBar = class {
             scheduleBarColor
         } = args;
 
-        this.scheduleBarInfo.reservationData = reservationData;
+        this.reservationData = reservationData;
         this.startMsOfCalendar = startMsOfCalendar;
         this.totalMsOfCalendar = totalMsOfCalendar;
         this.previousScheduleBarWidth = previousScheduleBarWidth;
         this.scheduleBarColor = scheduleBarColor;
-
-        const body: HTMLBodyElement = document.querySelector("body");
-
-        scheduleBar.addEventListener("click", (event: MouseEvent) => {
-            const modalBackgroundDiv: HTMLDivElement = ModalBackgroundDiv();
-            const reservationInfoModal: HTMLDivElement = this.reservationInfoModalDiv(event);
-
-            modalBackgroundDiv.append(reservationInfoModal);
-            body.append(modalBackgroundDiv);
-
-            this.scheduleBarInfo.modalBackground = modalBackgroundDiv;
-        }, false);
-
-        window.addEventListener("click", (event: MouseEvent) => {
-            if (event.target === this.scheduleBarInfo.modalBackground) {
-                this.scheduleBarInfo.modalBackground.remove();
-                this.scheduleBarInfo.modalBackground = undefined;
-            }
-        }, false);
-
-        scheduleBar.addEventListener("contextmenu", async () => {
-            await window.contextMenu.scheduleBar(reservationData.id);
-        }, false);
-
-        const scheduleBarInfo = {
-            reservationData: reservationData,
-            divElement: scheduleBar
-        }
-
-        ScheduleBar.scheduleBars.push(scheduleBarInfo);
     }
 
     ScheduleBar = (): HTMLDivElement => {
         const scheduleBar: HTMLDivElement = document.createElement("div");
         scheduleBar.className = "card";
 
-        const scheduleBarDepartureDatetime: number = this.scheduleBarInfo.reservationData.pickupDateObject.getTime();
-        const scheduleBarReturnDatetime: number = this.scheduleBarInfo.reservationData.returnDateObject.getTime();
+        const scheduleBarDepartureDatetime: number = this.reservationData.pickupDateObject.getTime();
+        const scheduleBarReturnDatetime: number = this.reservationData.returnDateObject.getTime();
 
         const diffInTime: number = scheduleBarReturnDatetime - scheduleBarDepartureDatetime;
         const relativeWidth = `${(diffInTime / this.totalMsOfCalendar) * 100}%`;
@@ -112,7 +80,7 @@ export const ScheduleBar = class {
                     gridRow: "1"
                 });
 
-                const pickupDateObject: Date = this.scheduleBarInfo.reservationData.pickupDateObject;
+                const pickupDateObject: Date = this.reservationData.pickupDateObject;
 
                 const pickupHours: number = pickupDateObject.getHours();
                 const pickupMinutes: number = pickupDateObject.getMinutes();
@@ -134,7 +102,7 @@ export const ScheduleBar = class {
                     gridRow: "2"
                 });
 
-                const returnDateObject: Date = this.scheduleBarInfo.reservationData.returnDateObject;
+                const returnDateObject: Date = this.reservationData.returnDateObject;
 
                 const returnHours: number = returnDateObject.getHours();
                 const returnMinutes: number = returnDateObject.getMinutes();
@@ -156,7 +124,7 @@ export const ScheduleBar = class {
                     gridRow: "1"
                 });
 
-                const pickupLocation: string = this.scheduleBarInfo.reservationData.pickupLocation;
+                const pickupLocation: string = this.reservationData.pickupLocation;
 
                 pickupLocationDiv.textContent = pickupLocation;
 
@@ -171,7 +139,7 @@ export const ScheduleBar = class {
                     gridRow: "2"
                 });
 
-                const returnLocation: string = this.scheduleBarInfo.reservationData.returnLocation;
+                const returnLocation: string = this.reservationData.returnLocation;
 
                 returnLocationDiv.textContent = returnLocation;
 
@@ -230,7 +198,7 @@ export const ScheduleBar = class {
                     gridRow: "1"
                 });
 
-                const reservationName: string = this.scheduleBarInfo.reservationData.reservationName;
+                const reservationName: string = this.reservationData.reservationName;
                 const reservationNameString = `${reservationName} 様`;
 
                 reservationNameDiv.textContent = reservationNameString;
@@ -246,7 +214,7 @@ export const ScheduleBar = class {
                     gridRow: "2"
                 });
 
-                const rentalCategory: string = this.scheduleBarInfo.reservationData.rentalCategory;
+                const rentalCategory: string = this.reservationData.rentalCategory;
 
                 switch (rentalCategory) {
                     case "generalRental":
@@ -267,188 +235,55 @@ export const ScheduleBar = class {
                 const pickupLocationDiv: HTMLDivElement = document.createElement("div");
                 Object.assign(pickupLocationDiv.style, {
                     display: "flex",
-                    gridColumn: "1",
+                    gridColumn: "2",
                     gridRow: "1"
                 });
 
-                const pickupLocation: string = this.scheduleBarInfo.reservationData.pickupLocation;
+                const pickupLocation: string = this.reservationData.pickupLocation;
                 pickupLocationDiv.textContent = pickupLocation;
 
                 return pickupLocationDiv;
             }
 
-            
+            const ReturnLocationDiv = (): HTMLDivElement => {
+                const returnLocationDiv: HTMLDivElement = document.createElement("div");
+                Object.assign(returnLocationDiv.style, {
+                    display: "flex",
+                    gridColumn: "2",
+                    gridRow: "4"
+                });
+
+                return returnLocationDiv;
+            }
+
+            const pickupDatetimeDiv = (): HTMLDivElement => {
+                const pickupDatetimeDiv: HTMLDivElement = document.createElement("div");
+                Object.assign(pickupDatetimeDiv.style, {
+                    display: "flex",
+                    gridColumn: "1",
+                    gridRow: "1"
+                });
+
+                const pickupDatetime: Date = this.reservationData.pickupDateObject;
+
+                return pickupDatetimeDiv;
+            }
+
+            const reservationNameDiv: HTMLDivElement = ReservationNameDiv();
+
+            textContainer.append(reservationNameDiv);
 
             return textContainer;
         }
 
+        const textContainer: HTMLDivElement = TextContainer();
+
+        reservationDetailsModal.append(textContainer);
+
         return reservationDetailsModal;
     }
 
-    const ReservationNameDiv = (): HTMLDivElement => {
-        const reservationNameDiv: HTMLDivElement = document.createElement("div");
-        Object.assign(reservationNameDiv.style, {
-            padding: "1em"
-        });
-
-        const reservationName = `${this.scheduleBarInfo.reservationData.reservationName} 様`;
-
-        reservationNameDiv.textContent = reservationName;
-
-        return reservationNameDiv;
+    displayModalWindow = (event: Event): void => {
+        // code to display modal widow goes on here.
     }
-
-    const DepartureDatetimeDiv = (): HTMLDivElement => {
-        const departureDatetimeDiv: HTMLDivElement = document.createElement("div");
-        Object.assign(departureDatetimeDiv.style, {
-            display: "flex"
-        });
-
-        const departureDatetime: Date = this.scheduleBarInfo.reservationData.departureDatetime;
-
-        const departureYear: number = departureDatetime.getFullYear();
-        const departureMonthIndex: number = departureDatetime.getMonth();
-        const departureMonth: string = getMonthName(departureMonthIndex);
-        const departureDate: string = String(departureDatetime.getDate()).padStart(2, "0");
-        const departureHours: number = departureDatetime.getHours();
-        const departureMinutes: string = String(departureDatetime.getMinutes()).padStart(2, "0");
-
-        departureDatetimeDiv.textContent = `出発時刻: ${departureYear}年${departureMonth}${departureDate}日 ${departureHours}:${departureMinutes}`;
-        return departureDatetimeDiv;
-    }
-}
-
-ReservationDetailsModalWindow = (event: MouseEvent): HTMLDivElement => {
-    const reservationDetailsModalDiv: HTMLDivElement = document.createElement("div");
-    reservationDetailsModalDiv.className = "card";
-    Object.assign(reservationDetailsModalDiv.style, {
-        display: "grid",
-        zIndex: "2",
-        backgroundColor: "green",
-        position: "absolute",
-        left: `${event.x}px`,
-        top: `${event.y}px`
-    });
-
-    const ReservationNameDiv = (): HTMLDivElement => {
-        const reservationNameDiv: HTMLDivElement = document.createElement("div");
-        Object.assign(reservationNameDiv.style, {
-            display: "flex"
-        });
-        reservationNameDiv.textContent = `${this.scheduleBarInfo.reservationData.reservationName} 様`;
-        return reservationNameDiv;
-    }
-
-
-
-    return reservationDetailsModalDiv;
-}
-
-displayModalWindow = (event: Event): void => {
-    // code to display modal widow goes on here.
-}
-
-const ReturnDatetimeDiv = (): HTMLDivElement => {
-    const returnDatetimeDiv: HTMLDivElement = document.createElement("div");
-    Object.assign(returnDatetimeDiv.style, {
-        display: "flex"
-    });
-
-    const returnDatetime: Date = new Date(this.reservationData.returnDatetime);
-    const returnMonthIndex: number = returnDatetime.getMonth();
-
-    const returnYear: number = returnDatetime.getFullYear();
-    const returnMonth: string = getMonthName(returnMonthIndex);
-    const returnDate: string = String(returnDatetime.getDate()).padStart(2, "0");
-    const returnHours: number = returnDatetime.getHours();
-    const returnMinutes: string = String(returnDatetime.getMinutes()).padStart(2, "0");
-
-    returnDatetimeDiv.textContent = `返却時刻: ${returnYear}年${returnMonth}${returnDate}日 ${returnHours}:${returnMinutes}`;
-    return returnDatetimeDiv;
-}
-
-const DepartureStoreDiv = (): HTMLDivElement => {
-    const departureStoreDiv: HTMLDivElement = document.createElement("div");
-    Object.assign(departureStoreDiv.style, {
-        display: "flex"
-    });
-    departureStoreDiv.textContent = this.reservationData.departureStore;
-    return departureStoreDiv;
-}
-
-const ReturnStoreDiv = (): HTMLDivElement => {
-    const returnStoreDiv: HTMLDivElement = document.createElement("div");
-    Object.assign(returnStoreDiv.style, {
-        display: "flex"
-    });
-    returnStoreDiv.textContent = this.reservationData.returnStore;
-    return returnStoreDiv;
-}
-
-const RentalCategoryDiv = (): HTMLDivElement => {
-    const rentalCategoryDiv: HTMLDivElement = document.createElement("div");
-    Object.assign(rentalCategoryDiv.style, {
-        display: "flex"
-    });
-    switch (this.reservationData.rentalCategory) {
-        case "general-rental":
-            rentalCategoryDiv.textContent = "貸出区分: 一般貸出"
-            break;
-        case "loaner-rental":
-            rentalCategoryDiv.textContent = "貸出区分: 損保代車"
-            break;
-        case "booking":
-            rentalCategoryDiv.textContent = "貸出区分: 仮押さえ"
-    }
-    return rentalCategoryDiv;
-}
-
-const NonSmokingDiv = (): HTMLDivElement => {
-    const nonSmokingDiv: HTMLDivElement = document.createElement("div");
-    Object.assign(nonSmokingDiv.style, {
-        display: "flex"
-    });
-    switch (this.reservationData.nonSmoking) {
-        case "non-smoking":
-            nonSmokingDiv.textContent = "禁煙希望"
-            break;
-        case "ok-smoking":
-            nonSmokingDiv.textContent = "喫煙希望"
-            break;
-        case "none-specification":
-            nonSmokingDiv.textContent = "指定なし"
-            break;
-    }
-    return nonSmokingDiv;
-}
-
-const reservationInfoModal: HTMLDivElement = ReservationInfoModal();
-const reservationNameDiv: HTMLDivElement = ReservationNameDiv();
-const departureStoreDiv: HTMLDivElement = DepartureStoreDiv();
-const departureDatetimeDiv: HTMLDivElement = DepartureDatetimeDiv();
-const returnStoreDiv: HTMLDivElement = ReturnStoreDiv();
-const returnDatetimeDiv: HTMLDivElement = ReturnDatetimeDiv();
-const rentalCategoryDiv: HTMLDivElement = RentalCategoryDiv();
-const nonSmokingDiv: HTMLDivElement = NonSmokingDiv();
-
-reservationInfoModal.append(
-    reservationNameDiv,
-    departureStoreDiv,
-    departureDatetimeDiv,
-    returnStoreDiv,
-    returnDatetimeDiv,
-    rentalCategoryDiv,
-    nonSmokingDiv
-);
-
-return reservationInfoModal;
-    }
-
-getReservationData() {
-    return this.reservationData;
-}
-
-getScheduleBarElement() {
-    return this.scheduleBar;
-}
 }

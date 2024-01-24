@@ -1,58 +1,60 @@
-#window-container-div {
+#window-container {
     display: grid;
     grid-template-rows: auto 1fr;
     grid-template-columns: auto 1fr;
+    width: 100vw;
     height: 100vh;
 }
 
-#header-div {
+#table-header {
     display: flex;
     border: solid;
+    border-width: 1px;
     min-width: 300px;
     height: 50px;
     grid-column: 1;
     grid-row: 1;
-    border-width: 1px;
 }
 
-#current-month-div {
+#month-display {
     display: flex;
     flex-grow: 1;
     justify-content: center;
-    font-size: x-large;
+    font-size: 100%;
     line-height: 200%;
 }
 
-#vehicle-attributes-item-container-div {
+#days-container {
     display: flex;
+    grid-column: 2;
+    grid-row: 1;
+    white-space: nowrap;
+    overflow-x: scroll;
+}
+
+#days-container::-webkit-scrollbar {
+    display: none;
+}
+
+#vehicle-items-container {
+    display: flex;
+    grid-column: 1;
+    grid-row: 2;
     flex-direction: column;
     white-space: nowrap;
     overflow-x: scroll;
-    grid-column: 1;
-    grid-row: 2;
 }
 
-#vehicle-attributes-item-container-div::-webkit-scrollbar {
+#vehicle-items-container::-webkit-scrollbar {
     display: none;
 }
 
-#calendar-container-div {
+#schedule-container {
     display: flex;
-    white-space: nowrap;
-    overflow-x: scroll;
     grid-column: 2;
-    grid-row: 1;
-}
-
-#calendar-container-div::-webkit-scrollbar {
-    display: none;
-}
-
-#vehicle-schedule-container-div {
-    display: flex;
+    grid-row: 2;
+    flex-direction: "row";
     white-space: nowrap;
     overflow-x: scroll;
     overflow-y: scroll;
-    grid-column: 2;
-    grid-row: 2;
 }
