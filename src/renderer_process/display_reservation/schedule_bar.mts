@@ -39,18 +39,18 @@ export const ScheduleBar = class {
         this.scheduleBarColor = scheduleBarColor;
     }
 
-    ScheduleBar = (): HTMLDivElement => {
-        const scheduleBar: HTMLDivElement = document.createElement("div");
-        scheduleBar.className = "card";
+    createScheduleBar = (): void => {
+        this.scheduleBarElement = document.createElement("div");
+        this.scheduleBarElement.className = "card";
 
-        const scheduleBarDepartureDatetime: number = this.reservationData.pickupDateObject.getTime();
-        const scheduleBarReturnDatetime: number = this.reservationData.returnDateObject.getTime();
+        const scheduleBarDepartureDatetime: number = new Date(this.reservationData.pickupDateObject).getTime();
+        const scheduleBarReturnDatetime: number = new Date(this.reservationData.returnDateObject).getTime();
 
         const diffInTime: number = scheduleBarReturnDatetime - scheduleBarDepartureDatetime;
         const relativeWidth = `${(diffInTime / this.totalMsOfCalendar) * 100}%`;
         const diffFromStart = `${((scheduleBarDepartureDatetime - this.startMsOfCalendar) / this.totalMsOfCalendar) * 100}%`;
 
-        Object.assign(scheduleBar.style, {
+        Object.assign(this.scheduleBarElement.style, {
             display: "flex",
             flexDirection: "row",
             position: "relative",
@@ -80,7 +80,7 @@ export const ScheduleBar = class {
                     gridRow: "1"
                 });
 
-                const pickupDateObject: Date = this.reservationData.pickupDateObject;
+                const pickupDateObject: Date = new Date(this.reservationData.pickupDateObject);
 
                 const pickupHours: number = pickupDateObject.getHours();
                 const pickupMinutes: number = pickupDateObject.getMinutes();
@@ -102,7 +102,7 @@ export const ScheduleBar = class {
                     gridRow: "2"
                 });
 
-                const returnDateObject: Date = this.reservationData.returnDateObject;
+                const returnDateObject: Date = new Date(this.reservationData.returnDateObject);
 
                 const returnHours: number = returnDateObject.getHours();
                 const returnMinutes: number = returnDateObject.getMinutes();
@@ -158,9 +158,7 @@ export const ScheduleBar = class {
 
         const scheduleBarInfoContainer: HTMLDivElement = ScheduleBarInfoContainer();
 
-        scheduleBar.append(scheduleBarInfoContainer);
-
-        return scheduleBar;
+        this.scheduleBarElement.append(scheduleBarInfoContainer);
     }
 
     ModalBackgroundDiv = (): HTMLDivElement => {

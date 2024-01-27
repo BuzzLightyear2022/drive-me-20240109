@@ -185,13 +185,17 @@ ipcMain.handle("sqlInsert:vehicleAttributes", async (event: Electron.IpcMainInvo
 
     const textData: {
         [key in keyof VehicleAttributes]:
+        | number
         | string
         | boolean
+        | Date
         | null
     } = {} as {
         [key in keyof VehicleAttributes]:
+        | number
         | string
         | boolean
+        | Date
         | null
     };
 
@@ -233,12 +237,16 @@ ipcMain.on("sqlUpdate:vehicleAttributes", async (event: Electron.IpcMainInvokeEv
     const textData: {
         [key in keyof VehicleAttributes]:
         | string
+        | number
         | boolean
+        | Date
         | null
     } = {} as {
         [key in keyof VehicleAttributes]:
         | string
+        | number
         | boolean
+        | Date
         | null
     };
 

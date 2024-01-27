@@ -8,24 +8,29 @@ export const ScheduleCell = class {
 
     scheduleCell: HTMLDivElement;
     scheduleDivs: {
-        reservationScheduleDiv: HTMLDivElement,
-        maintenanceScheduleDiv: HTMLDivElement
-    }
+        reservationScheduleDiv: HTMLDivElement | undefined,
+        maintenanceScheduleDiv: HTMLDivElement | undefined
+    } = {
+            reservationScheduleDiv: undefined,
+            maintenanceScheduleDiv: undefined
+        }
 
     vehicleItem: VehicleItemType;
     daysContainer: DaysContainerType;
 
-    width: number;
-    height: number;
+    width: string;
+    height: string;
 
     constructor(args: {
-        width: number,
-        height: number
+        width: string,
+        height: string,
+        vehicleItem: VehicleItemType
     }) {
-        const { width, height } = args;
+        const { width, height, vehicleItem } = args;
 
         this.width = width;
         this.height = height;
+        this.vehicleItem = vehicleItem
 
         ScheduleCell.instances.push(this);
     }
@@ -35,10 +40,10 @@ export const ScheduleCell = class {
         Object.assign(this.scheduleCell.style, {
             display: "flex",
             flexDirection: "column",
-            width: `${this.width}px`,
-            minHeight: `${this.height}px`,
+            width: this.width,
+            minHeight: this.height,
             border: "solid",
-            borderWidth: "1px 0.5px",
+            borderWidth: "1px",
             marginTop: "-1px",
             whiteSpace: "nowrap",
             overflow: "visible"
@@ -56,9 +61,9 @@ export const ScheduleCell = class {
             return innerScheduleDiv;
         }
 
-        const scheduleDiv: HTMLDivElement = InnerScheduleDiv();
-        const maintenanceDiv: HTMLDivElement = InnerScheduleDiv();
+        this.scheduleDivs.reservationScheduleDiv = InnerScheduleDiv();
+        this.scheduleDivs.maintenanceScheduleDiv = InnerScheduleDiv();
 
-        this.scheduleCell.append(scheduleDiv, maintenanceDiv);
+        this.scheduleCell.append(this.scheduleDivs.reservationScheduleDiv, this.scheduleDivs.maintenanceScheduleDiv);
     }
 }

@@ -22,12 +22,12 @@ export const VehicleItem = class {
             minWidth: "300px",
             border: "solid",
             borderWidth: "1px",
+            marginTop: "-1px",
             whiteSpace: "nowrap",
             alignItems: "center",
             lineHeight: "200%",
             cursor: "normal",
-            userSelect: "none",
-            marginTop: "-1px"
+            userSelect: "none"
         });
 
         const ImageDiv = async (fileName: string | null): Promise<HTMLDivElement> => {
@@ -52,6 +52,10 @@ export const VehicleItem = class {
                     width: "130px",
                     height: "130px",
                 });
+
+                imgElement.onerror = () => {
+                    imgElement.src = NoImagePng;
+                }
 
                 if (fileName) {
                     imgElement.src = `http://${serverHost}:${port}/${imageDirectory}/${fileName}`;

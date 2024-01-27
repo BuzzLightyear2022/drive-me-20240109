@@ -39,3 +39,16 @@ export const getMonthName = (monthIndex: number): string => {
     ];
     return monthNames[monthIndex];
 }
+
+export const getDayName = (dayIndex: number): string => {
+    const dayNames: string[] = [
+        "日",
+        "月",
+        "火",
+        "水",
+        "木",
+        "金",
+        "土"
+    ]
+    return dayNames[dayIndex];
+}
