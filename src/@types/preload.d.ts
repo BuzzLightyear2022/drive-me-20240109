@@ -46,6 +46,11 @@ export interface contextMenu {
     updateVehicleAttributes: (callback: () => void) => void;
 }
 
+export interface webSocket {
+    updateReservationData: (callback: () => void) => void;
+    updateVehicleAttributes: (callback: () => void) => void;
+}
+
 export interface dialog {
     openFile: () => Promise<string>;
 }
@@ -59,6 +64,7 @@ declare global {
         sqlInsert: sqlInsert;
         sqlUpdate: sqlUpdate
         contextMenu: contextMenu;
+        webSocket: webSocket;
         dialog: dialog;
     }
 }

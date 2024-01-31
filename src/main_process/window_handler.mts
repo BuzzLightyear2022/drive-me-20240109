@@ -103,9 +103,7 @@ class WindowHandler {
         });
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ipcMain.on("contextMenu:schedule-bar", (event: Electron.IpcMainEvent, args: { reservationId: string }) => {
-            const { reservationId } = args;
-
+        ipcMain.on("contextMenu:schedule-bar", (event: Electron.IpcMainEvent, reservationId: string) => {
             const contextMenu = Menu.buildFromTemplate([
                 {
                     label: "変更",

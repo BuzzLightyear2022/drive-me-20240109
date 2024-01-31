@@ -339,8 +339,8 @@ socket.on("open", () => {
     console.log("WebSocket connection established");
 });
 
-socket.on("message", async (message: string) => {
-    const recievedMessage: string = String(message);
+socket.on("message", async (message: String) => {
+    const recievedMessage = String(message);
     await WindowHandler.windows.displayReservationWindow.send(recievedMessage);
 });
 

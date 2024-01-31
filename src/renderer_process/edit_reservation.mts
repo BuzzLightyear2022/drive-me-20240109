@@ -3,9 +3,9 @@ import { ReservationData, LicensePlatesData, VehicleAttributes } from "../@types
 
 const reservationName: HTMLInputElement = document.querySelector("#reservation-name");
 const rentalCategoryRadios: NodeListOf<HTMLInputElement> = document.getElementsByName("rental-category") as NodeListOf<HTMLInputElement>;
-const departureStoreSelect: HTMLSelectElement = document.querySelector("#departure-store");
-const returnStoreSelect: HTMLSelectElement = document.querySelector("#return-store");
-const departureDatetimeInput: HTMLInputElement = document.querySelector("#departure-datetime");
+const pickupLocationSelect: HTMLSelectElement = document.querySelector("#pickup-location");
+const returnLocationSelect: HTMLSelectElement = document.querySelector("#return-location");
+const pickupDatetimeInput: HTMLInputElement = document.querySelector("#pickup-datetime");
 const returnDatetimeInput: HTMLInputElement = document.querySelector("#return-datetime");
 const nonSmokingRadios: NodeListOf<HTMLInputElement> = document.getElementsByName("non-smoking") as NodeListOf<HTMLInputElement>;
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class-select") as HTMLSelectElement;
@@ -70,17 +70,17 @@ window.contextMenu.getReservationId(async (reservationId: string) => {
     const reservationData: ReservationData = await window.sqlSelect.reservationDataById({ reservationId: reservationId });
     const vehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: reservationData.vehicleId });
 
-    const departureDatetime: Date = new Date(reservationData.departureDatetime);
-    departureDatetime.setHours(departureDatetime.getHours() + 9);
-    const returnDatetime: Date = new Date(reservationData.returnDatetime);
-    returnDatetime.setHours(returnDatetime.getHours() + 9);
+    const pickupDateObject: Date = new Date(reservationData.pickupDateObject);
+    pickupDateObject.setHours(pickupDateObject.getHours() + 9);
+    const returnDateObject: Date = new Date(reservationData.returnDateObject);
+    returnDateObject.setHours(returnDateObject.getHours() + 9);
 
     reservationName.value = reservationData.reservationName;
     setRadioValue({ radios: rentalCategoryRadios, checkedValue: reservationData.rentalCategory });
-    departureStoreSelect.value = reservationData.departureStore;
-    returnStoreSelect.value = reservationData.returnStore;
-    departureDatetimeInput.value = departureDatetime.toISOString().slice(0, 16);
-    returnDatetimeInput.value = returnDatetime.toISOString().slice(0, 16);
+    pickupLocationSelect.value = reservationData.pickupLocation;
+    returnLocationSelect.value = reservationData.returnLocation;
+    pickupDatetimeInput.value = pickupDateObject.toISOString().slice(0, 16);
+    returnDatetimeInput.value = returnDateObject.toISOString().slice(0, 16);
     setRadioValue({ radios: nonSmokingRadios, checkedValue: reservationData.nonSmoking });
 
     await setRentalClassSelectValue();
@@ -95,7 +95,7 @@ window.contextMenu.getReservationId(async (reservationId: string) => {
     submitButton.addEventListener("click", async () => {
         const selectedRentalCategory: string = getRadioValue({ radios: rentalCategoryRadios, defaultValue: "general-rental" });
         const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-specification" });
-        const selectedDepartureDatetime: Date = new Date(departureDatetimeInput.value);
+        const selectedDepartureDatetime: Date = new Date(pickupDatetimeInput.value);
         const selectedReturnDatetime: Date = new Date(returnDatetimeInput.value);
 
         const postReservationData: ReservationData = {
@@ -103,10 +103,10 @@ window.contextMenu.getReservationId(async (reservationId: string) => {
             vehicleId: licensePlateSelect.value,
             reservationName: reservationName.value,
             rentalCategory: selectedRentalCategory,
-            departureStore: departureStoreSelect.value,
-            returnStore: returnStoreSelect.value,
-            departureDatetime: selectedDepartureDatetime,
-            returnDatetime: selectedReturnDatetime,
+            pickupLocation: pickupLocationSelect.value,
+            returnLocation: returnLocationSelect.value,
+            pickupDateObject: selectedDepartureDatetime,
+            returnDateObject: selectedReturnDatetime,
             nonSmoking: selectedSmoking,
             comment: commentTextarea.value
         }

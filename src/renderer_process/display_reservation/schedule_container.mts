@@ -1,5 +1,5 @@
 import { ReservationData } from "../../@types/types";
-import { VehicleItem, VehicleItemType } from "./vehicle_item.mjs";
+import { VehicleItem } from "./vehicle_item.mjs";
 import { DaysContainerType } from "./days_container.mjs";
 import { ScheduleCell, ScheduleCellType } from "./schedule_cell.mjs";
 import { ScheduleBar, ScheduleBarType } from "./schedule_bar.mjs";
@@ -10,45 +10,56 @@ export const ScheduleContainer = class {
     scheduleContainer: HTMLDivElement;
     daysContainer: DaysContainerType;
     scheduleCells: ScheduleCellType[] = [];
-    width: number;
-    height: number;
 
     constructor(daysContainer: DaysContainerType) {
         this.daysContainer = daysContainer;
         // @ts-ignore
         daysContainer.calendar.scheduleContainer = this;
+
+        (async () => {
+            await new Promise(resolve => setTimeout(resolve, 0));
+        })();
     }
 
-    createScheduleContainer = () => {
+    createScheduleContainer = async () => {
+        const daysContainer: HTMLDivElement = this.daysContainer.daysContainer;
+        const daysContainerWidth: number = daysContainer.getBoundingClientRect().width;
+
         this.scheduleContainer = document.createElement("div");
         Object.assign(this.scheduleContainer.style, {
             display: "flex",
             flexDirection: "column",
-            flexBasis: "content",
+            minWidth: `${daysContainerWidth}px`,
             whiteSpace: "nowrap"
         });
 
         VehicleItem.instances.forEach(instance => {
-            const daysContainer: HTMLDivElement = this.daysContainer.daysContainer;
-            const daysContainerWidth: number = daysContainer.getBoundingClientRect().width;
-            this.width = daysContainerWidth;
-
             const vehicleItem: HTMLDivElement = instance.vehicleItem;
-            const vehicleItemHeight: number = vehicleItem.getBoundingClientRect().height;
-            this.height = vehicleItemHeight;
 
-            const scheduleCellInstance: ScheduleCellType = new ScheduleCell({
-                width: `${this.width}px`,
-                height: `${this.height}px`,
-                vehicleItem: instance
-            });
+            const scheduleCellInstance: ScheduleCellType = new ScheduleCell(instance);
+            scheduleCellInstance.daysContainer = this.daysContainer;
             scheduleCellInstance.createScheduleCell();
 
             const scheduleCell: HTMLDivElement = scheduleCellInstance.scheduleCell;
 
             this.scheduleCells.push(scheduleCellInstance);
             this.scheduleContainer.append(scheduleCell);
+
+            window.addEventListener("resize", () => {
+                const daysContainerWidth: number = daysContainer.getBoundingClientRect().width;
+                const vehicleItemHeight: number = vehicleItem.getBoundingClientRect().height;
+
+                scheduleCellInstance.handleWindowResize({
+                    width: `${daysContainerWidth}px`,
+                    height: `${vehicleItemHeight}px`
+                });
+            }, false);
         });
+
+        this.appendSchedulebars();
+        this.updateScheduleBars();
+
+        new Promise(resolve => setTimeout(resolve, 0));
     }
 
     appendSchedulebars = async (): Promise<void> => {
@@ -90,6 +101,31 @@ export const ScheduleContainer = class {
                     reservationScheduleDiv.append(scheduleBar);
                 }
             });
+        });
+    }
+
+    updateScheduleBars = () => {
+        window.webSocket.updateReservationData(() => {
+            ScheduleBar.scheduleBars.forEach(instance => {
+                const scheduleBarElm: HTMLDivElement = instance.scheduleBarElement;
+                scheduleBarElm.removeEventListener("contextmenu", instance.displayContextmenu, false);
+            });
+
+            this.scheduleCells.forEach(instance => {
+                const scheduleDivs = instance.scheduleDivs;
+                const reservationScheduleDiv: HTMLDivElement = scheduleDivs.reservationScheduleDiv;
+                const maintenanceScheduleDiv: HTMLDivElement = scheduleDivs.maintenanceScheduleDiv;
+
+                while (reservationScheduleDiv.firstChild) {
+                    reservationScheduleDiv.removeChild(reservationScheduleDiv.firstChild);
+                }
+
+                while (maintenanceScheduleDiv.firstChild) {
+                    maintenanceScheduleDiv.removeChild(maintenanceScheduleDiv.firstChild);
+                }
+            });
+
+            this.appendSchedulebars();
         });
     }
 }

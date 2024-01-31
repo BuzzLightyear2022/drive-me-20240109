@@ -105,6 +105,12 @@ contextBridge.exposeInMainWorld(
         },
         getReservationId: (callback: (reservationId: string) => void) => ipcRenderer.on("contextMenu:getReservationId", (event: Electron.IpcRendererEvent, reservationId: string) => callback(reservationId)),
         getVehicleId: (callback: (vehicleId: string) => void) => ipcRenderer.on("contextMenu:getVehicleId", (event: Electron.IpcRendererEvent, vehicleId) => callback(vehicleId)),
+    }
+);
+
+contextBridge.exposeInMainWorld(
+    "webSocket",
+    {
         updateReservationData: (callback: () => void) => {
             ipcRenderer.on("sqlUpdate:reservationData", () => {
                 return callback();

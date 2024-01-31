@@ -5,9 +5,7 @@ import { getMonthName } from "../common_modules.mjs";
 export type ScheduleBarType = InstanceType<typeof ScheduleBar>;
 
 export const ScheduleBar = class {
-    static scheduleBars: {
-        schedulebar: ScheduleBarType
-    }[] = [];
+    static scheduleBars: ScheduleBarType[] = [];
 
     scheduleBarElement: HTMLDivElement;
     modalBackground: HTMLDivElement;
@@ -37,6 +35,8 @@ export const ScheduleBar = class {
         this.totalMsOfCalendar = totalMsOfCalendar;
         this.previousScheduleBarWidth = previousScheduleBarWidth;
         this.scheduleBarColor = scheduleBarColor;
+        // @ts-ignore
+        ScheduleBar.scheduleBars.push(this);
     }
 
     createScheduleBar = (): void => {
@@ -67,91 +67,116 @@ export const ScheduleBar = class {
         const ScheduleBarInfoContainer = (): HTMLDivElement => {
             const scheduleBarInfoContainer: HTMLDivElement = document.createElement("div");
             Object.assign(scheduleBarInfoContainer.style, {
-                display: "grid",
+                display: "flex",
+                flexDirection: "row",
                 height: "100%",
-                width: "100px"
             });
 
-            const PickupTimeDiv = (): HTMLDivElement => {
-                const pickupTimeDiv: HTMLDivElement = document.createElement("div");
-                Object.assign(pickupTimeDiv.style, {
-                    display: "flex",
-                    gridColumn: "1",
-                    gridRow: "1"
+            const TimeAndLocationContainer = (): HTMLDivElement => {
+                const timeAndLocationContainer: HTMLDivElement = document.createElement("div");
+                Object.assign(timeAndLocationContainer.style, {
+                    display: "grid"
                 });
 
-                const pickupDateObject: Date = new Date(this.reservationData.pickupDateObject);
+                const PickupTimeDiv = (): HTMLDivElement => {
+                    const pickupTimeDiv: HTMLDivElement = document.createElement("div");
+                    Object.assign(pickupTimeDiv.style, {
+                        display: "flex",
+                        gridColumn: "1",
+                        gridRow: "1"
+                    });
 
-                const pickupHours: number = pickupDateObject.getHours();
-                const pickupMinutes: number = pickupDateObject.getMinutes();
+                    const pickupDateObject: Date = new Date(this.reservationData.pickupDateObject);
 
-                const pickupMinutesString: string = String(pickupMinutes).padStart(2, "0");
+                    const pickupHours: number = pickupDateObject.getHours();
+                    const pickupMinutes: number = pickupDateObject.getMinutes();
 
-                const pickupTimeString = `${pickupHours}:${pickupMinutesString}`;
+                    const pickupMinutesString: string = String(pickupMinutes).padStart(2, "0");
 
-                pickupTimeDiv.textContent = pickupTimeString;
+                    const pickupTimeString = `${pickupHours}:${pickupMinutesString}`;
 
-                return pickupTimeDiv;
+                    pickupTimeDiv.textContent = pickupTimeString;
+
+                    return pickupTimeDiv;
+                }
+
+                const ReturnTimeDiv = (): HTMLDivElement => {
+                    const returnTimeDiv: HTMLDivElement = document.createElement("div");
+                    Object.assign(returnTimeDiv.style, {
+                        display: "flex",
+                        gridColumn: "1",
+                        gridRow: "2"
+                    });
+
+                    const returnDateObject: Date = new Date(this.reservationData.returnDateObject);
+
+                    const returnHours: number = returnDateObject.getHours();
+                    const returnMinutes: number = returnDateObject.getMinutes();
+
+                    const returnMinutesString: string = String(returnMinutes).padStart(2, "0");
+
+                    const returnTimeString = `${returnHours}:${returnMinutesString}`;
+
+                    returnTimeDiv.textContent = returnTimeString;
+
+                    return returnTimeDiv;
+                }
+
+                const PickupLocationDiv = (): HTMLDivElement => {
+                    const pickupLocationDiv: HTMLDivElement = document.createElement("div");
+                    Object.assign(pickupLocationDiv.style, {
+                        display: "flex",
+                        gridColumn: "2",
+                        gridRow: "1"
+                    });
+
+                    const pickupLocation: string = this.reservationData.pickupLocation;
+
+                    pickupLocationDiv.textContent = pickupLocation;
+
+                    return pickupLocationDiv;
+                }
+
+                const ReturnLocationDiv = (): HTMLDivElement => {
+                    const returnLocationDiv: HTMLDivElement = document.createElement("div");
+                    Object.assign(returnLocationDiv.style, {
+                        display: "flex",
+                        gridColumn: "2",
+                        gridRow: "2"
+                    });
+
+                    const returnLocation: string = this.reservationData.returnLocation;
+
+                    returnLocationDiv.textContent = returnLocation;
+
+                    return returnLocationDiv;
+                }
+
+                const pickupTimeDiv: HTMLDivElement = PickupTimeDiv();
+                const returnTimeDiv: HTMLDivElement = ReturnTimeDiv();
+                const pickupLocationDiv: HTMLDivElement = PickupLocationDiv();
+                const returnLocationDiv: HTMLDivElement = ReturnLocationDiv();
+
+                timeAndLocationContainer.append(pickupTimeDiv, returnTimeDiv, pickupLocationDiv, returnLocationDiv);
+
+                return timeAndLocationContainer;
             }
 
-            const ReturnTimeDiv = (): HTMLDivElement => {
-                const returnTimeDiv: HTMLDivElement = document.createElement("div");
-                Object.assign(returnTimeDiv.style, {
+            const ReservationNameDiv = (): HTMLDivElement => {
+                const reservationNameDiv: HTMLDivElement = document.createElement("div");
+                Object.assign(reservationNameDiv.style, {
                     display: "flex",
-                    gridColumn: "1",
-                    gridRow: "2"
+                    padding: "1em"
                 });
+                reservationNameDiv.textContent = `${this.reservationData.reservationName} 様`;
 
-                const returnDateObject: Date = new Date(this.reservationData.returnDateObject);
-
-                const returnHours: number = returnDateObject.getHours();
-                const returnMinutes: number = returnDateObject.getMinutes();
-
-                const returnMinutesString: string = String(returnMinutes).padStart(2, "0");
-
-                const returnTimeString = `${returnHours}:${returnMinutesString}`;
-
-                returnTimeDiv.textContent = returnTimeString;
-
-                return returnTimeDiv;
+                return reservationNameDiv;
             }
 
-            const PickupLocationDiv = (): HTMLDivElement => {
-                const pickupLocationDiv: HTMLDivElement = document.createElement("div");
-                Object.assign(pickupLocationDiv.style, {
-                    display: "flex",
-                    gridColumn: "2",
-                    gridRow: "1"
-                });
+            const timeAndLocationContainer: HTMLDivElement = TimeAndLocationContainer();
+            const reservationNameDiv: HTMLDivElement = ReservationNameDiv();
 
-                const pickupLocation: string = this.reservationData.pickupLocation;
-
-                pickupLocationDiv.textContent = pickupLocation;
-
-                return pickupLocationDiv;
-            }
-
-            const ReturnLocationDiv = (): HTMLDivElement => {
-                const returnLocationDiv: HTMLDivElement = document.createElement("div");
-                Object.assign(returnLocationDiv.style, {
-                    display: "flex",
-                    gridColumn: "1",
-                    gridRow: "2"
-                });
-
-                const returnLocation: string = this.reservationData.returnLocation;
-
-                returnLocationDiv.textContent = returnLocation;
-
-                return returnLocationDiv;
-            }
-
-            const pickupTimeDiv: HTMLDivElement = PickupTimeDiv();
-            const returnTimeDiv: HTMLDivElement = ReturnTimeDiv();
-            const pickupLocationDiv: HTMLDivElement = PickupLocationDiv();
-            const returnLocationDiv: HTMLDivElement = ReturnLocationDiv();
-
-            scheduleBarInfoContainer.append(pickupTimeDiv, returnTimeDiv, pickupLocationDiv, returnLocationDiv);
+            scheduleBarInfoContainer.append(timeAndLocationContainer, reservationNameDiv);
 
             return scheduleBarInfoContainer;
         }
@@ -159,6 +184,12 @@ export const ScheduleBar = class {
         const scheduleBarInfoContainer: HTMLDivElement = ScheduleBarInfoContainer();
 
         this.scheduleBarElement.append(scheduleBarInfoContainer);
+
+        this.scheduleBarElement.addEventListener("contextmenu", this.displayContextmenu, false);
+    }
+
+    displayContextmenu = () => {
+        window.contextMenu.scheduleBar(this.reservationData.id);
     }
 
     ModalBackgroundDiv = (): HTMLDivElement => {

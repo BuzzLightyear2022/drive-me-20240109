@@ -26,7 +26,7 @@ export const DaysContainer = class {
         DaysContainer.calendars.push(this.calendar);
     }
 
-    createDaysContainer = async () => {
+    createDaysContainer = async (): Promise<void> => {
         this.daysContainer = document.createElement("div");
         Object.assign(this.daysContainer.style, {
             display: "flex",
@@ -56,6 +56,8 @@ export const DaysContainer = class {
         }
 
         for (let i = 1; i <= calendarDays; i++) {
+            const thisDate = new Date(this.dateObject.getFullYear(), this.dateObject.getMonth(), i, 9);
+
             const dayCell: HTMLDivElement = document.createElement("div");
             Object.assign(dayCell.style, {
                 display: "flex",
@@ -80,17 +82,24 @@ export const DaysContainer = class {
             }
 
             holidays.forEach(holiday => {
-                const thisDate = new Date(this.dateObject.getFullYear(), this.dateObject.getMonth(), i, 9).getTime();
+                const thisDateMs: number = thisDate.getTime();
                 const holidayDate = new Date(holiday).getTime();
 
-                if (thisDate === holidayDate) {
+                if (thisDateMs === holidayDate) {
                     dayCell.style.color = "black"
                     dayCell.style.background = "radial-gradient(circle closest-corner, rgba(255, 0, 0, 1) 25%, rgba(255, 255, 255, 1) 20%)";
                 }
             });
 
+            if (currentDate.getFullYear() === this.dateObject.getFullYear() && currentDate.getMonth() === this.dateObject.getMonth() && currentDate.getDate() === thisDate.getDate()) {
+                dayCell.style.borderColor = "yellow";
+                dayCell.style.borderWidth = "10px";
+                dayCell.style.lineHeight = "calc(200% - 15px)";
+            }
+
             this.daysContainer.append(dayCell);
         }
+        await new Promise(resolve => setTimeout(resolve, 0));
     }
 
     setIntersectionObserver = (
