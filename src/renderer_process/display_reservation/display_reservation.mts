@@ -11,14 +11,14 @@ const daysContainer: HTMLDivElement = document.querySelector("#days-container");
 const vehicleItemsContainer: HTMLDivElement = document.querySelector("#vehicle-items-container");
 const scheduleContainer: HTMLDivElement = document.querySelector("#schedule-container");
 
-let previousMonthDiff: number = -1;
-let nextMonthDiff: number = 1;
+let previousMonthDiff: number = 1;
+let nextMonthDiff: number = 3;
 
 // Get the Date objects of 3 monthes.
 const currentDate: Date = new Date();
-const firstDayOfCurrentDate: Date = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
-const previousMonthDate: Date = new Date(firstDayOfCurrentDate.getFullYear(), firstDayOfCurrentDate.getMonth() + previousMonthDiff, 0);
-const nextMonthDate: Date = new Date(firstDayOfCurrentDate.getFullYear(), firstDayOfCurrentDate.getMonth() + nextMonthDiff, 0);
+const lastDateOfPreviousMonth: Date = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+const previousMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + previousMonthDiff, 0);
+const nextMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + nextMonthDiff, 0);
 
 // Get the last date of 3 monthes.
 const previousMonthDays: number = new Date(previousMonthDate.getFullYear(), previousMonthDate.getMonth() + 1, 0).getDate();
