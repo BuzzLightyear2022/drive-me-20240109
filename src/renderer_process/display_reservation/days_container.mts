@@ -6,7 +6,7 @@ export type DaysContainerType = InstanceType<typeof DaysContainer>;
 export type Calendar = {
     daysContainer: DaysContainerType,
     scheduleContainer: ScheduleContainerType,
-    intersectionObserver: IntersectionObserver;
+    intersectionObserver: IntersectionObserver
 }
 
 export const DaysContainer = class {
@@ -94,7 +94,7 @@ export const DaysContainer = class {
             if (currentDate.getFullYear() === this.dateObject.getFullYear() && currentDate.getMonth() === this.dateObject.getMonth() && currentDate.getDate() === thisDate.getDate()) {
                 dayCell.style.borderColor = "yellow";
                 dayCell.style.borderWidth = "10px";
-                dayCell.style.lineHeight = "calc(200% - 15px)";
+                dayCell.style.lineHeight = "calc(200% - 17px)";
             }
 
             this.daysContainer.append(dayCell);
@@ -102,14 +102,11 @@ export const DaysContainer = class {
         await new Promise(resolve => setTimeout(resolve, 0));
     }
 
-    setIntersectionObserver = (
-        callback: (entries?: IntersectionObserverEntry[], observer?: IntersectionObserver) => void,
-        options?: {
-            root?: Element,
-            rootMargin?: string,
-            threshold?: number
-        }
-    ) => {
+    setIntersectionObserver = (callback: (entries: IntersectionObserverEntry[]) => void, options?: {
+        root?: Element | Document,
+        rootMargin?: string,
+        threshold?: number | number[]
+    }) => {
         this.calendar.intersectionObserver = new IntersectionObserver(callback, options);
     }
 }

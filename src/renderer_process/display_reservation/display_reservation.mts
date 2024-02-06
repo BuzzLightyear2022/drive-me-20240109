@@ -68,63 +68,6 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
         await new Promise(resolve => setTimeout(resolve, 0));
     }
 
-    const setDaysContainerObservers = async (): Promise<void> => {
-        const getDateString = (date: Date): string => {
-            const year: number = date.getFullYear();
-            const monthIndex: number = date.getMonth();
-            const month: string = getMonthName(monthIndex);
-            const dateString = `${year}年${month}月`;
-            return dateString;
-        }
-
-        const getWindowContainerPaddingLeft = (): number => {
-            const tableHeaderWidth: number = tableHeader.getBoundingClientRect().width;
-            const windowContainerStyle = window.getComputedStyle(windowContainer);
-            const windowContainerPaddingLeft: number = Number(windowContainerStyle.paddingLeft.slice(0, -2));
-            const offsetLeft: number = tableHeaderWidth + windowContainerPaddingLeft;
-
-            return offsetLeft;
-        }
-
-        const displayMonthHandler = (entries: IntersectionObserverEntry[], daysContainerInstance: DaysContainerType): void => {
-            entries.forEach(entry => {
-                const epsilon: number = 1;
-
-                const windowContainerPaddingLeft: number = getWindowContainerPaddingLeft();
-                const leftScrollDiff: number = Math.abs(entry.intersectionRect.left - windowContainerPaddingLeft);
-
-                if (entry.isIntersecting && leftScrollDiff < epsilon) {
-                    const date: Date = daysContainerInstance.dateObject;
-                    const dateString: string = getDateString(date);
-                    monthDisplay.textContent = dateString;
-                    monthDisplay.animate([
-                        { transform: "translateX(200px)" },
-                        { transform: "translateX(0px)" }
-                    ],
-                        {
-                            duration: 300
-                        }
-                    )
-                } else if (!entry.isIntersecting && entry.boundingClientRect.left < 0) {
-                    const date: Date = daysContainerInstance.dateObject;
-                    const nextMonthDate: Date = new Date(date.getFullYear(), date.getMonth() + 1);
-                    const dateString: string = getDateString(nextMonthDate);
-                    monthDisplay.textContent = dateString;
-                    monthDisplay.animate([
-                        { transform: "translateX(-200px)" },
-                        { transform: "translateX(0px)" }
-                    ],
-                        {
-                            duration: 300
-                        }
-                    );
-                }
-            });
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 0));
-    }
-
     const appendScheduleContainers = async (): Promise<void> => {
         previousMonthScheduleContainer.createScheduleContainer();
         currentMonthScheduleContainer.createScheduleContainer();
@@ -139,7 +82,7 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
         await new Promise(resolve => setTimeout(resolve, 0));
     }
 
-    const handleInitialScrollPosition = async (): Promise<void> => {
+    const handleInitialScrollPosition = (): void => {
         const previousDaysContainerWidth: number = previousMonthDaysContainer.getBoundingClientRect().width;
         const currentDaysContainerWidth: number = currentMonthDaysContainer.getBoundingClientRect().width;
         const nextDaysContainerWidth: number = nextMonthDaysContainer.getBoundingClientRect().width;
@@ -158,6 +101,99 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
     await appendDaysContainers();
     await appendScheduleContainers();
     handleInitialScrollPosition();
+
+    DaysContainer.calendars.forEach((calendar, index) => {
+        const daysContainerInstance: DaysContainerType = calendar.daysContainer;
+        const eachdaysContainer: HTMLDivElement = daysContainerInstance.daysContainer;
+        const firstDayElement = eachdaysContainer.children[0];
+
+        daysContainerInstance.setIntersectionObserver((entries) => {
+            entries.forEach(async (entry) => {
+
+                if (index === 0 && entry.isIntersecting) {
+                    const scrollBeforeInsert: number = daysContainer.scrollLeft;
+
+                    previousMonthDiff--;
+                    const newPreviousMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + previousMonthDiff, 0);
+                    const newPreviousMonthDaysContainerInstance: DaysContainerType = new DaysContainer(newPreviousMonthDate);
+                    await newPreviousMonthDaysContainerInstance.createDaysContainer();
+                    const newPreviousMonthDaysContainer: HTMLDivElement = newPreviousMonthDaysContainerInstance.daysContainer;
+                    previousMonthDaysContainer.before(newPreviousMonthDaysContainer);
+
+                    const newPreviousMonthScheduleContainerInstance: ScheduleContainerType = new ScheduleContainer(newPreviousMonthDaysContainerInstance);
+                    await newPreviousMonthScheduleContainerInstance.createScheduleContainer();
+                    const newPreviousMonthScheduleContainer: HTMLDivElement = newPreviousMonthScheduleContainerInstance.scheduleContainer;
+                    const previousScheduleContainer: HTMLDivElement = previousMonthScheduleContainer.scheduleContainer;
+                    previousScheduleContainer.before(newPreviousMonthScheduleContainer);
+
+                    await new Promise(resolve => setTimeout(resolve, 0));
+
+                    const scrollAfterInsert: number = scrollBeforeInsert + newPreviousMonthDaysContainer.offsetWidth;
+                    daysContainer.scrollTo(scrollAfterInsert, 0);
+
+                    daysContainerInstance.calendar.intersectionObserver.unobserve(firstDayElement);
+                }
+            });
+        });
+        daysContainerInstance.calendar.intersectionObserver.observe(firstDayElement);
+    });
+}
+
+const setDaysContainerObservers = async (): Promise<void> => {
+    const getDateString = (date: Date): string => {
+        const year: number = date.getFullYear();
+        const monthIndex: number = date.getMonth();
+        const month: string = getMonthName(monthIndex);
+        const dateString = `${year}年${month}月`;
+        return dateString;
+    }
+
+    const getWindowContainerPaddingLeft = (): number => {
+        const tableHeaderWidth: number = tableHeader.getBoundingClientRect().width;
+        const windowContainerStyle = window.getComputedStyle(windowContainer);
+        const windowContainerPaddingLeft: number = Number(windowContainerStyle.paddingLeft.slice(0, -2));
+        const offsetLeft: number = tableHeaderWidth + windowContainerPaddingLeft;
+
+        return offsetLeft;
+    }
+
+    const displayMonthHandler = (entries: IntersectionObserverEntry[], daysContainerInstance: DaysContainerType): void => {
+        entries.forEach(entry => {
+            const epsilon: number = 1;
+
+            const windowContainerPaddingLeft: number = getWindowContainerPaddingLeft();
+            const leftScrollDiff: number = Math.abs(entry.intersectionRect.left - windowContainerPaddingLeft);
+
+            if (entry.isIntersecting && leftScrollDiff < epsilon) {
+                const date: Date = daysContainerInstance.dateObject;
+                const dateString: string = getDateString(date);
+                monthDisplay.textContent = dateString;
+                monthDisplay.animate([
+                    { transform: "translateX(200px)" },
+                    { transform: "translateX(0px)" }
+                ],
+                    {
+                        duration: 300
+                    }
+                )
+            } else if (!entry.isIntersecting && entry.boundingClientRect.left < 0) {
+                const date: Date = daysContainerInstance.dateObject;
+                const nextMonthDate: Date = new Date(date.getFullYear(), date.getMonth() + 1);
+                const dateString: string = getDateString(nextMonthDate);
+                monthDisplay.textContent = dateString;
+                monthDisplay.animate([
+                    { transform: "translateX(-200px)" },
+                    { transform: "translateX(0px)" }
+                ],
+                    {
+                        duration: 300
+                    }
+                );
+            }
+        });
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 0));
 }
 
 const handleDaysContainerScroll = (): void => {
@@ -192,28 +228,6 @@ const handleScheduleContainerScrollY = (): void => {
     const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributes();
 
     await calendarInitializer(vehicleAttributesArray);
-
-    let isAppended: boolean = false;
-    DaysContainer.calendars.forEach((calendar, index) => {
-        const daysContainer: HTMLDivElement = calendar.daysContainer.daysContainer;
-        const intersectionObserver = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
-            entries.forEach(async (entry) => {
-                if (index === 0 && entry.isIntersecting && !isAppended) {
-                    previousMonthDiff--;
-                    console.log(previousMonthDiff, previousMonthDate);
-                    const newDaysContainerInstance: DaysContainerType = new DaysContainer(previousMonthDate);
-                    await newDaysContainerInstance.createDaysContainer();
-                    const newDaysContainer: HTMLDivElement = newDaysContainerInstance.daysContainer;
-
-                    // daysContainer.before(newDaysContainer);
-
-                    intersectionObserver.unobserve(daysContainer);
-                    isAppended = true;
-                }
-            });
-        });
-        intersectionObserver.observe(daysContainer);
-    });
 })();
 
 scheduleContainer.addEventListener("scroll", handleDaysContainerScroll, false);
