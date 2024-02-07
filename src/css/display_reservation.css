@@ -23,6 +23,24 @@
     justify-content: center;
     font-size: 150%;
     line-height: 200%;
+    cursor: default;
+    user-select: none;
+}
+
+#previous-month-button {
+    display: flex;
+    font-size: 150%;
+    line-height: 200%;
+    cursor: default;
+    user-select: none;
+}
+
+#next-month-button {
+    display: flex;
+    font-size: 150%;
+    line-height: 200%;
+    cursor: default;
+    user-select: none;
 }
 
 #days-container {

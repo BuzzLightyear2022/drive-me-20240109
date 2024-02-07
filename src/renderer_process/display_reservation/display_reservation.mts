@@ -1,36 +1,31 @@
 import { VehicleAttributes } from "../../@types/types";
-import { getMonthName } from "../common_modules.mjs"
 import { VehicleItem, VehicleItemType } from "./vehicle_item.mjs";
 import { DaysContainer, DaysContainerType } from "./days_container.mjs";
 import { ScheduleContainer, ScheduleContainerType } from "./schedule_container.mjs";
 
-const windowContainer: HTMLDivElement = document.querySelector("#window-container");
-const tableHeader: HTMLDivElement = document.querySelector("#table-header");
-const monthDisplay: HTMLDivElement = document.querySelector("#month-display");
+const previousMonthButton: HTMLDivElement = document.querySelector("#previous-month-button");
+const nextMonthButton: HTMLDivElement = document.querySelector("#next-month-button");
 const daysContainer: HTMLDivElement = document.querySelector("#days-container");
 const vehicleItemsContainer: HTMLDivElement = document.querySelector("#vehicle-items-container");
 const scheduleContainer: HTMLDivElement = document.querySelector("#schedule-container");
 
-let previousMonthDiff: number = 1;
-let nextMonthDiff: number = 3;
-
 // Get the Date objects of 3 monthes.
 const currentDate: Date = new Date();
 const lastDateOfPreviousMonth: Date = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
-const previousMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + previousMonthDiff, 0);
-const nextMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + nextMonthDiff, 0);
+const previousMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + DaysContainer.previousMonthDiff, 0);
+const nextMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + DaysContainer.nextMonthDiff, 0);
 
 // Get the last date of 3 monthes.
-const previousMonthDays: number = new Date(previousMonthDate.getFullYear(), previousMonthDate.getMonth() + 1, 0).getDate();
-const currentMonthDays: number = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-const nextMonthDays: number = new Date(nextMonthDate.getFullYear(), nextMonthDate.getMonth() + 1, 0).getDate();
+const previousMonthDays: number = lastDateOfPreviousMonth.getDate();
+const currentMonthDays: number = previousMonthDate.getDate();
+const nextMonthDays: number = nextMonthDate.getDate();
 
 const totalDays: number = previousMonthDays + currentMonthDays + nextMonthDays;
 
 const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) => {
-    const previousMonthDaysContainerInstance: DaysContainerType = new DaysContainer(previousMonthDate);
-    const currentMonthDaysContainerInstance: DaysContainerType = new DaysContainer(currentDate);
-    const nextMonthDaysContainerInstance: DaysContainerType = new DaysContainer(nextMonthDate);
+    const previousMonthDaysContainerInstance: DaysContainerType = new DaysContainer(previousMonthDate, false);
+    const currentMonthDaysContainerInstance: DaysContainerType = new DaysContainer(currentDate, false);
+    const nextMonthDaysContainerInstance: DaysContainerType = new DaysContainer(nextMonthDate, false);
 
     await previousMonthDaysContainerInstance.createDaysContainer();
     await currentMonthDaysContainerInstance.createDaysContainer();
@@ -101,112 +96,6 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
     await appendDaysContainers();
     await appendScheduleContainers();
     handleInitialScrollPosition();
-
-    DaysContainer.calendars.forEach((calendar, index) => {
-        const daysContainerInstance: DaysContainerType = calendar.daysContainer;
-        const eachdaysContainer: HTMLDivElement = daysContainerInstance.daysContainer;
-        const firstDayElement: Element = eachdaysContainer.children[0];
-        const lastDayElement = eachdaysContainer.lastChild;
-
-        daysContainerInstance.setIntersectionObserver((entries) => {
-            entries.forEach(async (entry) => {
-                if (index === 0 && entry.isIntersecting && entry.target === firstDayElement) {
-                    previousMonthDiff--;
-                    const newPreviousMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + previousMonthDiff, 0);
-                    const newPreviousMonthDaysContainerInstance: DaysContainerType = new DaysContainer(newPreviousMonthDate);
-                    await newPreviousMonthDaysContainerInstance.createDaysContainer();
-                    const newPreviousMonthDaysContainer: HTMLDivElement = newPreviousMonthDaysContainerInstance.daysContainer;
-                    previousMonthDaysContainer.before(newPreviousMonthDaysContainer);
-
-                    const newPreviousMonthScheduleContainerInstance: ScheduleContainerType = new ScheduleContainer(newPreviousMonthDaysContainerInstance);
-                    await newPreviousMonthScheduleContainerInstance.createScheduleContainer();
-                    const newPreviousMonthScheduleContainer: HTMLDivElement = newPreviousMonthScheduleContainerInstance.scheduleContainer;
-                    const previousScheduleContainer: HTMLDivElement = previousMonthScheduleContainer.scheduleContainer;
-                    previousScheduleContainer.before(newPreviousMonthScheduleContainer);
-
-                    daysContainerInstance.calendar.intersectionObserver.unobserve(firstDayElement);
-                }
-
-                if (index === 2 && entry.isIntersecting && entry.target === lastDayElement) {
-                    nextMonthDiff++;
-                    const newNextMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + nextMonthDiff, 0);
-                    const newNextMonthDaysContainerInstance: DaysContainerType = new DaysContainer(newNextMonthDate);
-                    await newNextMonthDaysContainerInstance.createDaysContainer();
-                    const newNextMonthDaysContainer: HTMLDivElement = newNextMonthDaysContainerInstance.daysContainer;
-                    nextMonthDaysContainer.after(newNextMonthDaysContainer);
-
-                    const newNextMonthScheduleContainerInstance: ScheduleContainerType = new ScheduleContainer(newNextMonthDaysContainerInstance);
-                    await newNextMonthScheduleContainerInstance.createScheduleContainer();
-                    const newNextMonthScheduleContainer: HTMLDivElement = newNextMonthScheduleContainerInstance.scheduleContainer;
-                    const nextScheduleContainer: HTMLDivElement = nextMonthScheduleContainer.scheduleContainer;
-                    nextScheduleContainer.after(newNextMonthScheduleContainer);
-
-                    // @ts-ignore
-                    daysContainerInstance.calendar.intersectionObserver.unobserve(lastDayElement);
-                }
-            });
-        });
-        daysContainerInstance.calendar.intersectionObserver.observe(firstDayElement);
-        // @ts-ignore
-        daysContainerInstance.calendar.intersectionObserver.observe(lastDayElement);
-    });
-}
-
-const setDaysContainerObservers = async (): Promise<void> => {
-    const getDateString = (date: Date): string => {
-        const year: number = date.getFullYear();
-        const monthIndex: number = date.getMonth();
-        const month: string = getMonthName(monthIndex);
-        const dateString = `${year}年${month}月`;
-        return dateString;
-    }
-
-    const getWindowContainerPaddingLeft = (): number => {
-        const tableHeaderWidth: number = tableHeader.getBoundingClientRect().width;
-        const windowContainerStyle = window.getComputedStyle(windowContainer);
-        const windowContainerPaddingLeft: number = Number(windowContainerStyle.paddingLeft.slice(0, -2));
-        const offsetLeft: number = tableHeaderWidth + windowContainerPaddingLeft;
-
-        return offsetLeft;
-    }
-
-    const displayMonthHandler = (entries: IntersectionObserverEntry[], daysContainerInstance: DaysContainerType): void => {
-        entries.forEach(entry => {
-            const epsilon: number = 1;
-
-            const windowContainerPaddingLeft: number = getWindowContainerPaddingLeft();
-            const leftScrollDiff: number = Math.abs(entry.intersectionRect.left - windowContainerPaddingLeft);
-
-            if (entry.isIntersecting && leftScrollDiff < epsilon) {
-                const date: Date = daysContainerInstance.dateObject;
-                const dateString: string = getDateString(date);
-                monthDisplay.textContent = dateString;
-                monthDisplay.animate([
-                    { transform: "translateX(200px)" },
-                    { transform: "translateX(0px)" }
-                ],
-                    {
-                        duration: 300
-                    }
-                )
-            } else if (!entry.isIntersecting && entry.boundingClientRect.left < 0) {
-                const date: Date = daysContainerInstance.dateObject;
-                const nextMonthDate: Date = new Date(date.getFullYear(), date.getMonth() + 1);
-                const dateString: string = getDateString(nextMonthDate);
-                monthDisplay.textContent = dateString;
-                monthDisplay.animate([
-                    { transform: "translateX(-200px)" },
-                    { transform: "translateX(0px)" }
-                ],
-                    {
-                        duration: 300
-                    }
-                );
-            }
-        });
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 0));
 }
 
 const handleDaysContainerScroll = (): void => {
@@ -237,9 +126,48 @@ const handleScheduleContainerScrollY = (): void => {
     scheduleContainer.scrollTop = vehicleItemsContainerScrollTop;
 }
 
+const handleAppendPreviousMonthCalendar = async () => {
+    DaysContainer.previousMonthDiff--;
+    const newPreviousMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + DaysContainer.previousMonthDiff, 0);
+    const newPreviousDaysContainerInstance: DaysContainerType = new DaysContainer(newPreviousMonthDate);
+    await newPreviousDaysContainerInstance.createDaysContainer();
+    const newPreviousDaysContainer: HTMLDivElement = newPreviousDaysContainerInstance.daysContainer;
+    daysContainer.firstChild.before(newPreviousDaysContainer);
+
+    const newPreviousScheduleContainerInstance: ScheduleContainerType = new ScheduleContainer(newPreviousDaysContainerInstance);
+    await newPreviousScheduleContainerInstance.createScheduleContainer();
+    const newPreviousMonthScheduleContainer: HTMLDivElement = newPreviousScheduleContainerInstance.scheduleContainer;
+    scheduleContainer.firstChild.before(newPreviousMonthScheduleContainer);
+
+    daysContainer.removeChild(daysContainer.lastChild);
+    scheduleContainer.removeChild(scheduleContainer.lastChild);
+
+    DaysContainer.calendars.pop();
+
+    daysContainer.scrollLeft = 0;
+}
+
+const handleAppendNextMonthCalendar = async () => {
+    DaysContainer.nextMonthDiff++;
+    const newNextMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + DaysContainer.nextMonthDiff, 0);
+    const newNextDaysContainerInstance: DaysContainerType = new DaysContainer(newNextMonthDate);
+    await newNextDaysContainerInstance.createDaysContainer();
+    const newNextDaysContainer: HTMLDivElement = newNextDaysContainerInstance.daysContainer;
+    daysContainer.lastChild.after(newNextDaysContainer);
+
+    const newNextScheduleContainerInstance: ScheduleContainerType = new ScheduleContainer(newNextDaysContainerInstance);
+    await newNextScheduleContainerInstance.createScheduleContainer();
+    const newNextScheduleContainer: HTMLDivElement = newNextScheduleContainerInstance.scheduleContainer;
+    scheduleContainer.lastChild.after(newNextScheduleContainer);
+
+    daysContainer.removeChild(daysContainer.firstChild);
+    scheduleContainer.removeChild(scheduleContainer.firstChild);
+
+    DaysContainer.calendars.shift();
+}
+
 (async (): Promise<void> => {
     const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributes();
-
     await calendarInitializer(vehicleAttributesArray);
 })();
 
@@ -247,3 +175,6 @@ scheduleContainer.addEventListener("scroll", handleDaysContainerScroll, false);
 scheduleContainer.addEventListener("scroll", handleVehicleItemsContainerScrollTop, false);
 daysContainer.addEventListener("scroll", handleScheduleContainerScrollX, false);
 vehicleItemsContainer.addEventListener("scroll", handleScheduleContainerScrollY, false);
+
+previousMonthButton.addEventListener("click", handleAppendPreviousMonthCalendar, false);
+nextMonthButton.addEventListener("click", handleAppendNextMonthCalendar, false);
