@@ -109,5 +109,10 @@ export const VehicleItem = class {
         const textDiv: HTMLDivElement = TextDiv();
 
         this.vehicleItem.append(imageDiv, textDiv);
+
+        this.vehicleItem.addEventListener("contextmenu", () => {
+            console.log(this.vehicleAttributes.id);
+            window.contextMenu.vehicleAttributesItem(this.vehicleAttributes.id);
+        }, false);
     }
 }

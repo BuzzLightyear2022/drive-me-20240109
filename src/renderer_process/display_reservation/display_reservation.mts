@@ -128,6 +128,7 @@ const handleScheduleContainerScrollY = (): void => {
 
 const handleAppendPreviousMonthCalendar = async () => {
     DaysContainer.previousMonthDiff--;
+    DaysContainer.nextMonthDiff--;
     const newPreviousMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + DaysContainer.previousMonthDiff, 0);
     const newPreviousDaysContainerInstance: DaysContainerType = new DaysContainer(newPreviousMonthDate);
     await newPreviousDaysContainerInstance.createDaysContainer();
@@ -143,12 +144,11 @@ const handleAppendPreviousMonthCalendar = async () => {
     scheduleContainer.removeChild(scheduleContainer.lastChild);
 
     DaysContainer.calendars.pop();
-
-    daysContainer.scrollLeft = 0;
 }
 
 const handleAppendNextMonthCalendar = async () => {
     DaysContainer.nextMonthDiff++;
+    DaysContainer.previousMonthDiff++;
     const newNextMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + DaysContainer.nextMonthDiff, 0);
     const newNextDaysContainerInstance: DaysContainerType = new DaysContainer(newNextMonthDate);
     await newNextDaysContainerInstance.createDaysContainer();

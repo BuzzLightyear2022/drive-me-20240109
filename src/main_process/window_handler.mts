@@ -122,9 +122,7 @@ class WindowHandler {
         });
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ipcMain.on("contextMenu:vehicleAttributesItem", (event: Electron.IpcMainEvent, args: { vehicleId: string }) => {
-            const { vehicleId } = args;
-
+        ipcMain.on("contextMenu:vehicleAttributesItem", (event: Electron.IpcMainEvent, vehicleId: string) => {
             const contextMenu = Menu.buildFromTemplate([
                 {
                     label: "車両情報更新",

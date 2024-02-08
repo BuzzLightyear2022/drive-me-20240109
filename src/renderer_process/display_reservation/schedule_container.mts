@@ -58,8 +58,6 @@ export const ScheduleContainer = class {
 
         this.appendSchedulebars();
         this.updateScheduleBars();
-
-        new Promise(resolve => setTimeout(resolve, 0));
     }
 
     appendSchedulebars = async (): Promise<void> => {
@@ -110,6 +108,8 @@ export const ScheduleContainer = class {
                 const scheduleBarElm: HTMLDivElement = instance.scheduleBarElement;
                 scheduleBarElm.removeEventListener("contextmenu", instance.displayContextmenu, false);
             });
+
+            ScheduleBar.scheduleBars.length = 0;
 
             this.scheduleCells.forEach(instance => {
                 const scheduleDivs = instance.scheduleDivs;

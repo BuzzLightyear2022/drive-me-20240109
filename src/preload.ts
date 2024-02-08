@@ -100,8 +100,8 @@ contextBridge.exposeInMainWorld(
         scheduleBar: async (reservationId: string) => {
             ipcRenderer.send("contextMenu:schedule-bar", reservationId);
         },
-        vehicleAttributesItem: async (args: { vehicleId: string }) => {
-            ipcRenderer.send("contextMenu:vehicleAttributesItem", args);
+        vehicleAttributesItem: async (vehicleId: string) => {
+            ipcRenderer.send("contextMenu:vehicleAttributesItem", vehicleId);
         },
         getReservationId: (callback: (reservationId: string) => void) => ipcRenderer.on("contextMenu:getReservationId", (event: Electron.IpcRendererEvent, reservationId: string) => callback(reservationId)),
         getVehicleId: (callback: (vehicleId: string) => void) => ipcRenderer.on("contextMenu:getVehicleId", (event: Electron.IpcRendererEvent, vehicleId) => callback(vehicleId)),

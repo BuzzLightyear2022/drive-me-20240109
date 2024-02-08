@@ -4,7 +4,7 @@ import NoImagePng from "../assets/NoImage.png";
 import squareAndArrowUpCircleFill from "../assets/square.and.arrow.up.circle.fill@2x.png";
 
 const submitButton: HTMLButtonElement = document.querySelector("#submit-button") as HTMLButtonElement;
-const imagePreview: HTMLImageElement = document.querySelector("#image-preview") as HTMLImageElement;
+const imagePreviewContainer: HTMLDivElement = document.querySelector("#image-preview-container");
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class") as HTMLSelectElement;
 const carModelSelect: HTMLSelectElement = document.querySelector("#car-model") as HTMLSelectElement;
 const modelCodeSelect: HTMLSelectElement = document.querySelector("#model-code") as HTMLSelectElement;
@@ -24,8 +24,6 @@ const hasTelevisionCheck: HTMLInputElement = document.querySelector("#has-televi
 const hasExternalInputCheck: HTMLInputElement = document.querySelector("#has-external-input") as HTMLInputElement;
 const hasSpareKeyCheck: HTMLInputElement = document.querySelector("#has-spare-key") as HTMLInputElement;
 const otherFeaturesInput: HTMLInputElement = document.querySelector("#other-features") as HTMLInputElement;
-
-let isImageChanged: boolean = false;
 
 const replaceFullWidthNumToHalfWidthNum = (args: { element: HTMLInputElement, limitDigits?: number }): void => {
     const { element, limitDigits = undefined } = args;
@@ -101,26 +99,39 @@ replaceFullWidthNumToHalfWidthNum({ element: licensePlateNumberInput, limitDigit
 window.contextMenu.getVehicleId(async (vehicleId: string) => {
     const currentVehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: vehicleId });
 
-    const carCatalog: CarCatalog = await window.fetchJson.carCatalog();
-    const jsonResponse: Navigations = await window.fetchJson.navigations();
-    const navigations: string[] = jsonResponse["navigations"];
-
     const serverHost: string = await window.serverInfo.serverHost();
     const port: string = await window.serverInfo.port();
     const imageDirectory: string = await window.serverInfo.imageDirectory();
 
-    const imagePath = `http://${serverHost}:${port}/${imageDirectory}/${currentVehicleAttributes.imageFileName}`;
+    const carCatalog: CarCatalog = await window.fetchJson.carCatalog();
+    const jsonResponse: Navigations = await window.fetchJson.navigations();
+    const navigations: string[] = jsonResponse["navigations"];
 
-    const img = new Image();
-    img.src = imagePath;
+    const currentImageUrl = `http://${serverHost}:${port}/${imageDirectory}/${currentVehicleAttributes.imageFileName}`
 
-    img.onload = () => {
-        imagePreview.src = imagePath;
-    };
+    const ImageElm = () => {
+        const imageElm: HTMLImageElement = new Image();
+        Object.assign(imageElm.style, {
+            width: "100%",
+            height: "100%",
+            objectFit: "contain"
+        });
 
-    img.onerror = () => {
-        imagePreview.src = NoImagePng;
+        if (currentVehicleAttributes.imageFileName) {
+            imageElm.src = currentImageUrl;
+        } else {
+            imageElm.src = NoImagePng;
+        }
+
+        imageElm.onerror = () => {
+            imageElm.src = NoImagePng;
+        }
+
+        return imageElm;
     }
+
+    const imageElm: HTMLImageElement = ImageElm();
+    imagePreviewContainer.append(imageElm);
 
     const rentalClasses: string[] = Object.keys(carCatalog.rentalClass);
     appendOptions({
@@ -172,26 +183,36 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
         createOptions({ carCatalog: carCatalog, target: target });
     }, false);
 
-    imagePreview.parentElement.addEventListener("click", async () => {
+    imageElm.parentElement.addEventListener("click", async () => {
         try {
             const imageUrl = await window.dialog.openFile();
             if (imageUrl) {
-                imagePreview.src = imageUrl;
-                isImageChanged = true;
+                imageElm.src = imageUrl;
             } else {
-                imagePreview.src = currentVehicleAttributes.imageFileName ? imagePath : NoImagePng;
-                isImageChanged = false;
+                imageElm.src = currentVehicleAttributes.imageFileName ? currentImageUrl : NoImagePng;
             }
         } catch (error: unknown) {
             console.error(error);
         }
     }, false);
 
+    imageElm.parentElement.addEventListener("mouseenter", () => {
+        imageElm.parentElement.append(overlayElement);
+    }, false);
+
+    imageElm.parentElement.addEventListener("mouseleave", () => {
+        overlayElement.remove();
+    }, false);
+
+    imageElm.addEventListener("dragstart", (event: MouseEvent) => {
+        event.preventDefault();
+    }, false);
+
     submitButton.addEventListener("click", async (): Promise<void> => {
-        const imageUrl: string | null = imagePreview.src;
-        const vehicleAttributes: VehicleAttributes = {
+        const imageUrl: string | null = null;
+        const newVehicleAttributes: VehicleAttributes = {
             id: currentVehicleAttributes.id,
-            imageFileName: null,
+            imageFileName: imageElm.src,
             carModel: carModelSelect.value,
             modelCode: modelCodeSelect.value,
             nonSmoking: nonSmokingCheck.checked,
@@ -210,49 +231,40 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
             hasTelevision: hasTelevisionCheck.checked,
             hasExternalInput: hasExternalInputCheck.checked,
             hasSpareKey: hasSpareKeyCheck.checked,
-            otherFeatures: otherFeaturesInput.value
+            otherFeatures: otherFeaturesInput.value,
+            hasJAFCard: false
         }
 
-        if (isImageChanged) {
-            vehicleAttributes.imageFileName = imageUrl;
-        }
+        console.log(newVehicleAttributes);
 
         try {
-            await window.sqlUpdate.vehicleAttributes(vehicleAttributes);
+            // await window.sqlUpdate.vehicleAttributes(vehicleAttributes);
         } catch (error: unknown) {
             console.error("Failed to insert VehicleAttributes: ", error);
         }
     }, false);
+
+    const overlayElement = document.createElement("div");
+    Object.assign(overlayElement.style, {
+        position: "absolute",
+        bottom: "10px",
+        right: "10px",
+        width: "50px",
+        height: "50px",
+        backgroundImage: `url(${squareAndArrowUpCircleFill})`,
+        backgroundSize: "cover",
+        zIndex: "1"
+    });
+
+    overlayElement.addEventListener("mouseenter", (event: MouseEvent) => {
+        event.stopPropagation();
+    }, false);
+
+    overlayElement.addEventListener("mouseleave", (event: MouseEvent) => {
+        event.stopPropagation();
+    }, false);
 });
 
-const overlayElement = document.createElement("div");
-Object.assign(overlayElement.style, {
-    position: "absolute",
-    bottom: "10px",
-    right: "10px",
-    width: "50px",
-    height: "50px",
-    backgroundImage: `url(${squareAndArrowUpCircleFill})`,
-    backgroundSize: "cover",
-    zIndex: "1"
-});
 
-imagePreview.parentElement.addEventListener("mouseenter", () => {
-    imagePreview.parentElement.append(overlayElement);
-}, false);
 
-imagePreview.parentElement.addEventListener("mouseleave", () => {
-    overlayElement.remove();
-}, false);
 
-overlayElement.addEventListener("mouseenter", (event: MouseEvent) => {
-    event.stopPropagation();
-}, false);
-
-overlayElement.addEventListener("mouseleave", (event: MouseEvent) => {
-    event.stopPropagation();
-}, false);
-
-imagePreview.addEventListener("dragstart", (event: MouseEvent) => {
-    event.preventDefault();
-}, false);
