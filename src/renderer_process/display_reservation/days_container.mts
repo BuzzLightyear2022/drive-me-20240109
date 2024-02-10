@@ -1,5 +1,6 @@
 import { getMonthName, getDayName } from "../common_modules.mjs"
 import { ScheduleContainerType } from "./schedule_container.mjs";
+import { ScheduleBarType } from "./schedule_bar.mjs";
 
 const windowContainer: HTMLDivElement = document.querySelector("#window-container");
 const tableHeader: HTMLDivElement = document.querySelector("#table-header");

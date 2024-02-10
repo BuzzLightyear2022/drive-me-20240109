@@ -1,12 +1,8 @@
-import { MouseInputEvent } from "electron";
 import { ReservationData } from "../../@types/types";
-import { getMonthName } from "../common_modules.mjs";
 
 export type ScheduleBarType = InstanceType<typeof ScheduleBar>;
 
 export const ScheduleBar = class {
-    static scheduleBars: ScheduleBarType[] = [];
-
     scheduleBarElement: HTMLDivElement;
     modalBackground: HTMLDivElement;
     reservationData: ReservationData;
@@ -35,8 +31,6 @@ export const ScheduleBar = class {
         this.totalMsOfCalendar = totalMsOfCalendar;
         this.previousScheduleBarWidth = previousScheduleBarWidth;
         this.scheduleBarColor = scheduleBarColor;
-        // @ts-ignore
-        ScheduleBar.scheduleBars.push(this);
     }
 
     createScheduleBar = (): void => {

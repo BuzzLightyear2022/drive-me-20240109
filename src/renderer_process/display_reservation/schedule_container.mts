@@ -10,15 +10,12 @@ export const ScheduleContainer = class {
     scheduleContainer: HTMLDivElement;
     daysContainer: DaysContainerType;
     scheduleCells: ScheduleCellType[] = [];
+    scheduleBars: ScheduleBarType[] = [];
 
     constructor(daysContainer: DaysContainerType) {
         this.daysContainer = daysContainer;
         // @ts-ignore
         daysContainer.calendar.scheduleContainer = this;
-
-        (async () => {
-            await new Promise(resolve => setTimeout(resolve, 0));
-        })();
     }
 
     createScheduleContainer = async () => {
@@ -57,7 +54,6 @@ export const ScheduleContainer = class {
         });
 
         this.appendSchedulebars();
-        this.updateScheduleBars();
     }
 
     appendSchedulebars = async (): Promise<void> => {
@@ -97,6 +93,7 @@ export const ScheduleContainer = class {
                     const scheduleBar: HTMLDivElement = scheduleBarInstance.scheduleBarElement;
 
                     reservationScheduleDiv.append(scheduleBar);
+                    this.scheduleBars.push(scheduleBarInstance);
                 }
             });
         });
@@ -104,12 +101,12 @@ export const ScheduleContainer = class {
 
     updateScheduleBars = () => {
         window.webSocket.updateReservationData(() => {
-            ScheduleBar.scheduleBars.forEach(instance => {
+            this.scheduleBars.forEach(instance => {
                 const scheduleBarElm: HTMLDivElement = instance.scheduleBarElement;
                 scheduleBarElm.removeEventListener("contextmenu", instance.displayContextmenu, false);
             });
 
-            ScheduleBar.scheduleBars.length = 0;
+            this.scheduleBars.length = 0;
 
             this.scheduleCells.forEach(instance => {
                 const scheduleDivs = instance.scheduleDivs;

@@ -3,8 +3,8 @@ import FormData from "form-data";
 import axios, { AxiosResponse } from "axios";
 import fs from "fs";
 import path from "path";
-// import WebSocket from "ws";
 import { WindowHandler } from "./window_handler.mjs";
+import { WebSocketHandler } from "./websocket_handler.mjs";
 import { VehicleAttributes, CarCatalog, ReservationData } from "../@types/types";
 import dotenv from "dotenv";
 dotenv.config();
@@ -17,9 +17,6 @@ const makeImageFileName = (vehicleAttributes: VehicleAttributes): string => {
     const imageFileName = `${carModel}${licensePlateNumber}${modelCode}${timestamp}.jpeg`;
     return imageFileName;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const WebSocket = require("ws");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -34,9 +31,6 @@ const port: string = import.meta.env.VITE_PORT as string;
 const imageDirectory: string = import.meta.env.VITE_IMAGE_DIRECTORY as string;
 
 app.on("ready", WindowHandler.createMainWindow);
-
-// const socket = new WebSocket(`ws://${serverHost}:${port}`);
-const socket = new WebSocket(`ws://${serverHost}:${port}`);
 
 // app.on("window-all-closed", () => {
 //     if (process.platform !== "darwin") {
@@ -335,15 +329,4 @@ ipcMain.handle("dialog:openFile", async () => {
     }
 });
 
-socket.on("open", () => {
-    console.log("WebSocket connection established");
-});
-
-socket.on("message", async (message: String) => {
-    const recievedMessage = String(message);
-    await WindowHandler.windows.displayReservationWindow.send(recievedMessage);
-});
-
-socket.on("close", () => {
-    console.log("WebSocket connection closed");
-});
+const webSocket = new WebSocketHandler();

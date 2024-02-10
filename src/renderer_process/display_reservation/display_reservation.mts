@@ -1,7 +1,8 @@
 import { VehicleAttributes } from "../../@types/types";
 import { VehicleItem, VehicleItemType } from "./vehicle_item.mjs";
-import { DaysContainer, DaysContainerType } from "./days_container.mjs";
+import { DaysContainer, DaysContainerType, Calendar } from "./days_container.mjs";
 import { ScheduleContainer, ScheduleContainerType } from "./schedule_container.mjs";
+import { ScheduleBarType } from "./schedule_bar.mjs";
 
 const previousMonthButton: HTMLDivElement = document.querySelector("#previous-month-button");
 const nextMonthButton: HTMLDivElement = document.querySelector("#next-month-button");
@@ -33,6 +34,8 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
     const previousMonthScheduleContainer: ScheduleContainerType = new ScheduleContainer(previousMonthDaysContainerInstance);
     const currentMonthScheduleContainer: ScheduleContainerType = new ScheduleContainer(currentMonthDaysContainerInstance);
     const nextMonthScheduleContainer: ScheduleContainerType = new ScheduleContainer(nextMonthDaysContainerInstance);
+
+    previousMonthScheduleContainer.updateScheduleBars();
 
     const appendVehicleItems = async (): Promise<void> => {
         for (const vehicleAttributes of vehicleAttributesArray) {
@@ -135,7 +138,12 @@ const handleAppendPreviousMonthCalendar = async () => {
     daysContainer.removeChild(daysContainer.lastChild);
     scheduleContainer.removeChild(scheduleContainer.lastChild);
 
-    DaysContainer.calendars.pop();
+    const removedElement: Calendar = DaysContainer.calendars.pop();
+    const removedScheduleBars: ScheduleBarType[] = removedElement.scheduleContainer.scheduleBars;
+    removedScheduleBars.forEach((scheduleBar: ScheduleBarType) => {
+        const scheduleBarElement: HTMLDivElement = scheduleBar.scheduleBarElement;
+        scheduleBarElement.removeEventListener("contextmenu", scheduleBar.displayContextmenu, false);
+    });
 }
 
 const handleAppendNextMonthCalendar = async () => {
@@ -155,14 +163,17 @@ const handleAppendNextMonthCalendar = async () => {
     daysContainer.removeChild(daysContainer.firstChild);
     scheduleContainer.removeChild(scheduleContainer.firstChild);
 
-    DaysContainer.calendars.shift();
-    console.log(DaysContainer.calendars);
+    const removedElement: Calendar = DaysContainer.calendars.shift();
+    const removedScheduleBars: ScheduleBarType[] = removedElement.scheduleContainer.scheduleBars;
+    removedScheduleBars.forEach((scheduleBar: ScheduleBarType) => {
+        const scheduleBarElement: HTMLDivElement = scheduleBar.scheduleBarElement;
+        scheduleBarElement.removeEventListener("contextmenu", scheduleBar.displayContextmenu, false);
+    });
 }
 
 (async (): Promise<void> => {
     const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributes();
     await calendarInitializer(vehicleAttributesArray);
-    console.log(DaysContainer.calendars);
 })();
 
 scheduleContainer.addEventListener("scroll", handleDaysContainerScroll, false);
