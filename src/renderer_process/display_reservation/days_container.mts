@@ -15,8 +15,10 @@ export type Calendar = {
 
 export const DaysContainer = class {
     static calendars: Calendar[] = [];
-    static previousMonthDiff: number = 1;
-    static nextMonthDiff: number = 3;
+    static previousMonthDiff: number = 0;
+    static nextMonthDiff: number = 2;
+    static isFirstElementVisible: boolean = false;
+    static isThirdElementVisible: boolean = false;
 
     calendar: Calendar = {
         daysContainer: this,
@@ -27,13 +29,13 @@ export const DaysContainer = class {
     daysContainer: HTMLDivElement;
     dateObject: Date;
 
-    constructor(dateObject: Date, append: boolean = true) {
+    constructor(dateObject: Date, append: boolean) {
         this.dateObject = dateObject;
 
         if (append) {
-            DaysContainer.calendars.unshift(this.calendar);
-        } else {
             DaysContainer.calendars.push(this.calendar);
+        } else {
+            DaysContainer.calendars.unshift(this.calendar);
         }
     }
 
@@ -78,7 +80,7 @@ export const DaysContainer = class {
                 lineHeight: "200%",
                 fontSize: "150%",
                 border: "solid",
-                borderWidth: "1px 0.5px"
+                borderWidth: "1px 0.5px",
             });
 
             const dayIndex: number = new Date(calendarYear, calendarMonthIndex, i).getDay();
@@ -133,39 +135,80 @@ export const DaysContainer = class {
             return dateString;
         }
 
+
+
         const intersectionObserver: IntersectionObserver = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
             entries.forEach((entry: IntersectionObserverEntry) => {
-                const epsilon: number = 1;
+                const firstElement: HTMLDivElement = DaysContainer.calendars[0].daysContainer.daysContainer;
+                const secondElement: HTMLDivElement = DaysContainer.calendars[1].daysContainer.daysContainer;
+                const thirdElement: HTMLDivElement = DaysContainer.calendars[2].daysContainer.daysContainer;
 
-                const windowContainerPaddingLeft: number = getWindowContainerPaddingLeft();
-                const leftScrollDiff: number = Math.abs(entry.intersectionRect.left - windowContainerPaddingLeft);
+                if (entry.isIntersecting && entry.target === firstElement) {
+                    DaysContainer.isFirstElementVisible = true;
+                } else if (!entry.isIntersecting && entry.target === firstElement) {
+                    DaysContainer.isFirstElementVisible = false;
+                }
 
-                if (entry.isIntersecting && leftScrollDiff < epsilon) {
-                    const date: Date = this.dateObject;
+                if (entry.isIntersecting && entry.target === thirdElement) {
+                    DaysContainer.isThirdElementVisible = true;
+                } else if (!entry.isIntersecting && entry.target === thirdElement) {
+                    DaysContainer.isThirdElementVisible = false;
+                }
+
+                if (entry.isIntersecting && entry.target === firstElement) {
                     const dateString: string = getDateString(this.dateObject);
                     monthDisplay.textContent = dateString;
-                    monthDisplay.animate([
-                        { transform: "translateX(200px)" },
-                        { transform: "translateX(0px)" }
-                    ],
-                        {
-                            duration: 300
-                        }
-                    )
-                } else if (!entry.isIntersecting && entry.boundingClientRect.left < 0) {
-                    const date: Date = this.dateObject;
-                    const nextMonthDate: Date = new Date(date.getFullYear(), date.getMonth() + 1);
+                } else if (!entry.isIntersecting && entry.target === firstElement) {
+                    const nextMonthDate: Date = new Date(this.dateObject.getFullYear(), this.dateObject.getMonth() + 2, 0);
                     const dateString: string = getDateString(nextMonthDate);
                     monthDisplay.textContent = dateString;
-                    monthDisplay.animate([
-                        { transform: "translateX(-200px)" },
-                        { transform: "translateX(0px)" }
-                    ],
-                        {
-                            duration: 300
-                        }
-                    );
                 }
+
+                if (entry.isIntersecting && entry.target === secondElement && !DaysContainer.isFirstElementVisible) {
+                    const dateString: string = getDateString(this.dateObject);
+                    monthDisplay.textContent = dateString;
+                } else if (!entry.isIntersecting && entry.target === secondElement && DaysContainer.isThirdElementVisible) {
+                    const nextMonthDate: Date = new Date(this.dateObject.getFullYear(), this.dateObject.getMonth() + 2, 0);
+                    const dateString: string = getDateString(nextMonthDate);
+                    monthDisplay.textContent = dateString;
+                }
+                // if (entry.isIntersecting && this.daysContainer !== secondElement) {
+                //     const dateString: string = getDateString(this.dateObject);
+                //     monthDisplay.textContent = dateString;
+                //     monthDisplay.animate([
+                //         { transform: "translateX(200px)" },
+                //         { transform: "translateX(0px)" }
+                //     ],
+                //         {
+                //             duration: 300
+                //         }
+                //     )
+                // } else if (!entry.isIntersecting && this.daysContainer === firstElement) {
+                //     const currentMonthDate: Date = new Date(this.dateObject.getFullYear(), this.dateObject.getMonth() + 2, 0);
+                //     const dateString: string = getDateString(currentMonthDate);
+                //     monthDisplay.textContent = dateString;
+                //     monthDisplay.animate([
+                //         { transform: "translateX(200px)" },
+                //         { transform: "translateX(0px)" }
+                //     ],
+                //         {
+                //             duration: 300
+                //         }
+                //     )
+                // }
+
+                // } else {
+                //     const nextMonthDate: Date = new Date(this.dateObject.getFullYear(), this.dateObject.getMonth() + 1);
+                //     const dateString: string = getDateString(nextMonthDate);
+                //     monthDisplay.textContent = dateString;
+                //     monthDisplay.animate([
+                //         { transform: "translateX(-200px)" },
+                //         { transform: "translateX(0px)" }
+                //     ],
+                //         {
+                //             duration: 300
+                //         }
+                //     );
             });
         });
 

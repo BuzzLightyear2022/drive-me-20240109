@@ -209,7 +209,6 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
     }, false);
 
     submitButton.addEventListener("click", async (): Promise<void> => {
-        const imageUrl: string | null = null;
         const newVehicleAttributes: VehicleAttributes = {
             id: currentVehicleAttributes.id,
             imageFileName: imageElm.src,

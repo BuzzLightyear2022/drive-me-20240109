@@ -29,18 +29,16 @@
 
 #previous-month-button {
     display: flex;
-    font-size: 150%;
-    line-height: 200%;
     cursor: default;
     user-select: none;
+    padding: 2%;
 }
 
 #next-month-button {
     display: flex;
-    font-size: 150%;
-    line-height: 200%;
     cursor: default;
     user-select: none;
+    padding: 2%;
 }
 
 #days-container {

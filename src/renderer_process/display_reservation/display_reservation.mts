@@ -11,21 +11,16 @@ const scheduleContainer: HTMLDivElement = document.querySelector("#schedule-cont
 
 // Get the Date objects of 3 monthes.
 const currentDate: Date = new Date();
-const lastDateOfPreviousMonth: Date = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
-const previousMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + DaysContainer.previousMonthDiff, 0);
-const nextMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + DaysContainer.nextMonthDiff, 0);
+const currentMonthDate: Date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+const previousMonthDate: Date = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + DaysContainer.previousMonthDiff, 0);
+const nextMonthDate: Date = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + DaysContainer.nextMonthDiff, 0);
 
-// Get the last date of 3 monthes.
-const previousMonthDays: number = lastDateOfPreviousMonth.getDate();
-const currentMonthDays: number = previousMonthDate.getDate();
-const nextMonthDays: number = nextMonthDate.getDate();
-
-const totalDays: number = previousMonthDays + currentMonthDays + nextMonthDays;
+const totalDays: number = currentMonthDate.getDate() + previousMonthDate.getDate() + nextMonthDate.getDate();
 
 const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) => {
-    const previousMonthDaysContainerInstance: DaysContainerType = new DaysContainer(previousMonthDate, false);
-    const currentMonthDaysContainerInstance: DaysContainerType = new DaysContainer(currentDate, false);
-    const nextMonthDaysContainerInstance: DaysContainerType = new DaysContainer(nextMonthDate, false);
+    const previousMonthDaysContainerInstance: DaysContainerType = new DaysContainer(previousMonthDate, true);
+    const currentMonthDaysContainerInstance: DaysContainerType = new DaysContainer(currentDate, true);
+    const nextMonthDaysContainerInstance: DaysContainerType = new DaysContainer(nextMonthDate, true);
 
     await previousMonthDaysContainerInstance.createDaysContainer();
     await currentMonthDaysContainerInstance.createDaysContainer();
@@ -81,12 +76,9 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
         const previousDaysContainerWidth: number = previousMonthDaysContainer.getBoundingClientRect().width;
         const currentDaysContainerWidth: number = currentMonthDaysContainer.getBoundingClientRect().width;
         const nextDaysContainerWidth: number = nextMonthDaysContainer.getBoundingClientRect().width;
-
         const totalDaysContainerWidth: number = previousDaysContainerWidth + currentDaysContainerWidth + nextDaysContainerWidth;
-
-        const daysContainerWidth: number = totalDaysContainerWidth;
-        const dayWidth: number = daysContainerWidth / totalDays;
-        const todayPosition: number = ((previousMonthDays + currentDate.getDate()) * dayWidth) - (dayWidth / 2);
+        const dayWidth: number = totalDaysContainerWidth / totalDays;
+        const todayPosition: number = ((previousMonthDate.getDate() + currentDate.getDate()) * dayWidth) - (dayWidth / 2);
         const daysContainerViewWidth: number = daysContainer.getBoundingClientRect().width;
         const centerPosition: number = todayPosition - (daysContainerViewWidth / 2);
         daysContainer.scrollLeft = centerPosition;
@@ -129,8 +121,8 @@ const handleScheduleContainerScrollY = (): void => {
 const handleAppendPreviousMonthCalendar = async () => {
     DaysContainer.previousMonthDiff--;
     DaysContainer.nextMonthDiff--;
-    const newPreviousMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + DaysContainer.previousMonthDiff, 0);
-    const newPreviousDaysContainerInstance: DaysContainerType = new DaysContainer(newPreviousMonthDate);
+    const newPreviousMonthDate: Date = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + DaysContainer.previousMonthDiff, 0);
+    const newPreviousDaysContainerInstance: DaysContainerType = new DaysContainer(newPreviousMonthDate, false);
     await newPreviousDaysContainerInstance.createDaysContainer();
     const newPreviousDaysContainer: HTMLDivElement = newPreviousDaysContainerInstance.daysContainer;
     daysContainer.firstChild.before(newPreviousDaysContainer);
@@ -149,8 +141,8 @@ const handleAppendPreviousMonthCalendar = async () => {
 const handleAppendNextMonthCalendar = async () => {
     DaysContainer.nextMonthDiff++;
     DaysContainer.previousMonthDiff++;
-    const newNextMonthDate: Date = new Date(lastDateOfPreviousMonth.getFullYear(), lastDateOfPreviousMonth.getMonth() + DaysContainer.nextMonthDiff, 0);
-    const newNextDaysContainerInstance: DaysContainerType = new DaysContainer(newNextMonthDate);
+    const newNextMonthDate: Date = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + DaysContainer.nextMonthDiff, 0);
+    const newNextDaysContainerInstance: DaysContainerType = new DaysContainer(newNextMonthDate, true);
     await newNextDaysContainerInstance.createDaysContainer();
     const newNextDaysContainer: HTMLDivElement = newNextDaysContainerInstance.daysContainer;
     daysContainer.lastChild.after(newNextDaysContainer);
@@ -164,11 +156,13 @@ const handleAppendNextMonthCalendar = async () => {
     scheduleContainer.removeChild(scheduleContainer.firstChild);
 
     DaysContainer.calendars.shift();
+    console.log(DaysContainer.calendars);
 }
 
 (async (): Promise<void> => {
     const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributes();
     await calendarInitializer(vehicleAttributesArray);
+    console.log(DaysContainer.calendars);
 })();
 
 scheduleContainer.addEventListener("scroll", handleDaysContainerScroll, false);
