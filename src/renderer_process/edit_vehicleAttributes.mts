@@ -1,5 +1,5 @@
 import { CarCatalog, VehicleAttributes, Navigations } from "../@types/types";
-import { appendOptions } from "./common_modules.mjs";
+import { appendOptions, replaceFullWidthNumToHalfWidthNum } from "./common_modules.mjs";
 import NoImagePng from "../assets/NoImage.png";
 import squareAndArrowUpCircleFill from "../assets/square.and.arrow.up.circle.fill@2x.png";
 
@@ -24,31 +24,6 @@ const hasTelevisionCheck: HTMLInputElement = document.querySelector("#has-televi
 const hasExternalInputCheck: HTMLInputElement = document.querySelector("#has-external-input") as HTMLInputElement;
 const hasSpareKeyCheck: HTMLInputElement = document.querySelector("#has-spare-key") as HTMLInputElement;
 const otherFeaturesInput: HTMLInputElement = document.querySelector("#other-features") as HTMLInputElement;
-
-const replaceFullWidthNumToHalfWidthNum = (args: { element: HTMLInputElement, limitDigits?: number }): void => {
-    const { element, limitDigits = undefined } = args;
-
-    const fullWidthNumbersRegExp = new RegExp(/[０-９]/);
-    const NotHalfWidthBumbersRegExp = new RegExp(/[^0-9]/);
-    const fullWidthNumbers = "０１２３４５６７８９";
-
-    element.addEventListener("input", (): void => {
-        const inputtedValue = String(element.value);
-        const inputtedValueLength: number = inputtedValue.length;
-
-        element.value = element.value.replace(fullWidthNumbersRegExp, (match: string): string => {
-            return fullWidthNumbersRegExp.test(match) ? String(fullWidthNumbers.indexOf(match)) : "";
-        });
-
-        element.value = element.value.replace(NotHalfWidthBumbersRegExp, "");
-
-        if (limitDigits) {
-            if (inputtedValueLength > limitDigits) {
-                element.value = inputtedValue.slice(0, limitDigits);
-            }
-        }
-    }, false);
-}
 
 const createOptions = (
     args: {
@@ -104,10 +79,10 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
     const imageDirectory: string = await window.serverInfo.imageDirectory();
 
     const carCatalog: CarCatalog = await window.fetchJson.carCatalog();
-    const jsonResponse: Navigations = await window.fetchJson.navigations();
-    const navigations: string[] = jsonResponse["navigations"];
+    const navigationsJson: Navigations = await window.fetchJson.navigations();
+    const navigations: string[] = navigationsJson["navigations"];
 
-    const currentImageUrl = `http://${serverHost}:${port}/${imageDirectory}/${currentVehicleAttributes.imageFileName}`
+    const currentImageUrl = `http://${serverHost}:${port}/${imageDirectory}/${currentVehicleAttributes.imageFileName}`;
 
     const ImageElm = () => {
         const imageElm: HTMLImageElement = new Image();
@@ -183,6 +158,26 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
         createOptions({ carCatalog: carCatalog, target: target });
     }, false);
 
+    const overlayElement = document.createElement("div");
+    Object.assign(overlayElement.style, {
+        position: "absolute",
+        bottom: "10px",
+        right: "10px",
+        width: "50px",
+        height: "50px",
+        backgroundImage: `url(${squareAndArrowUpCircleFill})`,
+        backgroundSize: "cover",
+        zIndex: "1"
+    });
+
+    overlayElement.addEventListener("mouseenter", (event: MouseEvent) => {
+        event.stopPropagation();
+    }, false);
+
+    overlayElement.addEventListener("mouseleave", (event: MouseEvent) => {
+        event.stopPropagation();
+    }, false);
+
     imageElm.parentElement.addEventListener("click", async () => {
         try {
             const imageUrl = await window.dialog.openFile();
@@ -242,28 +237,4 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
             console.error("Failed to insert VehicleAttributes: ", error);
         }
     }, false);
-
-    const overlayElement = document.createElement("div");
-    Object.assign(overlayElement.style, {
-        position: "absolute",
-        bottom: "10px",
-        right: "10px",
-        width: "50px",
-        height: "50px",
-        backgroundImage: `url(${squareAndArrowUpCircleFill})`,
-        backgroundSize: "cover",
-        zIndex: "1"
-    });
-
-    overlayElement.addEventListener("mouseenter", (event: MouseEvent) => {
-        event.stopPropagation();
-    }, false);
-
-    overlayElement.addEventListener("mouseleave", (event: MouseEvent) => {
-        event.stopPropagation();
-    }, false);
 });
-
-
-
-

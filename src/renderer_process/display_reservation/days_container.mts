@@ -140,6 +140,17 @@ export const DaysContainer = class {
 
 
         const intersectionObserver: IntersectionObserver = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
+            const animationHandler = (offsetPosition: number) => {
+                monthDisplay.animate([
+                    { transform: `translateX(${offsetPosition}px)` },
+                    { transform: "translateX(0px)" }
+                ],
+                    {
+                        duration: 300
+                    }
+                )
+            }
+
             entries.forEach((entry: IntersectionObserverEntry) => {
                 const firstElement: HTMLDivElement = DaysContainer.calendars[0].daysContainer.daysContainer;
                 const secondElement: HTMLDivElement = DaysContainer.calendars[1].daysContainer.daysContainer;
@@ -160,57 +171,24 @@ export const DaysContainer = class {
                 if (entry.isIntersecting && entry.target === firstElement) {
                     const dateString: string = getDateString(this.dateObject);
                     monthDisplay.textContent = dateString;
+                    animationHandler(200);
                 } else if (!entry.isIntersecting && entry.target === firstElement) {
                     const nextMonthDate: Date = new Date(this.dateObject.getFullYear(), this.dateObject.getMonth() + 2, 0);
                     const dateString: string = getDateString(nextMonthDate);
                     monthDisplay.textContent = dateString;
+                    animationHandler(-200);
                 }
 
                 if (entry.isIntersecting && entry.target === secondElement && !DaysContainer.isFirstElementVisible) {
                     const dateString: string = getDateString(this.dateObject);
                     monthDisplay.textContent = dateString;
+                    animationHandler(200);
                 } else if (!entry.isIntersecting && entry.target === secondElement && DaysContainer.isThirdElementVisible) {
                     const nextMonthDate: Date = new Date(this.dateObject.getFullYear(), this.dateObject.getMonth() + 2, 0);
                     const dateString: string = getDateString(nextMonthDate);
                     monthDisplay.textContent = dateString;
+                    animationHandler(-200);
                 }
-                // if (entry.isIntersecting && this.daysContainer !== secondElement) {
-                //     const dateString: string = getDateString(this.dateObject);
-                //     monthDisplay.textContent = dateString;
-                //     monthDisplay.animate([
-                //         { transform: "translateX(200px)" },
-                //         { transform: "translateX(0px)" }
-                //     ],
-                //         {
-                //             duration: 300
-                //         }
-                //     )
-                // } else if (!entry.isIntersecting && this.daysContainer === firstElement) {
-                //     const currentMonthDate: Date = new Date(this.dateObject.getFullYear(), this.dateObject.getMonth() + 2, 0);
-                //     const dateString: string = getDateString(currentMonthDate);
-                //     monthDisplay.textContent = dateString;
-                //     monthDisplay.animate([
-                //         { transform: "translateX(200px)" },
-                //         { transform: "translateX(0px)" }
-                //     ],
-                //         {
-                //             duration: 300
-                //         }
-                //     )
-                // }
-
-                // } else {
-                //     const nextMonthDate: Date = new Date(this.dateObject.getFullYear(), this.dateObject.getMonth() + 1);
-                //     const dateString: string = getDateString(nextMonthDate);
-                //     monthDisplay.textContent = dateString;
-                //     monthDisplay.animate([
-                //         { transform: "translateX(-200px)" },
-                //         { transform: "translateX(0px)" }
-                //     ],
-                //         {
-                //             duration: 300
-                //         }
-                //     );
             });
         });
 

@@ -47,6 +47,7 @@ export const ScheduleBar = class {
         Object.assign(this.scheduleBarElement.style, {
             display: "flex",
             flexDirection: "row",
+            flexShrink: 0,
             position: "relative",
             width: relativeWidth,
             height: "100%",

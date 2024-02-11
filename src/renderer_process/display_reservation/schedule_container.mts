@@ -77,8 +77,26 @@ export const ScheduleContainer = class {
                 const maintenanceScheduleDiv: HTMLDivElement = instance.scheduleDivs.maintenanceScheduleDiv;
 
                 const vehicleId = instance.vehicleItem.vehicleAttributes.id;
+                const pickupDate: Date = new Date(reservation.pickupDateObject);
 
-                if (reservation.vehicleId === vehicleId) {
+                if (reservation.vehicleId === vehicleId && pickupDate.getTime() >= startDate.getTime()) {
+                    const previousScheduleBar: Element | undefined = reservationScheduleDiv.lastElementChild;
+                    const previousScheduleBarWidth: number = previousScheduleBar ? previousScheduleBar.getBoundingClientRect().width : 0;
+
+                    const scheduleBarInstance: ScheduleBarType = new ScheduleBar({
+                        reservationData: reservation,
+                        startMsOfCalendar: startDate.getTime(),
+                        totalMsOfCalendar: totalMsOfMonth,
+                        previousScheduleBarWidth: previousScheduleBarWidth,
+                        scheduleBarColor: "green"
+                    });
+
+                    scheduleBarInstance.createScheduleBar();
+                    const scheduleBar: HTMLDivElement = scheduleBarInstance.scheduleBarElement;
+
+                    reservationScheduleDiv.append(scheduleBar);
+                    this.scheduleBars.push(scheduleBarInstance);
+                } else if (reservation.vehicleId === vehicleId && pickupDate.getTime() <= startDate.getTime()) {
                     const previousScheduleBar: Element | undefined = reservationScheduleDiv.lastElementChild;
                     const previousScheduleBarWidth: number = previousScheduleBar ? previousScheduleBar.getBoundingClientRect().width : 0;
 
