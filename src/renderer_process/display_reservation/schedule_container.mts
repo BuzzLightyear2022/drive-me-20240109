@@ -54,6 +54,7 @@ export const ScheduleContainer = class {
         });
 
         this.appendSchedulebars();
+        this.updateScheduleBars();
     }
 
     appendSchedulebars = async (): Promise<void> => {
@@ -100,7 +101,7 @@ export const ScheduleContainer = class {
     }
 
     updateScheduleBars = () => {
-        window.webSocket.updateReservationData(() => {
+        const eventId: number = window.webSocket.updateReservationData(() => {
             this.scheduleBars.forEach(instance => {
                 const scheduleBarElm: HTMLDivElement = instance.scheduleBarElement;
                 scheduleBarElm.removeEventListener("contextmenu", instance.displayContextmenu, false);
@@ -124,5 +125,7 @@ export const ScheduleContainer = class {
 
             this.appendSchedulebars();
         });
+
+        this.daysContainer.calendar.updateReservationEventId = eventId;
     }
 }

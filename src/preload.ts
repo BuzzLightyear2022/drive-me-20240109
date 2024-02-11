@@ -1,5 +1,8 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { CarCatalog, VehicleAttributes, Navigations, LicensePlatesData, ReservationData } from "./@types/types";
+import { generateUniqueId } from "./renderer_process/common_modules.mjs";
+
+const wsReservationUpdateListeners: any[] = [];
 
 contextBridge.exposeInMainWorld(
     "serverInfo",
@@ -111,13 +114,24 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "webSocket",
     {
-        updateReservationData: (callback: () => void) => {
-            ipcRenderer.on("sqlUpdate:reservationData", () => {
-                return callback();
-            });
+        updateReservationData: (callback: () => void): number => {
+            const eventId: number = generateUniqueId();
+
+            const listener = () => {
+                callback();
+            }
+
+            ipcRenderer.on("wsUpdate:reservationData", listener);
+
+            wsReservationUpdateListeners[eventId] = {
+                event: "wsUpdate:reservationData",
+                listener: listener
+            };
+
+            return eventId;
         },
         updateVehicleAttributes: (callback: () => void) => {
-            ipcRenderer.on("sqlUpdate:vehicleAttributes", () => {
+            ipcRenderer.on("wsUpdate:vehicleAttributes", () => {
                 return callback();
             });
         }
@@ -128,5 +142,19 @@ contextBridge.exposeInMainWorld(
     "dialog",
     {
         openFile: async () => ipcRenderer.invoke("dialog:openFile")
+    }
+);
+
+contextBridge.exposeInMainWorld(
+    "removeEvent",
+    {
+        wsUpdateReservationData: (eventId: number) => {
+            const listenerObject = wsReservationUpdateListeners[eventId];
+
+            if (listenerObject) {
+                ipcRenderer.removeListener(listenerObject.event, listenerObject.listener);
+                delete wsReservationUpdateListeners[eventId];
+            }
+        }
     }
 );

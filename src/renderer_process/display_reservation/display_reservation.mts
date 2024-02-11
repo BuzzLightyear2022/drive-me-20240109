@@ -35,8 +35,6 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
     const currentMonthScheduleContainer: ScheduleContainerType = new ScheduleContainer(currentMonthDaysContainerInstance);
     const nextMonthScheduleContainer: ScheduleContainerType = new ScheduleContainer(nextMonthDaysContainerInstance);
 
-    previousMonthScheduleContainer.updateScheduleBars();
-
     const appendVehicleItems = async (): Promise<void> => {
         for (const vehicleAttributes of vehicleAttributesArray) {
             const vehicleItemInstance: VehicleItemType = new VehicleItem(vehicleAttributes);
@@ -61,7 +59,7 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
         await new Promise(resolve => setTimeout(resolve, 0));
     }
 
-    const appendScheduleContainers = async (): Promise<void> => {
+    const appendScheduleContainers = (): void => {
         previousMonthScheduleContainer.createScheduleContainer();
         currentMonthScheduleContainer.createScheduleContainer();
         nextMonthScheduleContainer.createScheduleContainer();
@@ -71,8 +69,6 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
         const nextScheduleContainer: HTMLDivElement = nextMonthScheduleContainer.scheduleContainer;
 
         scheduleContainer.append(previousScheduleContainer, currentScheduleContainer, nextScheduleContainer);
-
-        await new Promise(resolve => setTimeout(resolve, 0));
     }
 
     const handleInitialScrollPosition = (): void => {
@@ -89,7 +85,7 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
 
     await appendVehicleItems();
     await appendDaysContainers();
-    await appendScheduleContainers();
+    appendScheduleContainers();
     handleInitialScrollPosition();
 }
 
@@ -144,6 +140,9 @@ const handleAppendPreviousMonthCalendar = async () => {
         const scheduleBarElement: HTMLDivElement = scheduleBar.scheduleBarElement;
         scheduleBarElement.removeEventListener("contextmenu", scheduleBar.displayContextmenu, false);
     });
+
+    const updateReservationEventId: number = removedElement.daysContainer.calendar.updateReservationEventId;
+    window.removeEvent.wsUpdateReservationData(updateReservationEventId);
 }
 
 const handleAppendNextMonthCalendar = async () => {
@@ -169,6 +168,9 @@ const handleAppendNextMonthCalendar = async () => {
         const scheduleBarElement: HTMLDivElement = scheduleBar.scheduleBarElement;
         scheduleBarElement.removeEventListener("contextmenu", scheduleBar.displayContextmenu, false);
     });
+
+    const updateReservationEventId: number = removedElement.daysContainer.calendar.updateReservationEventId;
+    window.removeEvent.wsUpdateReservationData(updateReservationEventId);
 }
 
 (async (): Promise<void> => {

@@ -52,3 +52,8 @@ export const getDayName = (dayIndex: number): string => {
     ]
     return dayNames[dayIndex];
 }
+
+export const generateUniqueId = (): number => {
+    const randomNumStr: string = Math.random().toString(36).substring(2, 9);
+    return parseInt(randomNumStr, 36);
+}

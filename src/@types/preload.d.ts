@@ -47,12 +47,16 @@ export interface contextMenu {
 }
 
 export interface webSocket {
-    updateReservationData: (callback: () => void) => void;
+    updateReservationData: (callback: () => void) => number;
     updateVehicleAttributes: (callback: () => void) => void;
 }
 
 export interface dialog {
     openFile: () => Promise<string>;
+}
+
+export interface removeEvent {
+    wsUpdateReservationData: (eventId: number) => void;
 }
 
 declare global {
@@ -66,5 +70,6 @@ declare global {
         contextMenu: contextMenu;
         webSocket: webSocket;
         dialog: dialog;
+        removeEvent: removeEvent;
     }
 }
