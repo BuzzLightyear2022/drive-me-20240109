@@ -52,6 +52,9 @@ contextBridge.exposeInMainWorld(
         vehicleAttributes: async (): Promise<VehicleAttributes[]> => {
             return await ipcRenderer.invoke("sqlSelect:vehicleAttributes")
         },
+        vehicleAttributesByRentalClass: async (args: { rentalClass: string }): Promise<VehicleAttributes[]> => {
+            return await ipcRenderer.invoke("sqlSelect:vehicleAttributesByRentalClass", args);
+        },
         rentalClasses: async (args: { selectedSmoking: string }): Promise<string[]> => {
             return await ipcRenderer.invoke("sqlSelect:rentalClasses", args);
         },

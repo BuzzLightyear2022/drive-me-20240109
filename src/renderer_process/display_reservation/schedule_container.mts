@@ -64,55 +64,60 @@ export const ScheduleContainer = class {
 
         const startDate: Date = new Date(calendarYear, calendarMonthIndex, 1, 0, 0, 0, 0);
         const endDate: Date = new Date(calendarYear, calendarMonthIndex + 1, 0, 23, 59, 59, 999);
-        const totalMsOfMonth: number = endDate.getTime() - startDate.getTime();
+        // const totalMsOfMonth: number = endDate.getTime() - startDate.getTime();
 
         const monthReservationData: ReservationData[] = await window.sqlSelect.reservationData({
             startDate: startDate,
             endDate: endDate
         });
 
-        monthReservationData.forEach(reservation => {
-            this.scheduleCells.forEach(instance => {
-                const reservationScheduleDiv: HTMLDivElement = instance.scheduleDivs.reservationScheduleDiv;
-                const maintenanceScheduleDiv: HTMLDivElement = instance.scheduleDivs.maintenanceScheduleDiv;
+        const processScheduleBar = (args: {
+            scheduleCellInstance: ScheduleCellType,
+            reservationData: ReservationData
+        }) => {
+            const {
+                scheduleCellInstance,
+                reservationData
+            } = args;
 
-                const vehicleId = instance.vehicleItem.vehicleAttributes.id;
-                const pickupDate: Date = new Date(reservation.pickupDateObject);
+            const reservationScheduleDiv: HTMLDivElement = scheduleCellInstance.scheduleDivs.reservationScheduleDiv;
+            const maintenanceScheduleDiv: HTMLDivElement = scheduleCellInstance.scheduleDivs.maintenanceScheduleDiv;
 
-                if (reservation.vehicleId === vehicleId && pickupDate.getTime() >= startDate.getTime()) {
-                    const previousScheduleBar: Element | undefined = reservationScheduleDiv.lastElementChild;
-                    const previousScheduleBarWidth: number = previousScheduleBar ? previousScheduleBar.getBoundingClientRect().width : 0;
+            const previousScheduleBar: Element | undefined = reservationScheduleDiv.lastElementChild;
+            const previousScheduleBarWidth: number = previousScheduleBar ? previousScheduleBar.getBoundingClientRect().width : 0;
 
-                    const scheduleBarInstance: ScheduleBarType = new ScheduleBar({
-                        reservationData: reservation,
-                        startMsOfCalendar: startDate.getTime(),
-                        totalMsOfCalendar: totalMsOfMonth,
-                        previousScheduleBarWidth: previousScheduleBarWidth,
-                        scheduleBarColor: "green"
+            const scheduleBarInstance: ScheduleBarType = new ScheduleBar({
+                reservationData: reservationData,
+                startMsOfCalendar: startDate.getTime(),
+                endMsOfCalendar: endDate.getTime(),
+                previousScheduleBarWidth: previousScheduleBarWidth,
+                scheduleBarColor: "green"
+            });
+
+            scheduleBarInstance.createScheduleBar();
+            const scheduleBar: HTMLDivElement = scheduleBarInstance.scheduleBarElement;
+
+            reservationScheduleDiv.append(scheduleBar);
+            this.scheduleBars.push(scheduleBarInstance);
+        }
+
+        monthReservationData.forEach(reservationData => {
+            this.scheduleCells.forEach(scheduleCellInstance => {
+
+
+                const vehicleId = scheduleCellInstance.vehicleItem.vehicleAttributes.id;
+                const pickupDate: Date = new Date(reservationData.pickupDateObject);
+
+                if (reservationData.vehicleId === vehicleId && pickupDate.getTime() >= startDate.getTime()) {
+                    processScheduleBar({
+                        scheduleCellInstance: scheduleCellInstance,
+                        reservationData: reservationData
                     });
-
-                    scheduleBarInstance.createScheduleBar();
-                    const scheduleBar: HTMLDivElement = scheduleBarInstance.scheduleBarElement;
-
-                    reservationScheduleDiv.append(scheduleBar);
-                    this.scheduleBars.push(scheduleBarInstance);
-                } else if (reservation.vehicleId === vehicleId && pickupDate.getTime() <= startDate.getTime()) {
-                    const previousScheduleBar: Element | undefined = reservationScheduleDiv.lastElementChild;
-                    const previousScheduleBarWidth: number = previousScheduleBar ? previousScheduleBar.getBoundingClientRect().width : 0;
-
-                    const scheduleBarInstance: ScheduleBarType = new ScheduleBar({
-                        reservationData: reservation,
-                        startMsOfCalendar: startDate.getTime(),
-                        totalMsOfCalendar: totalMsOfMonth,
-                        previousScheduleBarWidth: previousScheduleBarWidth,
-                        scheduleBarColor: "green"
+                } else if (reservationData.vehicleId === vehicleId && pickupDate.getTime() <= startDate.getTime()) {
+                    processScheduleBar({
+                        scheduleCellInstance: scheduleCellInstance,
+                        reservationData: reservationData
                     });
-
-                    scheduleBarInstance.createScheduleBar();
-                    const scheduleBar: HTMLDivElement = scheduleBarInstance.scheduleBarElement;
-
-                    reservationScheduleDiv.append(scheduleBar);
-                    this.scheduleBars.push(scheduleBarInstance);
                 }
             });
         });

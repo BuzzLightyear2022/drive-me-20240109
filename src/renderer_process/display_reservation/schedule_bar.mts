@@ -7,58 +7,37 @@ export const ScheduleBar = class {
     modalBackground: HTMLDivElement;
     reservationData: ReservationData;
     startMsOfCalendar: number;
-    totalMsOfCalendar: number;
+    endMsOfCalendar: number;
+    // totalMsOfCalendar: number;
     previousScheduleBarWidth: number;
     scheduleBarColor: string
 
     constructor(args: {
         reservationData: ReservationData,
         startMsOfCalendar: number,
-        totalMsOfCalendar: number,
+        endMsOfCalendar: number,
+        // totalMsOfCalendar: number,
         previousScheduleBarWidth: number,
         scheduleBarColor: string
     }) {
         const {
             reservationData,
             startMsOfCalendar,
-            totalMsOfCalendar,
+            endMsOfCalendar,
+            // totalMsOfCalendar,
             previousScheduleBarWidth,
             scheduleBarColor
         } = args;
 
         this.reservationData = reservationData;
         this.startMsOfCalendar = startMsOfCalendar;
-        this.totalMsOfCalendar = totalMsOfCalendar;
+        this.endMsOfCalendar = endMsOfCalendar;
+        // this.totalMsOfCalendar = totalMsOfCalendar;
         this.previousScheduleBarWidth = previousScheduleBarWidth;
         this.scheduleBarColor = scheduleBarColor;
     }
 
     createScheduleBar = (): void => {
-        this.scheduleBarElement = document.createElement("div");
-        this.scheduleBarElement.className = "card";
-
-        const scheduleBarDepartureDatetime: number = new Date(this.reservationData.pickupDateObject).getTime();
-        const scheduleBarReturnDatetime: number = new Date(this.reservationData.returnDateObject).getTime();
-
-        const diffInTime: number = scheduleBarReturnDatetime - scheduleBarDepartureDatetime;
-        const relativeWidth = `${(diffInTime / this.totalMsOfCalendar) * 100}%`;
-        const diffFromStart = `${((scheduleBarDepartureDatetime - this.startMsOfCalendar) / this.totalMsOfCalendar) * 100}%`;
-
-        Object.assign(this.scheduleBarElement.style, {
-            display: "flex",
-            flexDirection: "row",
-            flexShrink: 0,
-            position: "relative",
-            width: relativeWidth,
-            height: "100%",
-            left: `calc(${diffFromStart} - ${this.previousScheduleBarWidth}px`,
-            backgroundColor: this.scheduleBarColor,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            cursor: "default",
-            userSelect: "none"
-        });
-
         const ScheduleBarInfoContainer = (): HTMLDivElement => {
             const scheduleBarInfoContainer: HTMLDivElement = document.createElement("div");
             Object.assign(scheduleBarInfoContainer.style, {
@@ -174,6 +153,53 @@ export const ScheduleBar = class {
             scheduleBarInfoContainer.append(timeAndLocationContainer, reservationNameDiv);
 
             return scheduleBarInfoContainer;
+        }
+
+        this.scheduleBarElement = document.createElement("div");
+        this.scheduleBarElement.className = "card";
+
+        const totalMsOfCalendar: number = this.endMsOfCalendar - this.startMsOfCalendar;
+
+        const pickupDateMs: number = new Date(this.reservationData.pickupDateObject).getTime();
+        const returnDateMs: number = new Date(this.reservationData.returnDateObject).getTime();
+
+        const diffInTime: number = returnDateMs - pickupDateMs;
+        const relativeWidth = `${(diffInTime / totalMsOfCalendar) * 100}%`;
+        const diffFromStart = `${((pickupDateMs - this.startMsOfCalendar) / totalMsOfCalendar) * 100}%`;
+
+        const commonStyle = {
+            display: "flex",
+            flexDirection: "row",
+            position: "relative",
+            height: "100%",
+            backgroundColor: this.scheduleBarColor,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            border: "none",
+            cursor: "default",
+            userSelect: "none"
+        };
+
+        if (pickupDateMs <= this.startMsOfCalendar && returnDateMs >= this.endMsOfCalendar) {
+            Object.assign(this.scheduleBarElement.style, {
+                ...commonStyle,
+                width: "100%",
+                left: "0px",
+            });
+        } else if (pickupDateMs >= this.startMsOfCalendar && returnDateMs >= this.endMsOfCalendar) {
+            Object.assign(this.scheduleBarElement.style, {
+                ...commonStyle,
+                width: relativeWidth,
+                left: diffFromStart,
+                zIndex: "1"
+            });
+        } else {
+            Object.assign(this.scheduleBarElement.style, {
+                ...commonStyle,
+                flexShrink: 0,
+                width: relativeWidth,
+                left: `calc(${diffFromStart} - ${this.previousScheduleBarWidth}px)`,
+            });
         }
 
         const scheduleBarInfoContainer: HTMLDivElement = ScheduleBarInfoContainer();

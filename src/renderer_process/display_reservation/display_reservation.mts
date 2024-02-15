@@ -4,6 +4,7 @@ import { DaysContainer, DaysContainerType, Calendar } from "./days_container.mjs
 import { ScheduleContainer, ScheduleContainerType } from "./schedule_container.mjs";
 import { ScheduleBarType } from "./schedule_bar.mjs";
 
+const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class-select");
 const previousMonthButton: HTMLDivElement = document.querySelector("#previous-month-button");
 const nextMonthButton: HTMLDivElement = document.querySelector("#next-month-button");
 const daysContainer: HTMLDivElement = document.querySelector("#days-container");
@@ -18,7 +19,22 @@ const nextMonthDate: Date = new Date(currentMonthDate.getFullYear(), currentMont
 
 const totalDays: number = currentMonthDate.getDate() + previousMonthDate.getDate() + nextMonthDate.getDate();
 
-const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) => {
+const appendVehicleItems = async (vehicleAttributesArray: VehicleAttributes[]): Promise<void> => {
+    VehicleItem.instances.length = 0;
+
+    for (const vehicleAttributes of vehicleAttributesArray) {
+        const vehicleItemInstance: VehicleItemType = new VehicleItem(vehicleAttributes);
+        vehicleItemInstance.createVehicleItem();
+
+        const vehicleItem: HTMLDivElement = vehicleItemInstance.vehicleItem;
+        vehicleItemsContainer.append(vehicleItem);
+    }
+    await new Promise(resolve => setTimeout(resolve, 0));
+}
+
+const calendarInitializer = async () => {
+    const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass({ rentalClass: rentalClassSelect.value });
+
     const previousMonthDaysContainerInstance: DaysContainerType = new DaysContainer(previousMonthDate, true);
     const currentMonthDaysContainerInstance: DaysContainerType = new DaysContainer(currentDate, true);
     const nextMonthDaysContainerInstance: DaysContainerType = new DaysContainer(nextMonthDate, true);
@@ -34,18 +50,6 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
     const previousMonthScheduleContainer: ScheduleContainerType = new ScheduleContainer(previousMonthDaysContainerInstance);
     const currentMonthScheduleContainer: ScheduleContainerType = new ScheduleContainer(currentMonthDaysContainerInstance);
     const nextMonthScheduleContainer: ScheduleContainerType = new ScheduleContainer(nextMonthDaysContainerInstance);
-
-    const appendVehicleItems = async (): Promise<void> => {
-        for (const vehicleAttributes of vehicleAttributesArray) {
-            const vehicleItemInstance: VehicleItemType = new VehicleItem(vehicleAttributes);
-            vehicleItemInstance.createVehicleItem();
-
-            const vehicleItem: HTMLDivElement = vehicleItemInstance.vehicleItem;
-            vehicleItemsContainer.append(vehicleItem);
-
-            await new Promise(resolve => setTimeout(resolve, 0));
-        }
-    }
 
     const appendDaysContainers = async (): Promise<void> => {
         for (const container of [
@@ -83,10 +87,58 @@ const calendarInitializer = async (vehicleAttributesArray: VehicleAttributes[]) 
         daysContainer.scrollLeft = centerPosition;
     }
 
-    await appendVehicleItems();
     await appendDaysContainers();
+    await appendVehicleItems(vehicleAttributesArray);
     appendScheduleContainers();
     handleInitialScrollPosition();
+}
+
+const calendarUpdater = async () => {
+    while (vehicleItemsContainer.firstChild) {
+        vehicleItemsContainer.removeChild(vehicleItemsContainer.firstChild);
+    }
+
+    const previousMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[0].scheduleContainer.scheduleContainer;
+    const currentMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[1].scheduleContainer.scheduleContainer;
+    const nextMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[2].scheduleContainer.scheduleContainer;
+
+    while (previousMonthScheduleContainer.firstChild) {
+        previousMonthScheduleContainer.removeChild(previousMonthScheduleContainer.firstChild);
+    }
+
+    while (currentMonthScheduleContainer.firstChild) {
+        currentMonthScheduleContainer.removeChild(currentMonthScheduleContainer.firstChild);
+    }
+
+    while (nextMonthScheduleContainer.firstChild) {
+        nextMonthScheduleContainer.removeChild(nextMonthScheduleContainer.firstChild);
+    }
+
+    VehicleItem.instances.length = 0;
+
+    const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass({ rentalClass: rentalClassSelect.value });
+
+    const previousMonthDaysContainerInstance: DaysContainerType = DaysContainer.calendars[0].daysContainer;
+    const currentMonthDaysContainerInstance: DaysContainerType = DaysContainer.calendars[1].daysContainer;
+    const nextMonthDaysContainerInstance: DaysContainerType = DaysContainer.calendars[2].daysContainer;
+
+    await appendVehicleItems(vehicleAttributesArray);
+
+    const newPreviousMonthScheduleContainer: ScheduleContainerType = new ScheduleContainer(previousMonthDaysContainerInstance);
+    const newCurrentMonthScheduleContainer: ScheduleContainerType = new ScheduleContainer(currentMonthDaysContainerInstance);
+    const newNextMonthScheduleContainer: ScheduleContainerType = new ScheduleContainer(nextMonthDaysContainerInstance);
+
+    newPreviousMonthScheduleContainer.createScheduleContainer();
+    newCurrentMonthScheduleContainer.createScheduleContainer();
+    newNextMonthScheduleContainer.createScheduleContainer();
+
+    const previousScheduleContainer: HTMLDivElement = newPreviousMonthScheduleContainer.scheduleContainer;
+    const currentScheduleContainer: HTMLDivElement = newCurrentMonthScheduleContainer.scheduleContainer;
+    const nextScheduleContainer: HTMLDivElement = newNextMonthScheduleContainer.scheduleContainer;
+
+    previousMonthScheduleContainer.append(previousScheduleContainer);
+    currentMonthScheduleContainer.append(currentScheduleContainer);
+    nextMonthScheduleContainer.append(nextScheduleContainer);
 }
 
 const handleDaysContainerScroll = (): void => {
@@ -174,9 +226,17 @@ const handleAppendNextMonthCalendar = async () => {
 }
 
 (async (): Promise<void> => {
-    const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributes();
-    await calendarInitializer(vehicleAttributesArray);
+    const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: "none-specification" });
+    rentalClasses.forEach((rentalClass: string) => {
+        const option: HTMLOptionElement = document.createElement("option");
+        option.textContent = rentalClass;
+        rentalClassSelect.append(option);
+    });
+
+    await calendarInitializer();
 })();
+
+rentalClassSelect.addEventListener("change", calendarUpdater, false);
 
 scheduleContainer.addEventListener("scroll", handleDaysContainerScroll, false);
 scheduleContainer.addEventListener("scroll", handleVehicleItemsContainerScrollTop, false);

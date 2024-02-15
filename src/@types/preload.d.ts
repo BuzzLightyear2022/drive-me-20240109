@@ -19,7 +19,8 @@ export interface fetchJson {
 
 export interface sqlSelect {
     vehicleAttributes: () => Promise<VehicleAttributesArray>;
-    vehicleAttributesById: (args: { vehicleId: string }) => Promise<VehicleAttributes>
+    vehicleAttributesById: (args: { vehicleId: string }) => Promise<VehicleAttributes>;
+    vehicleAttributesByRentalClass: (args: { rentalClass: string }) => Promise<VehicleAttributes>;
     rentalClasses: (args: { selectedSmoking: string }) => Promise<string[]>;
     carModels: (args: { selectedSmoking: string, selectedRentalClass: string }) => Promise<string[]>;
     licensePlates: (args: { selectedSmoking: string, selectedCarModel: string }) => Promise<LicensePlatesData>;

@@ -33,6 +33,7 @@ export const ScheduleCell = class {
 
         const vehicleItemElm: HTMLDivElement = this.vehicleItem.vehicleItem;
         const vehicleItemHeight: number = vehicleItemElm.getBoundingClientRect().height;
+        console.log(vehicleItemHeight);
 
         this.scheduleCell = document.createElement("div");
         Object.assign(this.scheduleCell.style, {

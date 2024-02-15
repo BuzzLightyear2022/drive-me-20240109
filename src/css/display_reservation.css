@@ -1,9 +1,13 @@
+#rental-class-select {
+    max-width: 25%;
+}
+
 #window-container {
     display: grid;
     grid-template-rows: auto 1fr;
     grid-template-columns: auto 1fr;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
 }
 
 #table-header {

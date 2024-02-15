@@ -109,11 +109,22 @@ ipcMain.handle("sqlSelect:vehicleAttributesById", async (event: Electron.IpcMain
     }
 });
 
+ipcMain.handle("sqlSelect:vehicleAttributesByRentalClass", async (event: Electron.IpcMainEvent, args: { rentalClass: string }) => {
+    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/vehicleAttributesByClass`;
+    try {
+        const response: AxiosResponse = await axios.post(serverEndPoint, args);
+        return response.data;
+    } catch (error: unknown) {
+        return console.error(`Failed to select vehicleAttributes by class ${error}`);
+    }
+});
+
 ipcMain.handle("sqlSelect:rentalClasses", async (event: Electron.IpcMainInvokeEvent, args: { selectedSmoking: string }) => {
     const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/vehicleAttributes/rentalClasses`;
     try {
         const response: AxiosResponse = await axios.post(serverEndPoint, args);
         return response.data;
+
     } catch (error: unknown) {
         console.error(`Failed to fetch rentalClasses:, ${error}`);
     }

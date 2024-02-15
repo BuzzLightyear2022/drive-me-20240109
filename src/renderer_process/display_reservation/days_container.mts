@@ -137,8 +137,6 @@ export const DaysContainer = class {
             return dateString;
         }
 
-
-
         const intersectionObserver: IntersectionObserver = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
             const animationHandler = (offsetPosition: number) => {
                 monthDisplay.animate([
