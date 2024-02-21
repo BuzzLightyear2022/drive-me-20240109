@@ -54,6 +54,7 @@ export interface webSocket {
 
 export interface dialog {
     openFile: () => Promise<string>;
+    openFileCancelled: () => Promise<void>;
 }
 
 export interface removeEvent {

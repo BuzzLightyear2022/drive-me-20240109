@@ -42,7 +42,7 @@ export type VehicleAttributes = {
     hasExternalInput: boolean,
     hasSpareKey: boolean,
     hasJAFCard: boolean,
-    JAFCardNumber?: number,
+    JAFCardNumber?: string,
     JAFCardExp?: Date,
     otherFeatures?: string
 }

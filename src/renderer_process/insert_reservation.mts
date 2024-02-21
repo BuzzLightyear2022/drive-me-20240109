@@ -121,10 +121,10 @@ submitButton.addEventListener("click", async () => {
         vehicleId: licensePlateSelect.value,
         reservationName: reservationName.value,
         rentalCategory: selectedRentalCategory,
-        departureStore: departureStore.value,
-        returnStore: returnStore.value,
-        departureDatetime: selectedDepartureDatetime,
-        returnDatetime: selectedReturnDatetime,
+        pickupLocation: departureStore.value,
+        returnLocation: returnStore.value,
+        pickupDateObject: selectedDepartureDatetime,
+        returnDateObject: selectedReturnDatetime,
         nonSmoking: selectedSmoking,
         comment: commentTextarea.value
     }

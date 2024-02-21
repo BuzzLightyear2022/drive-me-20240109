@@ -3,27 +3,32 @@ import { appendOptions, replaceFullWidthNumToHalfWidthNum } from "./common_modul
 import NoImagePng from "../assets/NoImage.png";
 import squareAndArrowUpCircleFill from "../assets/square.and.arrow.up.circle.fill@2x.png";
 
-const submitButton: HTMLButtonElement = document.querySelector("#submit-button") as HTMLButtonElement;
+const submitButton: HTMLButtonElement = document.querySelector("#submit-button");
 const imagePreviewContainer: HTMLDivElement = document.querySelector("#image-preview-container");
-const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class") as HTMLSelectElement;
-const carModelSelect: HTMLSelectElement = document.querySelector("#car-model") as HTMLSelectElement;
-const modelCodeSelect: HTMLSelectElement = document.querySelector("#model-code") as HTMLSelectElement;
-const driveTypeSelect: HTMLSelectElement = document.querySelector("#drive-type") as HTMLSelectElement;
-const transmissionSelect: HTMLSelectElement = document.querySelector("#transmission") as HTMLSelectElement;
-const bodyColorSelect: HTMLSelectElement = document.querySelector("#body-color") as HTMLSelectElement;
-const nonSmokingCheck: HTMLInputElement = document.querySelector("#non-smoking") as HTMLInputElement;
-const insurancePriorityCheck: HTMLInputElement = document.querySelector("#insurance-priority") as HTMLInputElement;
-const licensePlateRegionSelect: HTMLSelectElement = document.querySelector("#license-plate-region") as HTMLSelectElement;
-const licensePlateCodeInput: HTMLInputElement = document.querySelector("#license-plate-code") as HTMLInputElement;
-const licensePlateHiraganaSelect: HTMLSelectElement = document.querySelector("#license-plate-hiragana") as HTMLSelectElement;
-const licensePlateNumberInput: HTMLInputElement = document.querySelector("#license-plate-number") as HTMLInputElement;
-const navigationSelect: HTMLSelectElement = document.querySelector("#navigation") as HTMLSelectElement;
-const hasBackCameraCheck: HTMLInputElement = document.querySelector("#has-back-camera") as HTMLInputElement;
-const hasDVDCheck: HTMLInputElement = document.querySelector("#has-DVD") as HTMLInputElement;
-const hasTelevisionCheck: HTMLInputElement = document.querySelector("#has-television") as HTMLInputElement;
-const hasExternalInputCheck: HTMLInputElement = document.querySelector("#has-external-input") as HTMLInputElement;
-const hasSpareKeyCheck: HTMLInputElement = document.querySelector("#has-spare-key") as HTMLInputElement;
-const otherFeaturesInput: HTMLInputElement = document.querySelector("#other-features") as HTMLInputElement;
+const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class");
+const carModelSelect: HTMLSelectElement = document.querySelector("#car-model");
+const modelCodeSelect: HTMLSelectElement = document.querySelector("#model-code");
+const driveTypeSelect: HTMLSelectElement = document.querySelector("#drive-type");
+const transmissionSelect: HTMLSelectElement = document.querySelector("#transmission");
+const bodyColorSelect: HTMLSelectElement = document.querySelector("#body-color");
+const nonSmokingCheck: HTMLInputElement = document.querySelector("#non-smoking");
+const insurancePriorityCheck: HTMLInputElement = document.querySelector("#insurance-priority");
+const licensePlateRegionSelect: HTMLSelectElement = document.querySelector("#license-plate-region");
+const licensePlateCodeInput: HTMLInputElement = document.querySelector("#license-plate-code");
+const licensePlateHiraganaSelect: HTMLSelectElement = document.querySelector("#license-plate-hiragana");
+const licensePlateNumberInput: HTMLInputElement = document.querySelector("#license-plate-number");
+const navigationSelect: HTMLSelectElement = document.querySelector("#navigation");
+const hasBackCameraCheck: HTMLInputElement = document.querySelector("#has-back-camera");
+const hasDVDCheck: HTMLInputElement = document.querySelector("#has-DVD");
+const hasTelevisionCheck: HTMLInputElement = document.querySelector("#has-television");
+const hasExternalInputCheck: HTMLInputElement = document.querySelector("#has-external-input");
+const hasSpareKeyCheck: HTMLInputElement = document.querySelector("#has-spare-key");
+const hasJAFCardCheck: HTMLInputElement = document.querySelector("#has-JAFcard");
+const JAFCardNumberInput: HTMLInputElement = document.querySelector("#JAFcard-number");
+const JAFCardExpInput: HTMLInputElement = document.querySelector("#JAFcard-exp");
+const otherFeaturesInput: HTMLInputElement = document.querySelector("#other-features");
+
+let selectedImageUrl: string = null;
 
 const createOptions = (
     args: {
@@ -70,6 +75,7 @@ const createOptions = (
 
 replaceFullWidthNumToHalfWidthNum({ element: licensePlateCodeInput, limitDigits: 3 });
 replaceFullWidthNumToHalfWidthNum({ element: licensePlateNumberInput, limitDigits: 4 });
+replaceFullWidthNumToHalfWidthNum({ element: JAFCardNumberInput, limitDigits: 3 });
 
 window.contextMenu.getVehicleId(async (vehicleId: string) => {
     const currentVehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: vehicleId });
@@ -89,8 +95,13 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
         Object.assign(imageElm.style, {
             width: "100%",
             height: "100%",
-            objectFit: "contain"
+            objectFit: "contain",
+            userSelect: "none"
         });
+
+        imageElm.addEventListener("dragstart", (event: Event) => {
+            event.preventDefault();
+        }, false);
 
         if (currentVehicleAttributes.imageFileName) {
             imageElm.src = currentImageUrl;
@@ -147,6 +158,9 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
     hasTelevisionCheck.checked = currentVehicleAttributes.hasTelevision;
     hasExternalInputCheck.checked = currentVehicleAttributes.hasExternalInput;
     hasSpareKeyCheck.checked = currentVehicleAttributes.hasSpareKey;
+    hasJAFCardCheck.checked = currentVehicleAttributes.hasJAFCard;
+    JAFCardNumberInput.value = currentVehicleAttributes.JAFCardNumber;
+    JAFCardExpInput.value = String(currentVehicleAttributes.JAFCardExp);
     otherFeaturesInput.value = currentVehicleAttributes.otherFeatures;
 
     rentalClassSelect.addEventListener("change", () => {
@@ -183,8 +197,10 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
             const imageUrl = await window.dialog.openFile();
             if (imageUrl) {
                 imageElm.src = imageUrl;
-            } else {
+                selectedImageUrl = imageElm.src;
+            } else if (window.dialog.openFileCancelled()) {
                 imageElm.src = currentVehicleAttributes.imageFileName ? currentImageUrl : NoImagePng;
+                selectedImageUrl = null;
             }
         } catch (error: unknown) {
             console.error(error);
@@ -199,14 +215,13 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
         overlayElement.remove();
     }, false);
 
-    imageElm.addEventListener("dragstart", (event: MouseEvent) => {
-        event.preventDefault();
-    }, false);
-
     submitButton.addEventListener("click", async (): Promise<void> => {
+        let JAFCardNumber: string | null = null;
+        JAFCardNumber = JAFCardNumberInput.value ? JAFCardNumberInput.value : null;
+
         const newVehicleAttributes: VehicleAttributes = {
             id: currentVehicleAttributes.id,
-            imageFileName: imageElm.src,
+            imageFileName: selectedImageUrl,
             carModel: carModelSelect.value,
             modelCode: modelCodeSelect.value,
             nonSmoking: nonSmokingCheck.checked,
@@ -226,13 +241,12 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
             hasExternalInput: hasExternalInputCheck.checked,
             hasSpareKey: hasSpareKeyCheck.checked,
             otherFeatures: otherFeaturesInput.value,
-            hasJAFCard: false
+            hasJAFCard: hasJAFCardCheck.checked,
+            JAFCardNumber: JAFCardNumber,
+            JAFCardExp: new Date(JAFCardExpInput.value)
         }
-
-        console.log(newVehicleAttributes);
-
         try {
-            // await window.sqlUpdate.vehicleAttributes(vehicleAttributes);
+            await window.sqlUpdate.vehicleAttributes(newVehicleAttributes);
         } catch (error: unknown) {
             console.error("Failed to insert VehicleAttributes: ", error);
         }

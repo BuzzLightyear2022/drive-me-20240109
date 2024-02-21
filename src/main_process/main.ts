@@ -112,8 +112,15 @@ ipcMain.handle("sqlSelect:vehicleAttributesById", async (event: Electron.IpcMain
 ipcMain.handle("sqlSelect:vehicleAttributesByRentalClass", async (event: Electron.IpcMainEvent, args: { rentalClass: string }) => {
     const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/vehicleAttributesByClass`;
     try {
-        const response: AxiosResponse = await axios.post(serverEndPoint, args);
-        return response.data;
+        if (args.rentalClass === "全て") {
+            const response: AxiosResponse = await axios.post(serverEndPoint, {
+                rentalClass: null
+            });
+            return response.data;
+        } else {
+            const response: AxiosResponse = await axios.post(serverEndPoint, args);
+            return response.data;
+        }
     } catch (error: unknown) {
         return console.error(`Failed to select vehicleAttributes by class ${error}`);
     }
@@ -232,11 +239,13 @@ ipcMain.on("sqlUpdate:vehicleAttributes", async (event: Electron.IpcMainInvokeEv
     const postData: FormData = new FormData();
 
     const imageFileName: string = makeImageFileName(vehicleAttributes);
-    const imageUrl: string | null = vehicleAttributes.imageFileName;
-    if (imageUrl) {
-        const base64Image: string = imageUrl.split(";base64").pop();
-        const bufferImage: Buffer = Buffer.from(base64Image, "base64");
-        postData.append("imageUrl", bufferImage, imageFileName);
+    if (imageFileName) {
+        const imageUrl: string | null = vehicleAttributes.imageFileName;
+        if (imageUrl) {
+            const base64Image: string = imageUrl.split(";base64").pop();
+            const bufferImage: Buffer = Buffer.from(base64Image, "base64");
+            postData.append("imageUrl", bufferImage, imageFileName);
+        }
     }
 
     const textData: {
@@ -315,7 +324,7 @@ ipcMain.on("sqlUpdate:reservationData", async (event: Electron.IpcMainInvokeEven
     }
 });
 
-ipcMain.handle("dialog:openFile", async () => {
+ipcMain.handle("dialog:openFile", async (event: Electron.IpcMainInvokeEvent) => {
     const result = await dialog.showOpenDialog({
         properties: ["openFile"],
         filters: [
@@ -337,6 +346,8 @@ ipcMain.handle("dialog:openFile", async () => {
         } catch (error: unknown) {
             console.error(error);
         }
+    } else {
+        event.sender.send("dialog:openFileCancelled");
     }
 });
 

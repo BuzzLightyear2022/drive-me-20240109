@@ -27,13 +27,12 @@ export const ScheduleCell = class {
         ScheduleCell.instances.push(this);
     }
 
-    createScheduleCell = (): void => {
+    createScheduleCell = async (): Promise<void> => {
         const daysContainerElm: HTMLDivElement = this.daysContainer.daysContainer;
         const daysContainerWidth: number = daysContainerElm.getBoundingClientRect().width;
 
         const vehicleItemElm: HTMLDivElement = this.vehicleItem.vehicleItem;
         const vehicleItemHeight: number = vehicleItemElm.getBoundingClientRect().height;
-        console.log(vehicleItemHeight);
 
         this.scheduleCell = document.createElement("div");
         Object.assign(this.scheduleCell.style, {

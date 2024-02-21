@@ -2,28 +2,31 @@ import { CarCatalog, VehicleAttributes, Navigations } from "../@types/types";
 import { appendOptions } from "./common_modules.mjs";
 import NoFileChosenPng from "../assets/NoFileChosen.png";
 
-const submitButton: HTMLButtonElement = document.querySelector("#submit-button") as HTMLButtonElement;
-const imageInput: HTMLInputElement = document.querySelector("#image-input") as HTMLInputElement;
-const imagePreview: HTMLImageElement = document.querySelector("#image-preview") as HTMLImageElement;
-const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class") as HTMLSelectElement;
-const carModelSelect: HTMLSelectElement = document.querySelector("#car-model") as HTMLSelectElement;
-const modelCodeSelect: HTMLSelectElement = document.querySelector("#model-code") as HTMLSelectElement;
-const driveTypeSelect: HTMLSelectElement = document.querySelector("#drive-type") as HTMLSelectElement;
-const transmissionSelect: HTMLSelectElement = document.querySelector("#transmission") as HTMLSelectElement;
-const bodyColorSelect: HTMLSelectElement = document.querySelector("#body-color") as HTMLSelectElement;
-const nonSmokingCheck: HTMLInputElement = document.querySelector("#non-smoking") as HTMLInputElement;
-const insurancePriorityCheck: HTMLInputElement = document.querySelector("#insurance-priority") as HTMLInputElement;
-const licensePlateRegionSelect: HTMLSelectElement = document.querySelector("#license-plate-region") as HTMLSelectElement;
-const licensePlateCodeInput: HTMLInputElement = document.querySelector("#license-plate-code") as HTMLInputElement;
-const licensePlateHiraganaSelect: HTMLSelectElement = document.querySelector("#license-plate-hiragana") as HTMLSelectElement;
-const licensePlateNumberInput: HTMLInputElement = document.querySelector("#license-plate-number") as HTMLInputElement;
-const navigationSelect: HTMLSelectElement = document.querySelector("#navigation") as HTMLSelectElement;
-const hasBackCameraCheck: HTMLInputElement = document.querySelector("#has-back-camera") as HTMLInputElement;
-const hasDVDCheck: HTMLInputElement = document.querySelector("#has-DVD") as HTMLInputElement;
-const hasTelevisionCheck: HTMLInputElement = document.querySelector("#has-television") as HTMLInputElement;
-const hasExternalInputCheck: HTMLInputElement = document.querySelector("#has-external-input") as HTMLInputElement;
-const hasSpareKeyCheck: HTMLInputElement = document.querySelector("#has-spare-key") as HTMLInputElement;
-const otherFeaturesInput: HTMLInputElement = document.querySelector("#other-features") as HTMLInputElement;
+const submitButton: HTMLButtonElement = document.querySelector("#submit-button");
+const imageInput: HTMLInputElement = document.querySelector("#image-input");
+const imagePreview: HTMLImageElement = document.querySelector("#image-preview");
+const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class");
+const carModelSelect: HTMLSelectElement = document.querySelector("#car-model");
+const modelCodeSelect: HTMLSelectElement = document.querySelector("#model-code");
+const driveTypeSelect: HTMLSelectElement = document.querySelector("#drive-type");
+const transmissionSelect: HTMLSelectElement = document.querySelector("#transmission");
+const bodyColorSelect: HTMLSelectElement = document.querySelector("#body-color");
+const nonSmokingCheck: HTMLInputElement = document.querySelector("#non-smoking");
+const insurancePriorityCheck: HTMLInputElement = document.querySelector("#insurance-priority");
+const licensePlateRegionSelect: HTMLSelectElement = document.querySelector("#license-plate-region");
+const licensePlateCodeInput: HTMLInputElement = document.querySelector("#license-plate-code");
+const licensePlateHiraganaSelect: HTMLSelectElement = document.querySelector("#license-plate-hiragana");
+const licensePlateNumberInput: HTMLInputElement = document.querySelector("#license-plate-number");
+const navigationSelect: HTMLSelectElement = document.querySelector("#navigation");
+const hasBackCameraCheck: HTMLInputElement = document.querySelector("#has-back-camera");
+const hasDVDCheck: HTMLInputElement = document.querySelector("#has-DVD");
+const hasTelevisionCheck: HTMLInputElement = document.querySelector("#has-television");
+const hasExternalInputCheck: HTMLInputElement = document.querySelector("#has-external-input");
+const hasSpareKeyCheck: HTMLInputElement = document.querySelector("#has-spare-key");
+const hasJAFCardCheck: HTMLInputElement = document.querySelector("#has-JAFcard");
+const JAFCardNumberInput: HTMLInputElement = document.querySelector("#JAFcard-number");
+const JAFCardExpInput: HTMLInputElement = document.querySelector("#JAFcard-exp");
+const otherFeaturesInput: HTMLInputElement = document.querySelector("#other-features");
 
 const getImageUrl = async (): Promise<string | null> => {
     const imageFiles: FileList | null = imageInput.files;
@@ -75,6 +78,7 @@ imageInput.addEventListener("change", async (): Promise<void> => {
 imagePreview.src = NoFileChosenPng;
 replaceFullWidthNumToHalfWidthNum({ element: licensePlateCodeInput, limitDigits: 3 });
 replaceFullWidthNumToHalfWidthNum({ element: licensePlateNumberInput, limitDigits: 4 });
+replaceFullWidthNumToHalfWidthNum({ element: JAFCardNumberInput, limitDigits: 3 });
 
 (async (): Promise<void> => {
     try {
@@ -176,6 +180,9 @@ submitButton.addEventListener("click", async (): Promise<void> => {
         hasTelevision: hasTelevisionCheck.checked,
         hasExternalInput: hasExternalInputCheck.checked,
         hasSpareKey: hasSpareKeyCheck.checked,
+        hasJAFCard: hasJAFCardCheck.checked,
+        JAFCardNumber: JAFCardNumberInput.value,
+        JAFCardExp: new Date(JAFCardExpInput.value),
         otherFeatures: otherFeaturesInput.value
     }
 

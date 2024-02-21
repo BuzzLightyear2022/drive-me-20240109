@@ -20,6 +20,7 @@ export const VehicleItem = class {
             display: "flex",
             flexDirection: "row",
             minWidth: "300px",
+            height: "130px",
             border: "solid",
             borderWidth: "1px",
             marginTop: "-1px",
@@ -111,7 +112,6 @@ export const VehicleItem = class {
         this.vehicleItem.append(imageDiv, textDiv);
 
         this.vehicleItem.addEventListener("contextmenu", () => {
-            console.log(this.vehicleAttributes.id);
             window.contextMenu.vehicleAttributesItem(this.vehicleAttributes.id);
         }, false);
     }

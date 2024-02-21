@@ -3,6 +3,7 @@ import { CarCatalog, VehicleAttributes, Navigations, LicensePlatesData, Reservat
 import { generateUniqueId } from "./renderer_process/common_modules.mjs";
 
 const wsReservationUpdateListeners: any[] = [];
+const wsVehicleAttributesUpdateListeners: any[] = [];
 
 contextBridge.exposeInMainWorld(
     "serverInfo",
@@ -134,9 +135,22 @@ contextBridge.exposeInMainWorld(
             return eventId;
         },
         updateVehicleAttributes: (callback: () => void) => {
+            const eventId: number = generateUniqueId();
+
+            const listener = () => {
+                callback();
+            }
+
             ipcRenderer.on("wsUpdate:vehicleAttributes", () => {
                 return callback();
             });
+
+            wsVehicleAttributesUpdateListeners[eventId] = {
+                event: "wsUpdate:vehicleAttributes",
+                listener: listener
+            }
+
+            return eventId;
         }
     }
 );
@@ -144,7 +158,8 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "dialog",
     {
-        openFile: async () => ipcRenderer.invoke("dialog:openFile")
+        openFile: async () => ipcRenderer.invoke("dialog:openFile"),
+        openFileCancelled: async () => ipcRenderer.on("dialog:openFileCancelled", () => true)
     }
 );
 

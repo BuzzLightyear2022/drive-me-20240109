@@ -30,12 +30,14 @@ export const ScheduleContainer = class {
             whiteSpace: "nowrap"
         });
 
-        VehicleItem.instances.forEach(instance => {
+        VehicleItem.instances.forEach(async (instance) => {
             const vehicleItem: HTMLDivElement = instance.vehicleItem;
+
+            const vehicleItemHeight: number = vehicleItem.getBoundingClientRect().height;
 
             const scheduleCellInstance: ScheduleCellType = new ScheduleCell(instance);
             scheduleCellInstance.daysContainer = this.daysContainer;
-            scheduleCellInstance.createScheduleCell();
+            await scheduleCellInstance.createScheduleCell();
 
             const scheduleCell: HTMLDivElement = scheduleCellInstance.scheduleCell;
 
@@ -66,7 +68,7 @@ export const ScheduleContainer = class {
         const endDate: Date = new Date(calendarYear, calendarMonthIndex + 1, 0, 23, 59, 59, 999);
         // const totalMsOfMonth: number = endDate.getTime() - startDate.getTime();
 
-        const monthReservationData: ReservationData[] = await window.sqlSelect.reservationData({
+        const monthReservationData: ReservationData[] | null = await window.sqlSelect.reservationData({
             startDate: startDate,
             endDate: endDate
         });
@@ -101,26 +103,27 @@ export const ScheduleContainer = class {
             this.scheduleBars.push(scheduleBarInstance);
         }
 
-        monthReservationData.forEach(reservationData => {
-            this.scheduleCells.forEach(scheduleCellInstance => {
+        if (monthReservationData) {
+            monthReservationData.forEach(reservationData => {
+                this.scheduleCells.forEach(scheduleCellInstance => {
 
+                    const vehicleId = scheduleCellInstance.vehicleItem.vehicleAttributes.id;
+                    const pickupDate: Date = new Date(reservationData.pickupDateObject);
 
-                const vehicleId = scheduleCellInstance.vehicleItem.vehicleAttributes.id;
-                const pickupDate: Date = new Date(reservationData.pickupDateObject);
-
-                if (reservationData.vehicleId === vehicleId && pickupDate.getTime() >= startDate.getTime()) {
-                    processScheduleBar({
-                        scheduleCellInstance: scheduleCellInstance,
-                        reservationData: reservationData
-                    });
-                } else if (reservationData.vehicleId === vehicleId && pickupDate.getTime() <= startDate.getTime()) {
-                    processScheduleBar({
-                        scheduleCellInstance: scheduleCellInstance,
-                        reservationData: reservationData
-                    });
-                }
+                    if (reservationData.vehicleId === vehicleId && pickupDate.getTime() >= startDate.getTime()) {
+                        processScheduleBar({
+                            scheduleCellInstance: scheduleCellInstance,
+                            reservationData: reservationData
+                        });
+                    } else if (reservationData.vehicleId === vehicleId && pickupDate.getTime() <= startDate.getTime()) {
+                        processScheduleBar({
+                            scheduleCellInstance: scheduleCellInstance,
+                            reservationData: reservationData
+                        });
+                    }
+                });
             });
-        });
+        }
     }
 
     updateScheduleBars = () => {

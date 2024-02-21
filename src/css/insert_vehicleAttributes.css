@@ -19,3 +19,7 @@
 #image-preview {
     object-fit: contain;
 }
+
+#JAFcard-number {
+    width: 50px;
+}
