@@ -69,6 +69,10 @@ ipcMain.on("openWindow:displayReservationWindow", (): void => {
     WindowHandler.createDisplayReservationWindow();
 });
 
+ipcMain.on("openWindow:editCarCatalogWindow", (): void => {
+    WindowHandler.createEditCarCatalogWindow();
+});
+
 ipcMain.handle("fetchJson:carCatalog", async (): Promise<CarCatalog | unknown> => {
     const serverEndPoint = `http://${serverHost}:${port}/fetchJson/carCatalog`;
     try {

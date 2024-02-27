@@ -11,7 +11,11 @@
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx ."
   },
-  "keywords": ["electron", "typescript", "node"],
+  "keywords": [
+    "electron",
+    "typescript",
+    "node"
+  ],
   "author": "Takehiro Mizuno",
   "license": "MIT",
   "devDependencies": {

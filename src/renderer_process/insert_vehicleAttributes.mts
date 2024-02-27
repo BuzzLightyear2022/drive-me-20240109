@@ -7,7 +7,9 @@ const imageInput: HTMLInputElement = document.querySelector("#image-input");
 const imagePreview: HTMLImageElement = document.querySelector("#image-preview");
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class");
 const carModelSelect: HTMLSelectElement = document.querySelector("#car-model");
+const seatingCapacityInput: HTMLInputElement = document.querySelector("#seating-capacity");
 const modelCodeSelect: HTMLSelectElement = document.querySelector("#model-code");
+const modelTrimSelect: HTMLSelectElement = document.querySelector("#model-trim");
 const driveTypeSelect: HTMLSelectElement = document.querySelector("#drive-type");
 const transmissionSelect: HTMLSelectElement = document.querySelector("#transmission");
 const bodyColorSelect: HTMLSelectElement = document.querySelector("#body-color");
@@ -22,6 +24,7 @@ const hasBackCameraCheck: HTMLInputElement = document.querySelector("#has-back-c
 const hasDVDCheck: HTMLInputElement = document.querySelector("#has-DVD");
 const hasTelevisionCheck: HTMLInputElement = document.querySelector("#has-television");
 const hasExternalInputCheck: HTMLInputElement = document.querySelector("#has-external-input");
+const hasETCCheck: HTMLInputElement = document.querySelector("#has-ETC");
 const hasSpareKeyCheck: HTMLInputElement = document.querySelector("#has-spare-key");
 const hasJAFCardCheck: HTMLInputElement = document.querySelector("#has-JAFcard");
 const JAFCardNumberInput: HTMLInputElement = document.querySelector("#JAFcard-number");
@@ -76,6 +79,7 @@ imageInput.addEventListener("change", async (): Promise<void> => {
 }, false);
 
 imagePreview.src = NoFileChosenPng;
+replaceFullWidthNumToHalfWidthNum({ element: seatingCapacityInput, limitDigits: 2 });
 replaceFullWidthNumToHalfWidthNum({ element: licensePlateCodeInput, limitDigits: 3 });
 replaceFullWidthNumToHalfWidthNum({ element: licensePlateNumberInput, limitDigits: 4 });
 replaceFullWidthNumToHalfWidthNum({ element: JAFCardNumberInput, limitDigits: 3 });
@@ -105,13 +109,19 @@ replaceFullWidthNumToHalfWidthNum({ element: JAFCardNumberInput, limitDigits: 3 
             const selectedCarModel: string = carModelSelect.value;
             const {
                 modelCode,
+                modelTrim,
                 driveType,
                 transmission,
                 bodyColor
             } = carCatalog.rentalClass[selectedRentalClass][selectedCarModel];
+
             appendOptions({
                 selectbox: modelCodeSelect,
                 options: modelCode as string[]
+            });
+            appendOptions({
+                selectbox: modelTrimSelect,
+                options: modelTrim as string[]
             });
             appendOptions({
                 selectbox: driveTypeSelect,
@@ -164,6 +174,8 @@ submitButton.addEventListener("click", async (): Promise<void> => {
         imageFileName: imageUrl,
         carModel: carModelSelect.value,
         modelCode: modelCodeSelect.value,
+        modelTrim: modelTrimSelect.value,
+        seatingCapacity: Number(seatingCapacityInput.value),
         nonSmoking: nonSmokingCheck.checked,
         insurancePriority: insurancePriorityCheck.checked,
         licensePlateRegion: licensePlateRegionSelect.value,
@@ -179,6 +191,7 @@ submitButton.addEventListener("click", async (): Promise<void> => {
         hasDVD: hasDVDCheck.checked,
         hasTelevision: hasTelevisionCheck.checked,
         hasExternalInput: hasExternalInputCheck.checked,
+        hasETC: hasETCCheck.checked,
         hasSpareKey: hasSpareKeyCheck.checked,
         hasJAFCard: hasJAFCardCheck.checked,
         JAFCardNumber: JAFCardNumberInput.value,

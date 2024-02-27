@@ -12,7 +12,8 @@ class WindowHandler {
         insertReservationWindow: undefined,
         displayReservationWindow: undefined,
         editReservationWindow: undefined,
-        editVehicleAttributesWindow: undefined
+        editVehicleAttributesWindow: undefined,
+        editCarCatalogWindow: undefined
     };
 
     static createMainWindow = () => {
@@ -171,6 +172,24 @@ class WindowHandler {
         WindowHandler.windows.editVehicleAttributesWindow.webContents.on("dom-ready", () => {
             WindowHandler.windows.editVehicleAttributesWindow.webContents.send("contextMenu:getVehicleId", vehicleId);
         });
+    }
+
+    static createEditCarCatalogWindow = (): void => {
+        const win: BrowserWindow = new BrowserWindow({
+            width: 1000,
+            height: 800,
+            webPreferences: {
+                preload: WindowHandler.preloadScript
+            },
+        });
+
+        if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_carCatalog.html`);
+            WindowHandler.windows.editVehicleAttributesWindow = win;
+        } else {
+            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_carCatalog.html`));
+            WindowHandler.windows.editVehicleAttributesWindow = win;
+        }
     }
 }
 

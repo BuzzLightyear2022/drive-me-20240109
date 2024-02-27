@@ -1,6 +1,7 @@
-const vehicleInputButton: HTMLButtonElement = document.querySelector("#vehicle-input-button") as HTMLButtonElement;
-const reservationInputButton: HTMLButtonElement = document.querySelector("#reservation-input-button") as HTMLButtonElement;
-const displayReservationButton: HTMLButtonElement = document.querySelector("#display-reservation") as HTMLButtonElement;
+const vehicleInputButton: HTMLButtonElement = document.querySelector("#vehicle-input-button");
+const reservationInputButton: HTMLButtonElement = document.querySelector("#reservation-input-button");
+const displayReservationButton: HTMLButtonElement = document.querySelector("#display-reservation");
+const editCarCatalogButton: HTMLButtonElement = document.querySelector("#edit_carCatalog-button");
 
 vehicleInputButton.addEventListener("click", (): void => {
     window.openWindow.vehicleInputWindow();
@@ -12,4 +13,8 @@ reservationInputButton.addEventListener("click", (): void => {
 
 displayReservationButton.addEventListener("click", (): void => {
     window.openWindow.displayReservationWindow();
+}, false);
+
+editCarCatalogButton.addEventListener("click", (): void => {
+    window.openWindow.editCarCatalogWindow();
 }, false);

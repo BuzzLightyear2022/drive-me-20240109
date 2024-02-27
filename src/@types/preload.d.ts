@@ -10,6 +10,7 @@ export interface openWindow {
     vehicleInputWindow: () => Promise<void>;
     reservationInputWindow: () => Promise<void>;
     displayReservationWindow: () => Promise<void>;
+    editCarCatalogWindow: () => Promise<void>;
 }
 
 export interface fetchJson {

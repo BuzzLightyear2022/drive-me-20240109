@@ -43,6 +43,9 @@ contextBridge.exposeInMainWorld(
         },
         displayReservationWindow: (): void => {
             ipcRenderer.send("openWindow:displayReservationWindow");
+        },
+        editCarCatalogWindow: (): void => {
+            ipcRenderer.send("openWindow:editCarCatalogWindow");
         }
     }
 );

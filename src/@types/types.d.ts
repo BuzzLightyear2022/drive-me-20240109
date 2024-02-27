@@ -4,7 +4,8 @@ export type Windows = {
     insertReservationWindow: BrowserWindow,
     displayReservationWindow: BrowserWindow,
     editReservationWindow: BrowserWindow,
-    editVehicleAttributesWindow: BrowserWindow
+    editVehicleAttributesWindow: BrowserWindow,
+    editCarCatalogWindow: BrowserWindow
 }
 
 export type CarCatalog = {
@@ -12,6 +13,7 @@ export type CarCatalog = {
         [rentalClassName: string]: {
             [carModel: string]: {
                 modelCode?: string[],
+                modelTrim?: string[],
                 driveType?: string[],
                 transmission?: string[],
                 bodyColor?: string[]
@@ -25,6 +27,8 @@ export type VehicleAttributes = {
     imageFileName?: string,
     carModel: string,
     modelCode: string,
+    modelTrim: string,
+    seatingCapacity: number,
     nonSmoking: boolean,
     insurancePriority: boolean,
     licensePlateRegion: string,
@@ -40,6 +44,7 @@ export type VehicleAttributes = {
     hasDVD: boolean,
     hasTelevision: boolean,
     hasExternalInput: boolean,
+    hasETC: boolean,
     hasSpareKey: boolean,
     hasJAFCard: boolean,
     JAFCardNumber?: string,
