@@ -1,20 +1,16 @@
-const vehicleInputButton: HTMLButtonElement = document.querySelector("#vehicle-input-button");
-const reservationInputButton: HTMLButtonElement = document.querySelector("#reservation-input-button");
-const displayReservationButton: HTMLButtonElement = document.querySelector("#display-reservation");
-const editCarCatalogButton: HTMLButtonElement = document.querySelector("#edit_carCatalog-button");
+const loginForm: HTMLDivElement = document.querySelector("#login-form");
 
-vehicleInputButton.addEventListener("click", (): void => {
-    window.openWindow.vehicleInputWindow();
-}, false);
+loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-reservationInputButton.addEventListener("click", (): void => {
-    window.openWindow.reservationInputWindow();
-}, false);
+    const usernameInput: HTMLInputElement = document.querySelector("#username");
+    const passwordInput: HTMLInputElement = document.querySelector("#password");
 
-displayReservationButton.addEventListener("click", (): void => {
-    window.openWindow.displayReservationWindow();
-}, false);
+    const username = usernameInput.value;
+    const password = passwordInput.value;
 
-editCarCatalogButton.addEventListener("click", (): void => {
-    window.openWindow.editCarCatalogWindow();
+    const userData = await window.login.sendUserData({
+        username: username,
+        password: password
+    });
 }, false);

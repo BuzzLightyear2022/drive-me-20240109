@@ -1,5 +1,6 @@
 export type Windows = {
-    mainWindow: BrowserWindow,
+    loginWindow: BrowserWindow,
+    menuWindow: BrowserWindow,
     insertVehicleAttributesWindow: BrowserWindow,
     insertReservationWindow: BrowserWindow,
     displayReservationWindow: BrowserWindow,

@@ -6,6 +6,13 @@ export interface serverInfo {
     imageDirectory: () => Promise<string>;
 }
 
+export interface login {
+    sendUserData: (args: {
+        username: string,
+        password: string
+    }) => Promise<void>;
+}
+
 export interface openWindow {
     vehicleInputWindow: () => Promise<void>;
     reservationInputWindow: () => Promise<void>;
@@ -65,6 +72,7 @@ export interface removeEvent {
 declare global {
     interface Window {
         serverInfo: serverInfo;
+        login: login;
         openWindow: openWindow;
         fetchJson: fetchJson;
         sqlSelect: sqlSelect;

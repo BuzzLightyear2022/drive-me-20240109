@@ -7,7 +7,8 @@ import { Windows } from "../@types/types";
 class WindowHandler {
     static preloadScript: string = path.join(__dirname, "preload.js");
     static windows: Windows = {
-        mainWindow: undefined,
+        loginWindow: undefined,
+        menuWindow: undefined,
         insertVehicleAttributesWindow: undefined,
         insertReservationWindow: undefined,
         displayReservationWindow: undefined,
@@ -16,8 +17,30 @@ class WindowHandler {
         editCarCatalogWindow: undefined
     };
 
-    static createMainWindow = () => {
-        const mainWindow: BrowserWindow = new BrowserWindow(
+    static createLoginWindow = () => {
+        const loginWindow: BrowserWindow = new BrowserWindow(
+            {
+                width: 300,
+                height: 200,
+                webPreferences: {
+                    preload: WindowHandler.preloadScript
+                },
+                autoHideMenuBar: true,
+                resizable: false
+            }
+        );
+
+        if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+            loginWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+            WindowHandler.windows.loginWindow = loginWindow;
+        } else {
+            loginWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+            WindowHandler.windows.loginWindow = loginWindow;
+        }
+    }
+
+    static createMenuWindow = () => {
+        const menuWindow: BrowserWindow = new BrowserWindow(
             {
                 width: 1000,
                 height: 800,
@@ -28,11 +51,11 @@ class WindowHandler {
         );
 
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-            mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
-            WindowHandler.windows.mainWindow = mainWindow;
+            menuWindow.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/menu.html`);
+            WindowHandler.windows.menuWindow = menuWindow;
         } else {
-            mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
-            WindowHandler.windows.mainWindow = mainWindow;
+            menuWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/menu.html`));
+            WindowHandler.windows.menuWindow = menuWindow;
         }
     }
 

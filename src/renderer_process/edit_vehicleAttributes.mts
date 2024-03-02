@@ -8,6 +8,8 @@ const imagePreviewContainer: HTMLDivElement = document.querySelector("#image-pre
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class");
 const carModelSelect: HTMLSelectElement = document.querySelector("#car-model");
 const modelCodeSelect: HTMLSelectElement = document.querySelector("#model-code");
+const modelTrimSelect: HTMLSelectElement = document.querySelector("#model-trim");
+const seatingCapacityInput: HTMLInputElement = document.querySelector("#seating-capacity");
 const driveTypeSelect: HTMLSelectElement = document.querySelector("#drive-type");
 const transmissionSelect: HTMLSelectElement = document.querySelector("#transmission");
 const bodyColorSelect: HTMLSelectElement = document.querySelector("#body-color");
@@ -22,6 +24,7 @@ const hasBackCameraCheck: HTMLInputElement = document.querySelector("#has-back-c
 const hasDVDCheck: HTMLInputElement = document.querySelector("#has-DVD");
 const hasTelevisionCheck: HTMLInputElement = document.querySelector("#has-television");
 const hasExternalInputCheck: HTMLInputElement = document.querySelector("#has-external-input");
+const hasETCCheck: HTMLInputElement = document.querySelector("#has-ETC");
 const hasSpareKeyCheck: HTMLInputElement = document.querySelector("#has-spare-key");
 const hasJAFCardCheck: HTMLInputElement = document.querySelector("#has-JAFcard");
 const JAFCardNumberInput: HTMLInputElement = document.querySelector("#JAFcard-number");
@@ -224,6 +227,8 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
             imageFileName: selectedImageUrl,
             carModel: carModelSelect.value,
             modelCode: modelCodeSelect.value,
+            modelTrim: modelTrimSelect.value,
+            seatingCapacity: Number(seatingCapacityInput.value),
             nonSmoking: nonSmokingCheck.checked,
             insurancePriority: insurancePriorityCheck.checked,
             licensePlateRegion: licensePlateRegionSelect.value,
@@ -239,12 +244,14 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
             hasDVD: hasDVDCheck.checked,
             hasTelevision: hasTelevisionCheck.checked,
             hasExternalInput: hasExternalInputCheck.checked,
+            hasETC: hasETCCheck.checked,
             hasSpareKey: hasSpareKeyCheck.checked,
             otherFeatures: otherFeaturesInput.value,
             hasJAFCard: hasJAFCardCheck.checked,
             JAFCardNumber: JAFCardNumber,
             JAFCardExp: new Date(JAFCardExpInput.value)
         }
+        
         try {
             await window.sqlUpdate.vehicleAttributes(newVehicleAttributes);
         } catch (error: unknown) {

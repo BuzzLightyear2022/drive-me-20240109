@@ -5,9 +5,17 @@ import fs from "fs";
 import path from "path";
 import { WindowHandler } from "./window_handler.mjs";
 import { WebSocketHandler } from "./websocket_handler.mjs";
+import { SqlSelectProcess } from "./sql_select_process.mjs";
 import { VehicleAttributes, CarCatalog, ReservationData } from "../@types/types";
 import dotenv from "dotenv";
 dotenv.config();
+
+const bcrypt = require("bcrypt");
+
+// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+if (require('electron-squirrel-startup')) {
+    app.quit();
+}
 
 const makeImageFileName = (vehicleAttributes: VehicleAttributes): string => {
     const carModel: string = vehicleAttributes.carModel;
@@ -18,32 +26,47 @@ const makeImageFileName = (vehicleAttributes: VehicleAttributes): string => {
     return imageFileName;
 }
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) {
-    app.quit();
-}
-
 // @ts-ignore
 const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST as string;
 // @ts-ignore
-const port: string = import.meta.env.VITE_PORT as string;
+const port: string = import.meta.env.VITE_HTTPS_PORT as string;
 // @ts-ignore
 const imageDirectory: string = import.meta.env.VITE_IMAGE_DIRECTORY as string;
 
-app.on("ready", WindowHandler.createMainWindow);
+app.on("ready", WindowHandler.createLoginWindow);
 
-// app.on("window-all-closed", () => {
-//     if (process.platform !== "darwin") {
-//         app.quit();
-//     }
-//     WindowHandler.windows.splice(0, WindowHandler.windows.length);
-// });
+SqlSelectProcess.selectVehicleAttributes();
+SqlSelectProcess.selectVehicleAttributesById();
+SqlSelectProcess.selectVehicleAttributesByRentalClass();
+SqlSelectProcess.selectRentalClasses()
+SqlSelectProcess.selectCarModels();
+SqlSelectProcess.selectLicensePlates();
+SqlSelectProcess.selectReservationData();
+SqlSelectProcess.selectReservationDataById();
 
-// app.on("activate", () => {
-//     if (!WindowHandler.windows.length) {
-//         WindowHandler.createMainWindow();
-//     }
-// });
+ipcMain.handle("login:sendUserData", async (event, data) => {
+    const serverEndPoint = `https://${serverHost}:${port}/login/getSessionData`;
+
+    const loginData = {
+        username: data.username,
+        password: data.password
+    }
+
+    try {
+        const response: AxiosResponse = await axios.post(serverEndPoint, loginData);
+        const sessionData = response.data;
+        if (sessionData && sessionData.token) {
+            WindowHandler.createDisplayReservationWindow();
+            WindowHandler.windows.loginWindow.close();
+            WindowHandler.windows.loginWindow = undefined;
+        } else {
+            // login failed process goes on.
+        }
+    } catch (error: unknown) {
+        console.error(error);
+    }
+
+});
 
 ipcMain.handle("serverInfo:serverHost", (): string => {
     return serverHost;
@@ -74,7 +97,7 @@ ipcMain.on("openWindow:editCarCatalogWindow", (): void => {
 });
 
 ipcMain.handle("fetchJson:carCatalog", async (): Promise<CarCatalog | unknown> => {
-    const serverEndPoint = `http://${serverHost}:${port}/fetchJson/carCatalog`;
+    const serverEndPoint = `https://${serverHost}:${port}/fetchJson/carCatalog`;
     try {
         const response: AxiosResponse = await axios.post(serverEndPoint);
         return response.data;
@@ -84,7 +107,7 @@ ipcMain.handle("fetchJson:carCatalog", async (): Promise<CarCatalog | unknown> =
 });
 
 ipcMain.handle("fetchJson:navigations", async (): Promise<JSON | unknown> => {
-    const serverEndPoint = `http://${serverHost}:${port}/fetchJson/navigations`;
+    const serverEndPoint = `https://${serverHost}:${port}/fetchJson/navigations`;
     try {
         const response: AxiosResponse = await axios.post(serverEndPoint);
         return response.data;
@@ -93,101 +116,8 @@ ipcMain.handle("fetchJson:navigations", async (): Promise<JSON | unknown> => {
     }
 });
 
-ipcMain.handle("sqlSelect:vehicleAttributes", async () => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/vehicleAttributes`;
-    try {
-        const response: AxiosResponse = await axios.post(serverEndPoint);
-        return response.data;
-    } catch (error: unknown) {
-        return console.error(`Failed to select vehicleAttributes: ${error}`);
-    }
-});
-
-ipcMain.handle("sqlSelect:vehicleAttributesById", async (event: Electron.IpcMainEvent, args: { vehicleId: string }) => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/vehicleAttributesById`;
-    try {
-        const response: AxiosResponse = await axios.post(serverEndPoint, args);
-        return response.data;
-    } catch (error: unknown) {
-        return console.error(`Failed to select vehicleAttributes by id ${error}`);
-    }
-});
-
-ipcMain.handle("sqlSelect:vehicleAttributesByRentalClass", async (event: Electron.IpcMainEvent, args: { rentalClass: string }) => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/vehicleAttributesByClass`;
-    try {
-        if (args.rentalClass === "全て") {
-            const response: AxiosResponse = await axios.post(serverEndPoint, {
-                rentalClass: null
-            });
-            return response.data;
-        } else {
-            const response: AxiosResponse = await axios.post(serverEndPoint, args);
-            return response.data;
-        }
-    } catch (error: unknown) {
-        return console.error(`Failed to select vehicleAttributes by class ${error}`);
-    }
-});
-
-ipcMain.handle("sqlSelect:rentalClasses", async (event: Electron.IpcMainInvokeEvent, args: { selectedSmoking: string }) => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/vehicleAttributes/rentalClasses`;
-    try {
-        const response: AxiosResponse = await axios.post(serverEndPoint, args);
-        return response.data;
-
-    } catch (error: unknown) {
-        console.error(`Failed to fetch rentalClasses:, ${error}`);
-    }
-});
-
-ipcMain.handle("sqlSelect:carModels", async (event: Electron.IpcMainInvokeEvent, args: { selectedSmoking: string, selectedRentalClass: string }) => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/vehicleAttributes/carModels`;
-    try {
-        const response: AxiosResponse = await axios.post(serverEndPoint, args);
-        return response.data;
-    } catch (error: unknown) {
-        console.error(`Failed to fetch carModels: ${error}`);
-    }
-});
-
-ipcMain.handle("sqlSelect:licensePlates", async (event: Electron.IpcMainInvokeEvent, args: { selectedSmoking: string, selectedCarModel: string }) => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/vehicleAttributes/licensePlates`;
-    try {
-        const response: AxiosResponse = await axios.post(serverEndPoint, args);
-        return response.data;
-    } catch (error: unknown) {
-        console.error(`Failed to fetch licensePlates: ${error}`);
-    }
-});
-
-ipcMain.handle("sqlSelect:reservationData", async (event: Electron.IpcMainInvokeEvent, args: {
-    startDate: Date,
-    endDate: Date
-}) => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/reservationData/filterByDateRange`;
-    try {
-        const response: AxiosResponse = await axios.post(serverEndPoint, args);
-        return response.data;
-    } catch (error: unknown) {
-        console.error(`Failed to fetch reservation data: ${error}`);
-    }
-});
-
-ipcMain.handle("sqlSelect:reservationDataById", async (event: Electron.IpcMainInvokeEvent, args: {
-    reservationId: string
-}) => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlSelect/reservationData/selectById`;
-    try {
-        const response: AxiosResponse = await axios.post(serverEndPoint, args);
-        return response.data;
-    } catch (error: unknown) {
-        return `Failed to select reservation data by id. ${error}`;
-    }
-});
-
 ipcMain.handle("sqlInsert:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent, vehicleAttributes: VehicleAttributes): Promise<string | unknown> => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlInsert/vehicleAttributes`;
+    const serverEndPoint = `https://${serverHost}:${port}/sqlInsert/vehicleAttributes`;
 
     const postData: FormData = new FormData();
 
@@ -238,7 +168,7 @@ ipcMain.handle("sqlInsert:vehicleAttributes", async (event: Electron.IpcMainInvo
 });
 
 ipcMain.on("sqlUpdate:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent, vehicleAttributes: VehicleAttributes) => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlUpdate/vehicleAttributes`;
+    const serverEndPoint = `https://${serverHost}:${port}/sqlUpdate/vehicleAttributes`;
 
     const postData: FormData = new FormData();
 
@@ -291,7 +221,7 @@ ipcMain.on("sqlUpdate:vehicleAttributes", async (event: Electron.IpcMainInvokeEv
 });
 
 ipcMain.handle("sqlInsert:reservationData", async (event: Electron.IpcMainInvokeEvent, data: ReservationData) => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlInsert/reservationData`;
+    const serverEndPoint = `https://${serverHost}:${port}/sqlInsert/reservationData`;
 
     const postData: FormData = new FormData();
     postData.append("data", JSON.stringify(data));
@@ -310,7 +240,7 @@ ipcMain.handle("sqlInsert:reservationData", async (event: Electron.IpcMainInvoke
 });
 
 ipcMain.on("sqlUpdate:reservationData", async (event: Electron.IpcMainInvokeEvent, data: ReservationData) => {
-    const serverEndPoint = `http://${serverHost}:${port}/sqlUpdate/reservationData`;
+    const serverEndPoint = `https://${serverHost}:${port}/sqlUpdate/reservationData`;
 
     const postData: FormData = new FormData();
     postData.append("data", JSON.stringify(data));
@@ -355,4 +285,4 @@ ipcMain.handle("dialog:openFile", async (event: Electron.IpcMainInvokeEvent) => 
     }
 });
 
-const webSocket = new WebSocketHandler();
+// const webSocket = new WebSocketHandler();

@@ -21,6 +21,14 @@ contextBridge.exposeInMainWorld(
 );
 
 contextBridge.exposeInMainWorld(
+    "login", {
+    sendUserData: async (args: { username: string, password: string }) => {
+        return await ipcRenderer.invoke("login:sendUserData", args);
+    }
+}
+);
+
+contextBridge.exposeInMainWorld(
     "fetchJson",
     {
         carCatalog: async (): Promise<CarCatalog> => {

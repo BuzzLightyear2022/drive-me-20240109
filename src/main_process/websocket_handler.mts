@@ -7,13 +7,13 @@ const WebSocket = require("ws");
 // @ts-ignore
 const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST as string;
 // @ts-ignore
-const port: string = import.meta.env.VITE_PORT as string;
+const port: string = import.meta.env.VITE_HTTPS_PORT as string;
 
 export class WebSocketHandler {
     socket;
 
     constructor() {
-        this.socket = new WebSocket(`ws://${serverHost}:${port}`);
+        this.socket = new WebSocket(`wss://${serverHost}:${port}`);
 
         this.socket.on("open", () => {
             console.log("WebSocket connection established");
