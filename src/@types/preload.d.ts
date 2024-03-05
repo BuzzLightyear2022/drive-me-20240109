@@ -28,8 +28,8 @@ export interface fetchJson {
 export interface sqlSelect {
     vehicleAttributes: () => Promise<VehicleAttributesArray>;
     vehicleAttributesById: (args: { vehicleId: string }) => Promise<VehicleAttributes>;
-    vehicleAttributesByRentalClass: (args: { rentalClass: string }) => Promise<VehicleAttributes>;
-    rentalClasses: (args: { selectedSmoking: string }) => Promise<string[]>;
+    vehicleAttributesByRentalClass: (args: { accessToken: string, rentalClass: string }) => Promise<VehicleAttributes>;
+    rentalClasses: (args: { accessToken: string, selectedSmoking: string }) => Promise<string[]>;
     carModels: (args: { selectedSmoking: string, selectedRentalClass: string }) => Promise<string[]>;
     licensePlates: (args: { selectedSmoking: string, selectedCarModel: string }) => Promise<LicensePlatesData>;
     reservationData: (args: { startDate: Date, endDate: Date }) => Promise<>;
@@ -69,6 +69,10 @@ export interface removeEvent {
     wsUpdateReservationData: (eventId: number) => void;
 }
 
+export interface accessToken {
+    getAccessToken: (callback: (accessToken: string) => void) => void
+}
+
 declare global {
     interface Window {
         serverInfo: serverInfo;
@@ -82,5 +86,6 @@ declare global {
         webSocket: webSocket;
         dialog: dialog;
         removeEvent: removeEvent;
+        accessToken: accessToken;
     }
 }

@@ -36,16 +36,37 @@ export class SqlSelectProcess {
     }
 
     static selectVehicleAttributesByRentalClass = () => {
-        ipcMain.handle("sqlSelect:vehicleAttributesByRentalClass", async (event: Electron.IpcMainEvent, args: { rentalClass: string }) => {
+        ipcMain.handle("sqlSelect:vehicleAttributesByRentalClass", async (event: Electron.IpcMainEvent, args: { accessToken: string, rentalClass: string }) => {
+            const { accessToken } = args;
             const serverEndPoint = `https://${SqlSelectProcess.serverHost}:${SqlSelectProcess.port}/sqlSelect/vehicleAttributesByClass`;
             try {
                 if (args.rentalClass === "全て") {
+                    // const response: AxiosResponse = await axios.post(serverEndPoint, {
+                    //     rentalClass: null
+                    // }, {
+                    //     headers: {
+                    //         "Content-Type": "application/json",
+                    //         "Authorization": accessToken
+                    //     },
+                    //     withCredentials: true
+                    // });
+
                     const response: AxiosResponse = await axios.post(serverEndPoint, {
                         rentalClass: null
                     });
+
                     return response.data;
                 } else {
+                    // const response: AxiosResponse = await axios.post(serverEndPoint, args, {
+                    //     headers: {
+                    //         "Content-Type": "application/json",
+                    //         "Authorization": accessToken
+                    //     },
+                    //     withCredentials: true
+                    // });
+
                     const response: AxiosResponse = await axios.post(serverEndPoint, args);
+
                     return response.data;
                 }
             } catch (error: unknown) {
@@ -55,12 +76,22 @@ export class SqlSelectProcess {
     }
 
     static selectRentalClasses = () => {
-        ipcMain.handle("sqlSelect:rentalClasses", async (event: Electron.IpcMainInvokeEvent, args: { selectedSmoking: string }) => {
+        ipcMain.handle("sqlSelect:rentalClasses", async (event: Electron.IpcMainInvokeEvent, args: { accessToken: string, selectedSmoking: string }) => {
+            const { accessToken, selectedSmoking } = args;
             const serverEndPoint = `https://${SqlSelectProcess.serverHost}:${SqlSelectProcess.port}/sqlSelect/vehicleAttributes/rentalClasses`;
-            try {
-                const response: AxiosResponse = await axios.post(serverEndPoint, args);
-                return response.data;
 
+            try {
+                const response: AxiosResponse = await axios.post(serverEndPoint, args, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": accessToken
+                    },
+                    withCredentials: true
+                });
+
+                // const response: AxiosResponse = await axios.post(serverEndPoint, args);
+
+                return response.data;
             } catch (error: unknown) {
                 console.error(`Failed to fetch rentalClasses:, ${error}`);
             }

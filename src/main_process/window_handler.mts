@@ -117,7 +117,9 @@ class WindowHandler {
         });
     }
 
-    static createDisplayReservationWindow = (): void => {
+    static createDisplayReservationWindow = (args: { accessToken: string }) => {
+        const { accessToken } = args;
+
         const win: BrowserWindow = new BrowserWindow({
             width: 1000,
             height: 800,
@@ -171,6 +173,10 @@ class WindowHandler {
             win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/display_reservation.html`));
             WindowHandler.windows.displayReservationWindow = win;
         }
+
+        WindowHandler.windows.displayReservationWindow.webContents.on("dom-ready", () => {
+            WindowHandler.windows.displayReservationWindow.webContents.send("accessToken:getAccessToken", accessToken);
+        });
 
         win.maximize();
     }

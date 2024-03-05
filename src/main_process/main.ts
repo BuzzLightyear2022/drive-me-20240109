@@ -54,9 +54,9 @@ ipcMain.handle("login:sendUserData", async (event, data) => {
 
     try {
         const response: AxiosResponse = await axios.post(serverEndPoint, loginData);
-        const sessionData = response.data;
-        if (sessionData && sessionData.token) {
-            WindowHandler.createDisplayReservationWindow();
+        const sessionData: string = response.data;
+        if (sessionData) {
+            WindowHandler.createDisplayReservationWindow({ accessToken: sessionData });
             WindowHandler.windows.loginWindow.close();
             WindowHandler.windows.loginWindow = undefined;
         } else {
@@ -88,9 +88,11 @@ ipcMain.on("openWindow:reservationInputWindow", (): void => {
     WindowHandler.createInsertReservationWindow();
 });
 
-ipcMain.on("openWindow:displayReservationWindow", (): void => {
-    WindowHandler.createDisplayReservationWindow();
-});
+// Temporarily removed the menu window when introducing the login window on March 5, 2024.
+
+// ipcMain.on("openWindow:displayReservationWindow", (): void => {
+//     WindowHandler.createDisplayReservationWindow();
+// });
 
 ipcMain.on("openWindow:editCarCatalogWindow", (): void => {
     WindowHandler.createEditCarCatalogWindow();

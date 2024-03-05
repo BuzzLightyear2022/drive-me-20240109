@@ -67,7 +67,7 @@ contextBridge.exposeInMainWorld(
         vehicleAttributesByRentalClass: async (args: { rentalClass: string }): Promise<VehicleAttributes[]> => {
             return await ipcRenderer.invoke("sqlSelect:vehicleAttributesByRentalClass", args);
         },
-        rentalClasses: async (args: { selectedSmoking: string }): Promise<string[]> => {
+        rentalClasses: async (args: { accessToken: string, selectedSmoking: string }): Promise<string[]> => {
             return await ipcRenderer.invoke("sqlSelect:rentalClasses", args);
         },
         carModels: async (args: { selectedSmoking: string, selectedRentalClass: string }): Promise<string[]> => {
@@ -185,5 +185,12 @@ contextBridge.exposeInMainWorld(
                 delete wsReservationUpdateListeners[eventId];
             }
         }
+    }
+);
+
+contextBridge.exposeInMainWorld(
+    "accessToken",
+    {
+        getAccessToken: (callback: (accessToken: string) => void) => ipcRenderer.on("accessToken:getAccessToken", (event: Electron.IpcRendererEvent, accessToken: string) => callback(accessToken))
     }
 );
