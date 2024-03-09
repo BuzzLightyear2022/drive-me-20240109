@@ -9,7 +9,7 @@ loginForm.addEventListener("submit", async (event) => {
     const username = usernameInput.value;
     const password = passwordInput.value;
 
-    const userData = await window.login.sendUserData({
+    await window.login.getSessionData({
         username: username,
         password: password
     });

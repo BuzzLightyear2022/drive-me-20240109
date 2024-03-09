@@ -1,10 +1,10 @@
-import dotenv from "dotenv";
-dotenv.config();
 import { BrowserWindow, ipcMain, Menu } from "electron";
 import path from "path";
 import { Windows } from "../@types/types";
+import dotenv from "dotenv";
+dotenv.config();
 
-class WindowHandler {
+export class WindowHandler {
     static preloadScript: string = path.join(__dirname, "preload.js");
     static windows: Windows = {
         loginWindow: undefined,
@@ -60,21 +60,48 @@ class WindowHandler {
     }
 
     static createInsertVehicleAttributesWindow = (): void => {
-        const win: BrowserWindow = new BrowserWindow({
-            webPreferences: {
-                preload: WindowHandler.preloadScript
-            },
-        });
+        if (!WindowHandler.windows.insertVehicleAttributesWindow) {
+            const win: BrowserWindow = new BrowserWindow({
+                webPreferences: {
+                    preload: WindowHandler.preloadScript
+                },
+            });
 
-        if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/insert_vehicleAttributes.html`);
-            WindowHandler.windows.insertVehicleAttributesWindow = win;
+            win.on("closed", () => {
+                WindowHandler.windows.insertVehicleAttributesWindow = undefined;
+            });
+
+            const menuTemplate = Menu.buildFromTemplate([
+                {
+                    label: "ファイル"
+                },
+                {
+                    label: "編集",
+                    submenu: [
+                        {
+                            label: "車両カタログ編集",
+                            click: async () => {
+                                WindowHandler.createEditCarCatalogWindow();
+                            }
+                        }
+                    ]
+                }
+            ]);
+
+            Menu.setApplicationMenu(menuTemplate);
+
+            if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+                win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/insert_vehicleAttributes.html`);
+                WindowHandler.windows.insertVehicleAttributesWindow = win;
+            } else {
+                win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/insert_vehicleAttributes.html`));
+                WindowHandler.windows.insertVehicleAttributesWindow = win;
+            }
+
+            win.maximize();
         } else {
-            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/insert_vehicleAttributes.html`));
-            WindowHandler.windows.insertVehicleAttributesWindow = win;
+            console.log("window is already created");
         }
-
-        win.maximize();
     }
 
     static createInsertReservationWindow = (): void => {
@@ -96,25 +123,31 @@ class WindowHandler {
     }
 
     static createEditReservationWindow = (reservationId: string): void => {
-        const win: BrowserWindow = new BrowserWindow({
-            width: 1000,
-            height: 800,
-            webPreferences: {
-                preload: WindowHandler.preloadScript
-            },
-        });
+        if (!WindowHandler.windows.editReservationWindow) {
+            const win: BrowserWindow = new BrowserWindow({
+                width: 1000,
+                height: 800,
+                webPreferences: {
+                    preload: WindowHandler.preloadScript
+                },
+            });
 
-        if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_reservation.html`);
-            WindowHandler.windows.editReservationWindow = win;
-        } else {
-            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_reservation.html`));
-            WindowHandler.windows.editReservationWindow = win;
+            if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+                win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_reservation.html`);
+                WindowHandler.windows.editReservationWindow = win;
+            } else {
+                win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_reservation.html`));
+                WindowHandler.windows.editReservationWindow = win;
+            }
+
+            WindowHandler.windows.editReservationWindow.webContents.on("dom-ready", () => {
+                WindowHandler.windows.editReservationWindow.webContents.send("contextMenu:getReservationId", reservationId);
+            });
+
+            win.on("closed", () => {
+                WindowHandler.windows.editReservationWindow = undefined;
+            });
         }
-
-        WindowHandler.windows.editReservationWindow.webContents.on("dom-ready", () => {
-            WindowHandler.windows.editReservationWindow.webContents.send("contextMenu:getReservationId", reservationId);
-        });
     }
 
     static createDisplayReservationWindow = (args: { accessToken: string }) => {
@@ -127,6 +160,30 @@ class WindowHandler {
                 preload: WindowHandler.preloadScript
             },
         });
+
+        win.webContents.openDevTools();
+
+        const menuTemplate = Menu.buildFromTemplate([
+            {
+                label: "ファイル"
+            },
+            {
+                label: "編集"
+            },
+            {
+                label: "車両管理",
+                submenu: [
+                    {
+                        label: "車両追加",
+                        click: async () => {
+                            WindowHandler.createInsertVehicleAttributesWindow();
+                        }
+                    }
+                ]
+            }
+        ]);
+
+        Menu.setApplicationMenu(menuTemplate);
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ipcMain.on("contextMenu:schedule-bar", (event: Electron.IpcMainEvent, reservationId: string) => {
@@ -153,7 +210,7 @@ class WindowHandler {
                 {
                     label: "車両情報更新",
                     click: async () => {
-                        WindowHandler.createEditVehicleAttributesWindow(vehicleId);
+                        WindowHandler.createEditVehicleAttributesWindow({ accessToken: accessToken, vehicleId: vehicleId });
                     }
                 },
                 {
@@ -181,45 +238,56 @@ class WindowHandler {
         win.maximize();
     }
 
-    static createEditVehicleAttributesWindow = (vehicleId: string): void => {
-        const win: BrowserWindow = new BrowserWindow({
-            width: 1000,
-            height: 800,
-            webPreferences: {
-                preload: WindowHandler.preloadScript
-            },
-        });
+    static createEditVehicleAttributesWindow = (args: { accessToken: string, vehicleId: string }): void => {
+        const { accessToken, vehicleId } = args;
+        if (!WindowHandler.windows.editVehicleAttributesWindow) {
+            const win: BrowserWindow = new BrowserWindow({
+                width: 1000,
+                height: 800,
+                webPreferences: {
+                    preload: WindowHandler.preloadScript
+                },
+            });
 
-        if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_vehicleAttributes.html`);
-            WindowHandler.windows.editVehicleAttributesWindow = win;
-        } else {
-            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_vehicleAttributes.html`));
-            WindowHandler.windows.editVehicleAttributesWindow = win;
+            if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+                win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_vehicleAttributes.html`);
+                WindowHandler.windows.editVehicleAttributesWindow = win;
+            } else {
+                win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_vehicleAttributes.html`));
+                WindowHandler.windows.editVehicleAttributesWindow = win;
+            }
+
+            WindowHandler.windows.editVehicleAttributesWindow.webContents.on("dom-ready", () => {
+                WindowHandler.windows.editVehicleAttributesWindow.webContents.send("contextMenu:getVehicleId", accessToken, vehicleId);
+            });
+
+            win.on("closed", () => {
+                WindowHandler.windows.editVehicleAttributesWindow = undefined;
+            });
         }
-
-        WindowHandler.windows.editVehicleAttributesWindow.webContents.on("dom-ready", () => {
-            WindowHandler.windows.editVehicleAttributesWindow.webContents.send("contextMenu:getVehicleId", vehicleId);
-        });
     }
 
     static createEditCarCatalogWindow = (): void => {
-        const win: BrowserWindow = new BrowserWindow({
-            width: 1000,
-            height: 800,
-            webPreferences: {
-                preload: WindowHandler.preloadScript
-            },
-        });
+        if (!WindowHandler.windows.editCarCatalogWindow) {
+            const win: BrowserWindow = new BrowserWindow({
+                width: 1000,
+                height: 800,
+                webPreferences: {
+                    preload: WindowHandler.preloadScript
+                },
+            });
 
-        if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_carCatalog.html`);
-            WindowHandler.windows.editVehicleAttributesWindow = win;
-        } else {
-            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_carCatalog.html`));
-            WindowHandler.windows.editVehicleAttributesWindow = win;
+            win.on("closed", () => {
+                WindowHandler.windows.editCarCatalogWindow = undefined;
+            });
+
+            if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+                win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_carCatalog.html`);
+                WindowHandler.windows.editCarCatalogWindow = win;
+            } else {
+                win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_carCatalog.html`));
+                WindowHandler.windows.editCarCatalogWindow = win;
+            }
         }
     }
 }
-
-export { WindowHandler }

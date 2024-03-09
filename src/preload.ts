@@ -22,8 +22,8 @@ contextBridge.exposeInMainWorld(
 
 contextBridge.exposeInMainWorld(
     "login", {
-    sendUserData: async (args: { username: string, password: string }) => {
-        return await ipcRenderer.invoke("login:sendUserData", args);
+    getSessionData: async (args: { username: string, password: string }) => {
+        return await ipcRenderer.invoke("login:getSessionData", args);
     }
 }
 );
@@ -61,14 +61,14 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "sqlSelect",
     {
-        vehicleAttributes: async (): Promise<VehicleAttributes[]> => {
+        vehicleAttributes: async (args: { accessToken: string }): Promise<VehicleAttributes[]> => {
             return await ipcRenderer.invoke("sqlSelect:vehicleAttributes")
         },
-        vehicleAttributesByRentalClass: async (args: { rentalClass: string }): Promise<VehicleAttributes[]> => {
-            return await ipcRenderer.invoke("sqlSelect:vehicleAttributesByRentalClass", args);
+        vehicleAttributesByRentalClass: async (accessToken: string, args: { rentalClass: string }): Promise<VehicleAttributes[]> => {
+            return await ipcRenderer.invoke("sqlSelect:vehicleAttributesByRentalClass", accessToken, args);
         },
-        rentalClasses: async (args: { accessToken: string, selectedSmoking: string }): Promise<string[]> => {
-            return await ipcRenderer.invoke("sqlSelect:rentalClasses", args);
+        rentalClasses: async (accessToken: string, args: { selectedSmoking: string }): Promise<string[]> => {
+            return await ipcRenderer.invoke("sqlSelect:rentalClasses", accessToken, args);
         },
         carModels: async (args: { selectedSmoking: string, selectedRentalClass: string }): Promise<string[]> => {
             return await ipcRenderer.invoke("sqlSelect:carModels", args);
@@ -76,14 +76,14 @@ contextBridge.exposeInMainWorld(
         licensePlates: async (args: { selectedSmoking: string, selectedCarModel: string }): Promise<LicensePlatesData> => {
             return await ipcRenderer.invoke("sqlSelect:licensePlates", args);
         },
-        reservationData: async (args: { startDate: Date, endDate: Date }) => {
-            return await ipcRenderer.invoke("sqlSelect:reservationData", args);
+        reservationData: async (accessToken: string, args: { startDate: Date, endDate: Date }) => {
+            return await ipcRenderer.invoke("sqlSelect:reservationData/filterByDateRange", args);
         },
         reservationDataById: async (args: { reservationId: string }) => {
             return await ipcRenderer.invoke("sqlSelect:reservationDataById", args);
         },
-        vehicleAttributesById: async (args: { vehicleId: string }) => {
-            return await ipcRenderer.invoke("sqlSelect:vehicleAttributesById", args);
+        vehicleAttributesById: async (accessToken: string, vehicleId: string) => {
+            return await ipcRenderer.invoke("sqlSelect:vehicleAttributesById", accessToken, vehicleId);
         }
     }
 );
@@ -122,7 +122,7 @@ contextBridge.exposeInMainWorld(
             ipcRenderer.send("contextMenu:vehicleAttributesItem", vehicleId);
         },
         getReservationId: (callback: (reservationId: string) => void) => ipcRenderer.on("contextMenu:getReservationId", (event: Electron.IpcRendererEvent, reservationId: string) => callback(reservationId)),
-        getVehicleId: (callback: (vehicleId: string) => void) => ipcRenderer.on("contextMenu:getVehicleId", (event: Electron.IpcRendererEvent, vehicleId) => callback(vehicleId)),
+        getVehicleId: (callback: (accessToken: string, vehicleId: string) => void) => ipcRenderer.on("contextMenu:getVehicleId", (event: Electron.IpcRendererEvent, accessToken: string, vehicleId: string) => callback(accessToken, vehicleId)),
     }
 );
 

@@ -3,6 +3,7 @@ import { VehicleItem } from "./vehicle_item.mjs";
 import { DaysContainerType } from "./days_container.mjs";
 import { ScheduleCell, ScheduleCellType } from "./schedule_cell.mjs";
 import { ScheduleBar, ScheduleBarType } from "./schedule_bar.mjs";
+import { accessToken } from "./display_reservation.mjs";
 
 export type ScheduleContainerType = InstanceType<typeof ScheduleContainer>;
 
@@ -68,7 +69,7 @@ export const ScheduleContainer = class {
         const endDate: Date = new Date(calendarYear, calendarMonthIndex + 1, 0, 23, 59, 59, 999);
         // const totalMsOfMonth: number = endDate.getTime() - startDate.getTime();
 
-        const monthReservationData: ReservationData[] | null = await window.sqlSelect.reservationData({
+        const monthReservationData: ReservationData[] | null = await window.sqlSelect.reservationData(accessToken, {
             startDate: startDate,
             endDate: endDate
         });

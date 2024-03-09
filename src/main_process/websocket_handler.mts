@@ -1,4 +1,4 @@
-import { WindowHandler } from "./window_handler.mjs";
+import { BrowserWindow } from "electron";
 import dotenv from "dotenv";
 dotenv.config();
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -9,20 +9,14 @@ const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST as string;
 // @ts-ignore
 const port: string = import.meta.env.VITE_HTTPS_PORT as string;
 
-export class WebSocketHandler {
-    socket;
+export const connectWebSocket = async () => {
+    const webSocket = new WebSocket(`wss://${serverHost}:${port}`);
 
-    constructor() {
-        this.socket = new WebSocket(`wss://${serverHost}:${port}`);
+    webSocket.on("open", () => {
+        console.log("WebSocket connection established");
+    });
+}
 
-        this.socket.on("open", () => {
-            console.log("WebSocket connection established");
-        });
-
-        this.socket.addEventListener("message", this.handleMessage, false);
-    }
-
-    handleMessage = async (event: MessageEvent) => {
-        await WindowHandler.windows.displayReservationWindow.send(event.data);
-    }
+export const handleWssMessage = (event: MessageEvent, targetWindow: BrowserWindow) => {
+    targetWindow.webContents.send(event.data);
 }

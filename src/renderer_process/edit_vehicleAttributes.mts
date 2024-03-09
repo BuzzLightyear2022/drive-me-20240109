@@ -80,8 +80,8 @@ replaceFullWidthNumToHalfWidthNum({ element: licensePlateCodeInput, limitDigits:
 replaceFullWidthNumToHalfWidthNum({ element: licensePlateNumberInput, limitDigits: 4 });
 replaceFullWidthNumToHalfWidthNum({ element: JAFCardNumberInput, limitDigits: 3 });
 
-window.contextMenu.getVehicleId(async (vehicleId: string) => {
-    const currentVehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: vehicleId });
+window.contextMenu.getVehicleId(async (accessToken: string, vehicleId: string) => {
+    const currentVehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ accessToken: accessToken, vehicleId: vehicleId });
 
     const serverHost: string = await window.serverInfo.serverHost();
     const port: string = await window.serverInfo.port();
@@ -163,7 +163,7 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
     hasSpareKeyCheck.checked = currentVehicleAttributes.hasSpareKey;
     hasJAFCardCheck.checked = currentVehicleAttributes.hasJAFCard;
     JAFCardNumberInput.value = currentVehicleAttributes.JAFCardNumber;
-    JAFCardExpInput.value = String(currentVehicleAttributes.JAFCardExp);
+    JAFCardExpInput.value = String(currentVehicleAttributes.JAFCardExp).split("T")[0];
     otherFeaturesInput.value = currentVehicleAttributes.otherFeatures;
 
     rentalClassSelect.addEventListener("change", () => {
@@ -251,7 +251,7 @@ window.contextMenu.getVehicleId(async (vehicleId: string) => {
             JAFCardNumber: JAFCardNumber,
             JAFCardExp: new Date(JAFCardExpInput.value)
         }
-        
+
         try {
             await window.sqlUpdate.vehicleAttributes(newVehicleAttributes);
         } catch (error: unknown) {

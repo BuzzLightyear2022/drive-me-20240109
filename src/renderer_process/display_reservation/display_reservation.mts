@@ -8,7 +8,7 @@ window.accessToken.getAccessToken((accessToken: string) => {
     window.localStorage.setItem("accessToken", accessToken);
 });
 
-const accessToken = window.localStorage.getItem("accessToken");
+export const accessToken: string = window.localStorage.getItem("accessToken");
 
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class-select");
 const previousMonthButton: HTMLDivElement = document.querySelector("#previous-month-button");
@@ -68,7 +68,7 @@ const appendScheduleContainers = (
 }
 
 const calendarInitializer = async () => {
-    const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass({ accessToken: accessToken, rentalClass: rentalClassSelect.value });
+    const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass(accessToken, { rentalClass: rentalClassSelect.value });
 
     const previousMonthDaysContainerInstance: DaysContainerType = new DaysContainer(previousMonthDate, true);
     const currentMonthDaysContainerInstance: DaysContainerType = new DaysContainer(currentDate, true);
@@ -144,7 +144,7 @@ const calendarUpdater = async () => {
         nextMonthScheduleContainer.removeChild(nextMonthScheduleContainer.firstChild);
     }
 
-    const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass({ accessToken: accessToken, rentalClass: rentalClassSelect.value });
+    const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass(accessToken, { rentalClass: rentalClassSelect.value });
 
     const previousMonthDaysContainerInstance: DaysContainerType = DaysContainer.calendars[0].daysContainer;
     const currentMonthDaysContainerInstance: DaysContainerType = DaysContainer.calendars[1].daysContainer;
@@ -256,7 +256,7 @@ const handleAppendNextMonthCalendar = async () => {
 }
 
 (async (): Promise<void> => {
-    const rentalClasses: string[] | null = await window.sqlSelect.rentalClasses({ accessToken: accessToken, selectedSmoking: "none-specification" });
+    const rentalClasses: string[] | null = await window.sqlSelect.rentalClasses(accessToken, { selectedSmoking: "none-specification" });
 
     const allOption: HTMLOptionElement = document.createElement("option");
     allOption.textContent = "全て";

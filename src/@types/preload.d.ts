@@ -7,7 +7,7 @@ export interface serverInfo {
 }
 
 export interface login {
-    sendUserData: (args: {
+    getSessionData: (args: {
         username: string,
         password: string
     }) => Promise<void>;
@@ -26,13 +26,13 @@ export interface fetchJson {
 }
 
 export interface sqlSelect {
-    vehicleAttributes: () => Promise<VehicleAttributesArray>;
-    vehicleAttributesById: (args: { vehicleId: string }) => Promise<VehicleAttributes>;
-    vehicleAttributesByRentalClass: (args: { accessToken: string, rentalClass: string }) => Promise<VehicleAttributes>;
-    rentalClasses: (args: { accessToken: string, selectedSmoking: string }) => Promise<string[]>;
+    vehicleAttributes: (args: { accessToken: string }) => Promise<VehicleAttributes[]>;
+    vehicleAttributesById: (args: { accessToken: string, vehicleId: string }) => Promise<VehicleAttributes>;
+    vehicleAttributesByRentalClass: (accessToken: string, args: { rentalClass: string }) => Promise<VehicleAttributes>;
+    rentalClasses: (accessToken: string, args: { selectedSmoking: string }) => Promise<string[]>;
     carModels: (args: { selectedSmoking: string, selectedRentalClass: string }) => Promise<string[]>;
     licensePlates: (args: { selectedSmoking: string, selectedCarModel: string }) => Promise<LicensePlatesData>;
-    reservationData: (args: { startDate: Date, endDate: Date }) => Promise<>;
+    reservationData: (accessToken: string, args: { startDate: Date, endDate: Date }) => Promise<>;
     reservationDataById: (args: { reservationId: string }) => Promise<ReservationData>;
 }
 
@@ -50,7 +50,7 @@ export interface contextMenu {
     scheduleBar: (reservationId: string) => Promise<void>;
     vehicleAttributesItem: (vehicleId: string) => Promise<void>;
     getReservationId: (callback) => void;
-    getVehicleId: (callback) => void;
+    getVehicleId: (callback: (accessToken: string, vehicleId: string) => void) => void;
     updateReservationData: (callback: () => void) => void;
     updateVehicleAttributes: (callback: () => void) => void;
 }
