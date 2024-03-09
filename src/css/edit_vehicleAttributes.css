@@ -1,0 +1,29 @@
+#vehicle-input-table {
+    white-space: nowrap;
+}
+
+#image-preview-container {
+    display: flex;
+    position: relative;
+    width: 300px;
+    height: 300px;
+    overflow: hidden;
+}
+
+#license-plate-code {
+    width: 70px;
+}
+
+#license-plate-number {
+    width: 80px;
+}
+
+#image-preview {
+    object-fit: contain;
+    width: 200px;
+    height: 200px;
+}
+
+#JAFcard-number {
+    width: 50px;
+}

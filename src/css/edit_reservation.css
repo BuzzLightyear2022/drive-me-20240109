@@ -1,0 +1,27 @@
+#reservation-input-form {
+    min-width: 800px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.col-md {
+    max-width: 50%;
+    box-sizing: border-box;
+}
+
+#rental-category-container {
+    flex-wrap: nowrap;
+    text-align: center;
+}
+
+#non-smoking-container {
+    flex-wrap: nowrap;
+    text-align: center;
+}
+
+#comment-textarea {
+    min-height: 200px;
+}
