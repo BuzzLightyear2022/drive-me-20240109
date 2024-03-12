@@ -24,7 +24,7 @@ export type CarCatalog = {
 }
 
 export type VehicleAttributes = {
-    id?: string
+    id?: number,
     imageFileName?: string,
     carModel: string,
     modelCode: string,
@@ -54,8 +54,8 @@ export type VehicleAttributes = {
 }
 
 export type ReservationData = {
-    id?: string
-    vehicleId: string,
+    id?: number
+    vehicleId: number,
     reservationName: string,
     rentalCategory: string,
     pickupLocation: string,
@@ -67,7 +67,7 @@ export type ReservationData = {
 }
 
 export type LicensePlatesData = Array<{
-    id: string,
+    id: number,
     licensePlate: string
 }>
 

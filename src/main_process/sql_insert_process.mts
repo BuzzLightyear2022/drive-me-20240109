@@ -3,16 +3,20 @@ import axios, { AxiosResponse } from "axios";
 import FormData from "form-data";
 import { VehicleAttributes, ReservationData } from "../@types/types";
 import { makeImageFileName } from "./common_modules.mjs";
+import { accessToken } from "./login_process.mjs";
+import { WindowHandler } from "./window_handler.mjs";
 import dotenv from "dotenv";
 dotenv.config();
 
 // @ts-ignore
 const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST;
 // @ts-ignore
-const port: string = import.meta.env.VITE_STTPS_PORT;
+const port: string = import.meta.env.VITE_HTTPS_PORT;
 
 (async () => {
-    ipcMain.handle("sqlInsert:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent, vehicleAttributes: VehicleAttributes): Promise<string | unknown> => {
+    ipcMain.handle("sqlInsert:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent, args: { vehicleAttributes: VehicleAttributes }): Promise<string | unknown> => {
+        const { vehicleAttributes } = args;
+
         const serverEndPoint = `https://${serverHost}:${port}/sqlInsert/vehicleAttributes`;
 
         const postData: FormData = new FormData();
@@ -53,9 +57,14 @@ const port: string = import.meta.env.VITE_STTPS_PORT;
             const response: AxiosResponse = await axios.post(serverEndPoint, postData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    ...postData.getHeaders()
-                }
+                    ...postData.getHeaders(),
+                    "Authorization": accessToken
+                },
+                withCredentials: true
             });
+
+            WindowHandler.windows.insertVehicleAttributesWindow.close();
+            WindowHandler.windows.insertVehicleAttributesWindow = undefined;
 
             return response.status;
         } catch (error: unknown) {
@@ -74,9 +83,14 @@ const port: string = import.meta.env.VITE_STTPS_PORT;
         try {
             const response: AxiosResponse = await axios.post(serverEndPoint, postData, {
                 headers: {
-                    ...postData.getHeaders()
-                }
+                    ...postData.getHeaders(),
+                    "Authorization": accessToken
+                },
+                withCredentials: true
             });
+
+            WindowHandler.windows.insertReservationWindow.close();
+            WindowHandler.windows.insertReservationWindow = undefined;
 
             return response.status;
         } catch (error: unknown) {

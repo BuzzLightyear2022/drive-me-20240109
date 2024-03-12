@@ -1,6 +1,8 @@
-import { BrowserWindow, ipcMain, Menu } from "electron";
+import { BrowserWindow, ipcMain, screen, Menu } from "electron";
 import path from "path";
 import { Windows } from "../@types/types";
+import { ContextmenuHandler } from "./contextmenu_handler.mjs";
+import { accessToken } from "./login_process.mjs";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -15,7 +17,7 @@ export class WindowHandler {
         editReservationWindow: undefined,
         editVehicleAttributesWindow: undefined,
         editCarCatalogWindow: undefined
-    };
+    }
 
     static createLoginWindow = () => {
         const loginWindow: BrowserWindow = new BrowserWindow(
@@ -25,10 +27,11 @@ export class WindowHandler {
                 webPreferences: {
                     preload: WindowHandler.preloadScript
                 },
-                autoHideMenuBar: true,
                 resizable: false
             }
         );
+
+        loginWindow.menuBarVisible = false;
 
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
             loginWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
@@ -61,34 +64,25 @@ export class WindowHandler {
 
     static createInsertVehicleAttributesWindow = (): void => {
         if (!WindowHandler.windows.insertVehicleAttributesWindow) {
+            const { height } = screen.getPrimaryDisplay().workAreaSize;
+
             const win: BrowserWindow = new BrowserWindow({
+                width: 800,
+                height: height,
                 webPreferences: {
                     preload: WindowHandler.preloadScript
                 },
             });
 
+            win.webContents.openDevTools();
+
+            win.webContents.on("dom-ready", () => {
+                win.webContents.send("accessToken", accessToken);
+            });
+
             win.on("closed", () => {
                 WindowHandler.windows.insertVehicleAttributesWindow = undefined;
             });
-
-            const menuTemplate = Menu.buildFromTemplate([
-                {
-                    label: "ファイル"
-                },
-                {
-                    label: "編集",
-                    submenu: [
-                        {
-                            label: "車両カタログ編集",
-                            click: async () => {
-                                WindowHandler.createEditCarCatalogWindow();
-                            }
-                        }
-                    ]
-                }
-            ]);
-
-            Menu.setApplicationMenu(menuTemplate);
 
             if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
                 win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/insert_vehicleAttributes.html`);
@@ -97,14 +91,12 @@ export class WindowHandler {
                 win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/insert_vehicleAttributes.html`));
                 WindowHandler.windows.insertVehicleAttributesWindow = win;
             }
-
-            win.maximize();
         } else {
             console.log("window is already created");
         }
     }
 
-    static createInsertReservationWindow = (): void => {
+    static createInsertReservationWindow = (vehicleId: number): void => {
         const win: BrowserWindow = new BrowserWindow({
             width: 1000,
             height: 800,
@@ -113,12 +105,20 @@ export class WindowHandler {
             },
         });
 
+        win.webContents.openDevTools();
+
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
             win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/insert_reservation.html`);
             WindowHandler.windows.insertReservationWindow = win;
         } else {
             win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/insert_reservation.html`));
             WindowHandler.windows.insertReservationWindow = win;
+        }
+
+        if (vehicleId) {
+            win.webContents.on("dom-ready", () => {
+                win.webContents.send("contextmenu:getVehicleId", vehicleId);
+            });
         }
     }
 
@@ -150,9 +150,7 @@ export class WindowHandler {
         }
     }
 
-    static createDisplayReservationWindow = (args: { accessToken: string }) => {
-        const { accessToken } = args;
-
+    static createDisplayReservationWindow = () => {
         const win: BrowserWindow = new BrowserWindow({
             width: 1000,
             height: 800,
@@ -163,27 +161,9 @@ export class WindowHandler {
 
         win.webContents.openDevTools();
 
-        const menuTemplate = Menu.buildFromTemplate([
-            {
-                label: "ファイル"
-            },
-            {
-                label: "編集"
-            },
-            {
-                label: "車両管理",
-                submenu: [
-                    {
-                        label: "車両追加",
-                        click: async () => {
-                            WindowHandler.createInsertVehicleAttributesWindow();
-                        }
-                    }
-                ]
-            }
-        ]);
-
-        Menu.setApplicationMenu(menuTemplate);
+        ContextmenuHandler.displayMenubarMenu();
+        ContextmenuHandler.displayScheduleCellMenu();
+        ContextmenuHandler.displayVehicleItemMenu();
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ipcMain.on("contextMenu:schedule-bar", (event: Electron.IpcMainEvent, reservationId: string) => {
@@ -204,25 +184,6 @@ export class WindowHandler {
             contextMenu.popup(WindowHandler.windows.displayReservationWindow);
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ipcMain.on("contextMenu:vehicleAttributesItem", (event: Electron.IpcMainEvent, vehicleId: string) => {
-            const contextMenu = Menu.buildFromTemplate([
-                {
-                    label: "車両情報更新",
-                    click: async () => {
-                        WindowHandler.createEditVehicleAttributesWindow({ accessToken: accessToken, vehicleId: vehicleId });
-                    }
-                },
-                {
-                    label: "車両削除",
-                    click: () => {
-                        console.log("remove vehicle");
-                    }
-                }
-            ]);
-            contextMenu.popup(WindowHandler.windows.displayReservationWindow);
-        });
-
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
             win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/display_reservation.html`);
             WindowHandler.windows.displayReservationWindow = win;
@@ -231,23 +192,22 @@ export class WindowHandler {
             WindowHandler.windows.displayReservationWindow = win;
         }
 
-        WindowHandler.windows.displayReservationWindow.webContents.on("dom-ready", () => {
-            WindowHandler.windows.displayReservationWindow.webContents.send("accessToken:getAccessToken", accessToken);
-        });
-
         win.maximize();
     }
 
-    static createEditVehicleAttributesWindow = (args: { accessToken: string, vehicleId: string }): void => {
-        const { accessToken, vehicleId } = args;
+    static createEditVehicleAttributesWindow = (vehicleId: number): void => {
+        const { height } = screen.getPrimaryDisplay().workAreaSize;
+
         if (!WindowHandler.windows.editVehicleAttributesWindow) {
             const win: BrowserWindow = new BrowserWindow({
-                width: 1000,
-                height: 800,
+                width: 800,
+                height: height,
                 webPreferences: {
                     preload: WindowHandler.preloadScript
-                },
+                }
             });
+
+            win.webContents.openDevTools();
 
             if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
                 win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_vehicleAttributes.html`);
@@ -257,8 +217,8 @@ export class WindowHandler {
                 WindowHandler.windows.editVehicleAttributesWindow = win;
             }
 
-            WindowHandler.windows.editVehicleAttributesWindow.webContents.on("dom-ready", () => {
-                WindowHandler.windows.editVehicleAttributesWindow.webContents.send("contextMenu:getVehicleId", accessToken, vehicleId);
+            win.webContents.on("dom-ready", () => {
+                win.webContents.send("contextmenu:getVehicleId", vehicleId);
             });
 
             win.on("closed", () => {

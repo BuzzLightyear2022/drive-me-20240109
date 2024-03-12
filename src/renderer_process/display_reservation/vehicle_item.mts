@@ -112,7 +112,7 @@ export const VehicleItem = class {
         this.vehicleItem.append(imageDiv, textDiv);
 
         this.vehicleItem.addEventListener("contextmenu", () => {
-            window.contextMenu.vehicleAttributesItem(this.vehicleAttributes.id);
+            window.contextmenu.vehicleAttributesItem(this.vehicleAttributes.id);
         }, false);
     }
 }

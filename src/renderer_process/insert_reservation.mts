@@ -1,5 +1,5 @@
 import { appendOptions } from "./common_modules.mjs";
-import { ReservationData, LicensePlatesData } from "../@types/types";
+import { VehicleAttributes, ReservationData, LicensePlatesData } from "../@types/types";
 
 const reservationName: HTMLInputElement = document.querySelector("#reservation-name") as HTMLInputElement;
 const rentalCategoryRadios: NodeListOf<HTMLInputElement> = document.getElementsByName("rental-category") as NodeListOf<HTMLInputElement>;
@@ -27,11 +27,39 @@ const getRadioValue = (args: { radios: NodeListOf<HTMLInputElement>, defaultValu
     return selectedValue;
 }
 
+(async () => {
+    const vehicleId: number = await window.contextmenu.getVehicleId();
+
+    if (vehicleId) {
+        const vehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: vehicleId });
+
+        const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-specification" });
+        const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: selectedSmoking });
+        appendOptions({ selectbox: rentalClassSelect, options: rentalClasses });
+        rentalClassSelect.value = vehicleAttributes.rentalClass;
+
+        const selectedRentalClass: string = rentalClassSelect.value;
+        const carModels: string[] = await window.sqlSelect.carModels({ selectedSmoking: selectedSmoking, selectedRentalClass: selectedRentalClass });
+        appendOptions({ selectbox: carModelSelect, options: carModels });
+        carModelSelect.value = vehicleAttributes.carModel;
+
+        const selectedCarModel: string = carModelSelect.value;
+        const licensePlateData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
+
+        licensePlateData.map((licensePlateData: { id: number, licensePlate: string }) => {
+            const option = document.createElement("option");
+            option.textContent = licensePlateData.licensePlate;
+            option.value = String(licensePlateData.id);
+        });
+
+        licensePlateSelect.value = String(vehicleId);
+    }
+})();
+
 (async (): Promise<void> => {
     const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-spacification" });
 
     const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: selectedSmoking });
-
     appendOptions({ selectbox: rentalClassSelect, options: rentalClasses });
 
     const selectedRentalClass: string = rentalClassSelect.value;
@@ -41,10 +69,10 @@ const getRadioValue = (args: { radios: NodeListOf<HTMLInputElement>, defaultValu
 
     const selectedCarModel: string = carModelSelect.value;
     const licensePlatesData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
-    const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }): string => {
+    const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }): string => {
         return licensePlateData.licensePlate;
     });
-    const idsArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }) => {
+    const idsArray: number[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }) => {
         return licensePlateData.id;
     });
 
@@ -66,10 +94,10 @@ nonSmokingRadios.forEach((nonSmokingRadio: HTMLInputElement) => {
 
         const selectedCarModel: string = carModelSelect.value;
         const licensePlatesData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
-        const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }): string => {
+        const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }): string => {
             return licensePlateData.licensePlate;
         });
-        const idsArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }) => {
+        const idsArray: number[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }) => {
             return licensePlateData.id;
         });
 
@@ -87,10 +115,10 @@ rentalClassSelect.addEventListener("change", async () => {
 
     const selectedCarModel: string = carModelSelect.value;
     const licensePlatesData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
-    const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }): string => {
+    const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }): string => {
         return licensePlateData.licensePlate;
     });
-    const idsArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }) => {
+    const idsArray: number[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }) => {
         return licensePlateData.id;
     });
 
@@ -101,10 +129,10 @@ carModelSelect.addEventListener("change", async () => {
     const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-spacification" });
     const selectedCarModel: string = carModelSelect.value;
     const licensePlatesData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
-    const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }): string => {
+    const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }): string => {
         return licensePlateData.licensePlate;
     });
-    const idsArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }) => {
+    const idsArray: number[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }) => {
         return licensePlateData.id;
     });
 
@@ -118,7 +146,7 @@ submitButton.addEventListener("click", async () => {
     const selectedReturnDatetime: Date = new Date(returnDatetime.value);
 
     const reservationData: ReservationData = {
-        vehicleId: licensePlateSelect.value,
+        vehicleId: Number(licensePlateSelect.value),
         reservationName: reservationName.value,
         rentalCategory: selectedRentalCategory,
         pickupLocation: departureStore.value,

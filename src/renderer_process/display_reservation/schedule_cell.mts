@@ -63,6 +63,11 @@ export const ScheduleCell = class {
         this.scheduleDivs.maintenanceScheduleDiv = InnerScheduleDiv();
 
         this.scheduleCell.append(this.scheduleDivs.reservationScheduleDiv, this.scheduleDivs.maintenanceScheduleDiv);
+
+        this.scheduleCell.addEventListener("contextmenu", (event: any) => {
+            const vehicleId: number = this.vehicleItem.vehicleAttributes.id;
+            window.contextmenu.scheduleCell(vehicleId);
+        }, false);
     }
 
     handleWindowResize = (args: {

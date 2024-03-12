@@ -5,6 +5,8 @@ import { connectWebSocket } from "./websocket_handler.mjs";
 import dotenv from "dotenv";
 dotenv.config();
 
+export let accessToken: string;
+
 // @ts-ignore
 const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST;
 // @ts-ignore
@@ -22,17 +24,18 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
         try {
             const response: AxiosResponse = await axios.post(serverEndPoint, loginData);
             const sessionData: string = response.data;
-            if (sessionData) {
-                WindowHandler.createDisplayReservationWindow({ accessToken: sessionData });
-                WindowHandler.windows.loginWindow.close();
-                WindowHandler.windows.loginWindow = undefined;
-
-                connectWebSocket();
+            accessToken = sessionData;
+            WindowHandler.createDisplayReservationWindow();
+            WindowHandler.windows.loginWindow.close();
+            WindowHandler.windows.loginWindow = undefined;
+            connectWebSocket();
+        } catch (error: any) {
+            if (error.response) {
+                console.error("login error");
+                console.error(error.response.status);
             } else {
-                // login failed process goes on.
+                console.error("request error");
             }
-        } catch (error: unknown) {
-            console.error(error);
         }
     });
 })();

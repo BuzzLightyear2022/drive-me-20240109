@@ -80,8 +80,9 @@ replaceFullWidthNumToHalfWidthNum({ element: licensePlateCodeInput, limitDigits:
 replaceFullWidthNumToHalfWidthNum({ element: licensePlateNumberInput, limitDigits: 4 });
 replaceFullWidthNumToHalfWidthNum({ element: JAFCardNumberInput, limitDigits: 3 });
 
-window.contextMenu.getVehicleId(async (accessToken: string, vehicleId: string) => {
-    const currentVehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ accessToken: accessToken, vehicleId: vehicleId });
+(async () => {
+    const vehicleId: number = await window.contextmenu.getVehicleId();
+    const currentVehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: vehicleId });
 
     const serverHost: string = await window.serverInfo.serverHost();
     const port: string = await window.serverInfo.port();
@@ -253,9 +254,9 @@ window.contextMenu.getVehicleId(async (accessToken: string, vehicleId: string) =
         }
 
         try {
-            await window.sqlUpdate.vehicleAttributes(newVehicleAttributes);
+            await window.sqlUpdate.vehicleAttributes({ vehicleAttributes: newVehicleAttributes });
         } catch (error: unknown) {
             console.error("Failed to insert VehicleAttributes: ", error);
         }
     }, false);
-});
+})()

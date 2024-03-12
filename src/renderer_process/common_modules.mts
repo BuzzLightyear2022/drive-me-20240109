@@ -2,7 +2,7 @@ export const appendOptions = (
     args: {
         selectbox: HTMLSelectElement,
         options: string[],
-        values?: string[]
+        values?: number[]
     }
 ): void => {
     const { selectbox, options, values } = args;
@@ -15,7 +15,7 @@ export const appendOptions = (
             const option: HTMLOptionElement = document.createElement("option");
             option.textContent = element;
             if (values && values[index]) {
-                option.value = values[index];
+                option.value = String(values[index]);
             }
             selectbox.append(option);
         });

@@ -1,4 +1,4 @@
-import { BrowserWindow } from "electron";
+import { WindowHandler } from "./window_handler.mjs";
 import dotenv from "dotenv";
 dotenv.config();
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -15,8 +15,10 @@ export const connectWebSocket = async () => {
     webSocket.on("open", () => {
         console.log("WebSocket connection established");
     });
-}
 
-export const handleWssMessage = (event: MessageEvent, targetWindow: BrowserWindow) => {
-    targetWindow.webContents.send(event.data);
+    webSocket.on("message", async (message: string) => {
+        const eventName: string = String(message);
+
+        WindowHandler.windows.displayReservationWindow.send(eventName);
+    });
 }

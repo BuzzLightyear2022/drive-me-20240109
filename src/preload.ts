@@ -34,7 +34,7 @@ contextBridge.exposeInMainWorld(
         carCatalog: async (): Promise<CarCatalog> => {
             return await ipcRenderer.invoke("fetchJson:carCatalog");
         },
-        navigations: async (): Promise<Navigations> => {
+        navigations: async (accessToken: string): Promise<Navigations> => {
             return await ipcRenderer.invoke("fetchJson:navigations");
         }
     }
@@ -61,14 +61,14 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "sqlSelect",
     {
-        vehicleAttributes: async (args: { accessToken: string }): Promise<VehicleAttributes[]> => {
+        vehicleAttributes: async (): Promise<VehicleAttributes[]> => {
             return await ipcRenderer.invoke("sqlSelect:vehicleAttributes")
         },
-        vehicleAttributesByRentalClass: async (accessToken: string, args: { rentalClass: string }): Promise<VehicleAttributes[]> => {
-            return await ipcRenderer.invoke("sqlSelect:vehicleAttributesByRentalClass", accessToken, args);
+        vehicleAttributesByRentalClass: async (args: { rentalClass: string }): Promise<VehicleAttributes[]> => {
+            return await ipcRenderer.invoke("sqlSelect:vehicleAttributesByRentalClass", args);
         },
-        rentalClasses: async (accessToken: string, args: { selectedSmoking: string }): Promise<string[]> => {
-            return await ipcRenderer.invoke("sqlSelect:rentalClasses", accessToken, args);
+        rentalClasses: async (args: { selectedSmoking?: string }): Promise<string[]> => {
+            return await ipcRenderer.invoke("sqlSelect:rentalClasses", args);
         },
         carModels: async (args: { selectedSmoking: string, selectedRentalClass: string }): Promise<string[]> => {
             return await ipcRenderer.invoke("sqlSelect:carModels", args);
@@ -76,14 +76,14 @@ contextBridge.exposeInMainWorld(
         licensePlates: async (args: { selectedSmoking: string, selectedCarModel: string }): Promise<LicensePlatesData> => {
             return await ipcRenderer.invoke("sqlSelect:licensePlates", args);
         },
-        reservationData: async (accessToken: string, args: { startDate: Date, endDate: Date }) => {
+        reservationData: async (args: { startDate: Date, endDate: Date }) => {
             return await ipcRenderer.invoke("sqlSelect:reservationData/filterByDateRange", args);
         },
         reservationDataById: async (args: { reservationId: string }) => {
             return await ipcRenderer.invoke("sqlSelect:reservationDataById", args);
         },
-        vehicleAttributesById: async (accessToken: string, vehicleId: string) => {
-            return await ipcRenderer.invoke("sqlSelect:vehicleAttributesById", accessToken, vehicleId);
+        vehicleAttributesById: async (vehicleId: string) => {
+            return await ipcRenderer.invoke("sqlSelect:vehicleAttributesById", vehicleId);
         }
     }
 );
@@ -91,8 +91,8 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "sqlInsert",
     {
-        vehicleAttributes: async (vehicleAttributes: VehicleAttributes): Promise<string> => {
-            return await ipcRenderer.invoke("sqlInsert:vehicleAttributes", vehicleAttributes);
+        vehicleAttributes: async (args: { vehicleAttributes: VehicleAttributes }): Promise<string> => {
+            return await ipcRenderer.invoke("sqlInsert:vehicleAttributes", args);
         },
         reservationData: async (reservationData: ReservationData): Promise<string> => {
             return await ipcRenderer.invoke("sqlInsert:reservationData", reservationData);
@@ -106,23 +106,37 @@ contextBridge.exposeInMainWorld(
         reservationData: async (reservationData: ReservationData): Promise<void> => {
             ipcRenderer.send("sqlUpdate:reservationData", reservationData);
         },
-        vehicleAttributes: async (vehicleAttributes: VehicleAttributes): Promise<void> => {
-            ipcRenderer.send("sqlUpdate:vehicleAttributes", vehicleAttributes);
+        vehicleAttributes: async (args: { vehicleAttributes: VehicleAttributes }): Promise<void> => {
+            ipcRenderer.send("sqlUpdate:vehicleAttributes", args);
         }
     }
 );
 
 contextBridge.exposeInMainWorld(
-    "contextMenu",
+    "contextmenu",
     {
-        scheduleBar: async (reservationId: string) => {
-            ipcRenderer.send("contextMenu:schedule-bar", reservationId);
+        scheduleBar: async (reservationId: number) => {
+            ipcRenderer.send("contextmenu:schedule-bar", reservationId);
         },
-        vehicleAttributesItem: async (vehicleId: string) => {
-            ipcRenderer.send("contextMenu:vehicleAttributesItem", vehicleId);
+        vehicleAttributesItem: async (vehicleId: number) => {
+            ipcRenderer.send("contextmenu:vehicleAttributesItem", vehicleId);
         },
-        getReservationId: (callback: (reservationId: string) => void) => ipcRenderer.on("contextMenu:getReservationId", (event: Electron.IpcRendererEvent, reservationId: string) => callback(reservationId)),
-        getVehicleId: (callback: (accessToken: string, vehicleId: string) => void) => ipcRenderer.on("contextMenu:getVehicleId", (event: Electron.IpcRendererEvent, accessToken: string, vehicleId: string) => callback(accessToken, vehicleId)),
+        scheduleCell: async (vehicleId: number) => {
+            ipcRenderer.send("contextmenu:schedule-cell", vehicleId)
+        },
+        getReservationId: (callback: (reservationId: string) => void) => ipcRenderer.on("contextmenu:getReservationId", (event: Electron.IpcRendererEvent, reservationId: string) => callback(reservationId)),
+        getVehicleId: async () => {
+            return new Promise((resolve, reject) => {
+                ipcRenderer.on("contextmenu:getVehicleId", (event: Electron.IpcRendererEvent, vehicleId: number) => {
+                    if (vehicleId) {
+                        resolve(vehicleId);
+                    } else {
+                        resolve(null);
+                    }
+                });
+            });
+        }
+
     }
 );
 
@@ -131,15 +145,16 @@ contextBridge.exposeInMainWorld(
     {
         updateReservationData: (callback: () => void): number => {
             const eventId: number = generateUniqueId();
+            const eventName: string = "wssUpdate:reservationData";
 
             const listener = () => {
                 callback();
             }
 
-            ipcRenderer.on("wsUpdate:reservationData", listener);
+            ipcRenderer.on(eventName, listener);
 
             wsReservationUpdateListeners[eventId] = {
-                event: "wsUpdate:reservationData",
+                event: eventName,
                 listener: listener
             };
 
@@ -147,17 +162,18 @@ contextBridge.exposeInMainWorld(
         },
         updateVehicleAttributes: (callback: () => void) => {
             const eventId: number = generateUniqueId();
+            const eventName: string = "wssUpdate:vehicleAttributes";
 
             const listener = () => {
                 callback();
             }
 
-            ipcRenderer.on("wsUpdate:vehicleAttributes", () => {
+            ipcRenderer.on(eventName, () => {
                 return callback();
             });
 
             wsVehicleAttributesUpdateListeners[eventId] = {
-                event: "wsUpdate:vehicleAttributes",
+                event: eventName,
                 listener: listener
             }
 
@@ -191,6 +207,16 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "accessToken",
     {
-        getAccessToken: (callback: (accessToken: string) => void) => ipcRenderer.on("accessToken:getAccessToken", (event: Electron.IpcRendererEvent, accessToken: string) => callback(accessToken))
+        get: async () => {
+            return new Promise((resolve, reject) => {
+                ipcRenderer.on("accessToken", (event, accessToken) => {
+                    if (accessToken) {
+                        resolve(accessToken);
+                    } else {
+                        reject(new Error("Access token not available."));
+                    }
+                })
+            });
+        }
     }
 );

@@ -3,6 +3,8 @@ import axios, { AxiosResponse } from "axios";
 import FormData from "form-data";
 import { makeImageFileName } from "./common_modules.mjs";
 import { VehicleAttributes, ReservationData } from "../@types/types";
+import { accessToken } from "./login_process.mjs";
+import { WindowHandler } from "./window_handler.mjs";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -12,7 +14,8 @@ const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST;
 const port: string = import.meta.env.VITE_HTTPS_PORT;
 
 (async () => {
-    ipcMain.on("sqlUpdate:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent, vehicleAttributes: VehicleAttributes) => {
+    ipcMain.on("sqlUpdate:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent, args: { vehicleAttributes: VehicleAttributes }) => {
+        const { vehicleAttributes } = args;
         const serverEndPoint = `https://${serverHost}:${port}/sqlUpdate/vehicleAttributes`;
 
         const postData: FormData = new FormData();
@@ -55,9 +58,14 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
             const response: AxiosResponse = await axios.post(serverEndPoint, postData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    ...postData.getHeaders()
-                }
+                    ...postData.getHeaders(),
+                    "Authorization": accessToken
+                },
+                withCredentials: true
             });
+
+            WindowHandler.windows.editVehicleAttributesWindow.close();
+            WindowHandler.windows.editVehicleAttributesWindow = undefined;
 
             return response.status;
         } catch (error: unknown) {
@@ -76,9 +84,14 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
         try {
             const response: AxiosResponse = await axios.post(serverEndPoint, postData, {
                 headers: {
-                    ...postData.getHeaders()
-                }
+                    ...postData.getHeaders(),
+                    "Authorization": accessToken
+                },
+                withCredentials: true
             });
+
+            WindowHandler.windows.editReservationWindow.close();
+            WindowHandler.windows.editReservationWindow = undefined;
 
             return response.status;
         } catch (error: unknown) {

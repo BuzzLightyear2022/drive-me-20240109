@@ -4,12 +4,6 @@ import { DaysContainer, DaysContainerType, Calendar } from "./days_container.mjs
 import { ScheduleContainer, ScheduleContainerType } from "./schedule_container.mjs";
 import { ScheduleBarType } from "./schedule_bar.mjs";
 
-window.accessToken.getAccessToken((accessToken: string) => {
-    window.localStorage.setItem("accessToken", accessToken);
-});
-
-export const accessToken: string = window.localStorage.getItem("accessToken");
-
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class-select");
 const previousMonthButton: HTMLDivElement = document.querySelector("#previous-month-button");
 const nextMonthButton: HTMLDivElement = document.querySelector("#next-month-button");
@@ -68,7 +62,7 @@ const appendScheduleContainers = (
 }
 
 const calendarInitializer = async () => {
-    const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass(accessToken, { rentalClass: rentalClassSelect.value });
+    const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass({ rentalClass: rentalClassSelect.value });
 
     const previousMonthDaysContainerInstance: DaysContainerType = new DaysContainer(previousMonthDate, true);
     const currentMonthDaysContainerInstance: DaysContainerType = new DaysContainer(currentDate, true);
@@ -117,12 +111,12 @@ const calendarInitializer = async () => {
 }
 
 const calendarUpdater = async () => {
-    const currentScrollPositionX: number = scheduleContainer.scrollLeft;
-
     DaysContainer.calendars.forEach((calendar) => {
         const previousEventId: number = calendar.daysContainer.calendar.updateReservationEventId;
         window.removeEvent.wsUpdateReservationData(previousEventId);
     });
+
+    const currentScrollPositionX: number = scheduleContainer.scrollLeft;
 
     while (vehicleItemsContainer.firstChild) {
         vehicleItemsContainer.removeChild(vehicleItemsContainer.firstChild);
@@ -144,7 +138,7 @@ const calendarUpdater = async () => {
         nextMonthScheduleContainer.removeChild(nextMonthScheduleContainer.firstChild);
     }
 
-    const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass(accessToken, { rentalClass: rentalClassSelect.value });
+    const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass({ rentalClass: rentalClassSelect.value });
 
     const previousMonthDaysContainerInstance: DaysContainerType = DaysContainer.calendars[0].daysContainer;
     const currentMonthDaysContainerInstance: DaysContainerType = DaysContainer.calendars[1].daysContainer;
@@ -256,7 +250,7 @@ const handleAppendNextMonthCalendar = async () => {
 }
 
 (async (): Promise<void> => {
-    const rentalClasses: string[] | null = await window.sqlSelect.rentalClasses(accessToken, { selectedSmoking: "none-specification" });
+    const rentalClasses: string[] | null = await window.sqlSelect.rentalClasses({ selectedSmoking: "none-specification" });
 
     const allOption: HTMLOptionElement = document.createElement("option");
     allOption.textContent = "全て";
@@ -285,13 +279,30 @@ previousMonthButton.addEventListener("click", handleAppendPreviousMonthCalendar,
 nextMonthButton.addEventListener("click", handleAppendNextMonthCalendar, false);
 
 window.webSocket.updateVehicleAttributes(async () => {
-    const selectedRentalClass: string = rentalClassSelect.value;
+    const currentSelectedRentalClass: string = rentalClassSelect.value;
     const currentScrollPositionX: number = scheduleContainer.scrollLeft;
     const currentScrollPositionY: number = scheduleContainer.scrollTop;
 
+    const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: null });
+
+    while (rentalClassSelect.firstChild) {
+        rentalClassSelect.removeChild(rentalClassSelect.firstChild);
+    }
+
+    rentalClasses.forEach((rentalClass: string) => {
+        const option = document.createElement("option");
+        option.textContent = rentalClass;
+        rentalClassSelect.append(option);
+    });
+
+    const allOption = document.createElement("option");
+    allOption.textContent = "全て";
+    rentalClassSelect.append(allOption);
+
+    rentalClassSelect.value = currentSelectedRentalClass;
+
     await calendarUpdater();
 
-    rentalClassSelect.value = selectedRentalClass;
     scheduleContainer.scrollLeft = currentScrollPositionX;
     scheduleContainer.scrollTop = currentScrollPositionY;
 });

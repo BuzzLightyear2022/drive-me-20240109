@@ -155,9 +155,7 @@ replaceFullWidthNumToHalfWidthNum({ element: JAFCardNumberInput, limitDigits: 3 
     } catch (error: unknown) {
         console.error("Failed to fetch carCatalog: ", error);
     }
-})();
 
-(async (): Promise<void> => {
     try {
         const jsonResponse: Navigations = await window.fetchJson.navigations();
         const navigations: string[] = jsonResponse["navigations"];
@@ -200,7 +198,7 @@ submitButton.addEventListener("click", async (): Promise<void> => {
     }
 
     try {
-        await window.sqlInsert.vehicleAttributes(vehicleAttributes);
+        await window.sqlInsert.vehicleAttributes({ vehicleAttributes: vehicleAttributes });
     } catch (error: unknown) {
         console.error("Failed to insert VehicleAttributes: ", error);
     }
