@@ -21,8 +21,9 @@ export interface openWindow {
 }
 
 export interface fetchJson {
-    carCatalog: () => Promise<CarCatalog>;
-    navigations: () => Promise<Navigations>;
+    carCatalog: () => Promise<CarCatalog | unknown>;
+    navigations: () => Promise<Navigations | unknown>;
+    carLocation: () => Promise<CarLocation | unknown>;
 }
 
 export interface sqlSelect {
@@ -33,7 +34,7 @@ export interface sqlSelect {
     carModels: (args: { selectedSmoking: string, selectedRentalClass: string }) => Promise<string[]>;
     licensePlates: (args: { selectedSmoking: string, selectedCarModel: string }) => Promise<LicensePlatesData>;
     reservationData: (args: { startDate: Date, endDate: Date }) => Promise<>;
-    reservationDataById: (args: { reservationId: string }) => Promise<ReservationData>;
+    reservationDataById: (args: { reservationId: number }) => Promise<ReservationData>;
 }
 
 export interface sqlInsert {
@@ -50,7 +51,7 @@ export interface contextmenu {
     scheduleBar: (reservationId: number) => Promise<void>;
     vehicleAttributesItem: (vehicleId: number) => Promise<void>;
     scheduleCell: (vehicleId: number) => Promise<void>;
-    getReservationId: (callback) => void;
+    getReservationId: () => Promise<number>;
     getVehicleId: () => Promise<number>;
     updateReservationData: (callback: () => void) => void;
     updateVehicleAttributes: (callback: () => void) => void;

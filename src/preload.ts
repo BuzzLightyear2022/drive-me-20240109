@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { CarCatalog, VehicleAttributes, Navigations, LicensePlatesData, ReservationData } from "./@types/types";
+import { CarCatalog, VehicleAttributes, Navigations, LicensePlatesData, ReservationData, CarLocation } from "./@types/types";
 import { generateUniqueId } from "./renderer_process/common_modules.mjs";
 
 const wsReservationUpdateListeners: any[] = [];
@@ -34,8 +34,11 @@ contextBridge.exposeInMainWorld(
         carCatalog: async (): Promise<CarCatalog> => {
             return await ipcRenderer.invoke("fetchJson:carCatalog");
         },
-        navigations: async (accessToken: string): Promise<Navigations> => {
+        navigations: async (): Promise<Navigations> => {
             return await ipcRenderer.invoke("fetchJson:navigations");
+        },
+        carLocation: async (): Promise<CarLocation | unknown> => {
+            return await ipcRenderer.invoke("fetchJson:carLocation");
         }
     }
 );
@@ -79,7 +82,7 @@ contextBridge.exposeInMainWorld(
         reservationData: async (args: { startDate: Date, endDate: Date }) => {
             return await ipcRenderer.invoke("sqlSelect:reservationData/filterByDateRange", args);
         },
-        reservationDataById: async (args: { reservationId: string }) => {
+        reservationDataById: async (args: { reservationId: number }) => {
             return await ipcRenderer.invoke("sqlSelect:reservationDataById", args);
         },
         vehicleAttributesById: async (vehicleId: string) => {
@@ -124,7 +127,17 @@ contextBridge.exposeInMainWorld(
         scheduleCell: async (vehicleId: number) => {
             ipcRenderer.send("contextmenu:schedule-cell", vehicleId)
         },
-        getReservationId: (callback: (reservationId: string) => void) => ipcRenderer.on("contextmenu:getReservationId", (event: Electron.IpcRendererEvent, reservationId: string) => callback(reservationId)),
+        getReservationId: async () => {
+            return new Promise((resolve, reject) => {
+                ipcRenderer.on("contextmenu:getReservationId", (event: Electron.IpcRendererEvent, reservationId: number) => {
+                    if (reservationId) {
+                        resolve(reservationId);
+                    } else {
+                        resolve(null);
+                    }
+                });
+            });
+        },
         getVehicleId: async () => {
             return new Promise((resolve, reject) => {
                 ipcRenderer.on("contextmenu:getVehicleId", (event: Electron.IpcRendererEvent, vehicleId: number) => {

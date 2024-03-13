@@ -16,7 +16,8 @@ export class WindowHandler {
         displayReservationWindow: undefined,
         editReservationWindow: undefined,
         editVehicleAttributesWindow: undefined,
-        editCarCatalogWindow: undefined
+        editCarCatalogWindow: undefined,
+        insertVehicleStatusWindow: undefined
     }
 
     static createLoginWindow = () => {
@@ -74,7 +75,7 @@ export class WindowHandler {
                 },
             });
 
-            win.webContents.openDevTools();
+            // win.webContents.openDevTools();
 
             win.webContents.on("dom-ready", () => {
                 win.webContents.send("accessToken", accessToken);
@@ -96,7 +97,7 @@ export class WindowHandler {
         }
     }
 
-    static createInsertReservationWindow = (vehicleId: number): void => {
+    static createInsertReservationWindow = (vehicleId?: number): void => {
         const win: BrowserWindow = new BrowserWindow({
             width: 1000,
             height: 800,
@@ -105,7 +106,7 @@ export class WindowHandler {
             },
         });
 
-        win.webContents.openDevTools();
+        // win.webContents.openDevTools();
 
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
             win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/insert_reservation.html`);
@@ -132,6 +133,8 @@ export class WindowHandler {
                 },
             });
 
+            win.webContents.openDevTools();
+
             if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
                 win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_reservation.html`);
                 WindowHandler.windows.editReservationWindow = win;
@@ -140,8 +143,8 @@ export class WindowHandler {
                 WindowHandler.windows.editReservationWindow = win;
             }
 
-            WindowHandler.windows.editReservationWindow.webContents.on("dom-ready", () => {
-                WindowHandler.windows.editReservationWindow.webContents.send("contextMenu:getReservationId", reservationId);
+            win.webContents.on("dom-ready", () => {
+                win.webContents.send("contextmenu:getReservationId", reservationId);
             });
 
             win.on("closed", () => {
@@ -159,30 +162,12 @@ export class WindowHandler {
             },
         });
 
-        win.webContents.openDevTools();
+        // win.webContents.openDevTools();
 
         ContextmenuHandler.displayMenubarMenu();
         ContextmenuHandler.displayScheduleCellMenu();
+        ContextmenuHandler.displayScheduleBarMenu();
         ContextmenuHandler.displayVehicleItemMenu();
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ipcMain.on("contextMenu:schedule-bar", (event: Electron.IpcMainEvent, reservationId: string) => {
-            const contextMenu = Menu.buildFromTemplate([
-                {
-                    label: "変更",
-                    click: async () => {
-                        WindowHandler.createEditReservationWindow(reservationId);
-                    }
-                },
-                {
-                    label: "キャンセル",
-                    click: () => {
-                        // console.log("cancel", reservationId);
-                    }
-                }
-            ]);
-            contextMenu.popup(WindowHandler.windows.displayReservationWindow);
-        });
 
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
             win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/display_reservation.html`);
@@ -207,7 +192,7 @@ export class WindowHandler {
                 }
             });
 
-            win.webContents.openDevTools();
+            // win.webContents.openDevTools();
 
             if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
                 win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_vehicleAttributes.html`);
@@ -234,7 +219,7 @@ export class WindowHandler {
                 height: 800,
                 webPreferences: {
                     preload: WindowHandler.preloadScript
-                },
+                }
             });
 
             win.on("closed", () => {
@@ -247,6 +232,38 @@ export class WindowHandler {
             } else {
                 win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_carCatalog.html`));
                 WindowHandler.windows.editCarCatalogWindow = win;
+            }
+        }
+    }
+
+    static createInsertVehicleStatusWindow = (vehicleId: number) => {
+        if (!WindowHandler.windows.insertVehicleStatusWindow) {
+            const win: BrowserWindow = new BrowserWindow({
+                width: 800,
+                height: 600,
+                webPreferences: {
+                    preload: WindowHandler.preloadScript
+                }
+            });
+
+            win.webContents.openDevTools();
+
+            win.menuBarVisible = false;
+
+            win.webContents.on("dom-ready", () => {
+                win.webContents.send("contextmenu:getVehicleId", vehicleId);
+            });
+
+            win.on("closed", () => {
+                WindowHandler.windows.insertVehicleStatusWindow = undefined;
+            });
+
+            if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+                win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/insert_vehicle_status.html`);
+                WindowHandler.windows.insertVehicleStatusWindow = win;
+            } else {
+                win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/insert_vehicle_status.html`));
+                WindowHandler.windows.insertVehicleStatusWindow = win;
             }
         }
     }

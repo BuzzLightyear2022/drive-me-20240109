@@ -1,3 +1,4 @@
+import { loadImage } from "../common_modules.mjs";
 import { VehicleAttributes } from "../../@types/types";
 import NoImagePng from "../../assets/NoImage.png";
 
@@ -46,29 +47,14 @@ export const VehicleItem = class {
                 return imageDiv;
             }
 
-            const ImgElement = (): HTMLImageElement => {
-                const imgElement: HTMLImageElement = new Image();
-                Object.assign(imgElement.style, {
-                    objectFit: "contain",
-                    width: "130px",
-                    height: "130px",
-                });
-
-                imgElement.onerror = () => {
-                    imgElement.src = NoImagePng;
-                }
-
-                if (fileName) {
-                    imgElement.src = `http://${serverHost}:${port}/${imageDirectory}/${fileName}`;
-                    return imgElement;
-                } else {
-                    imgElement.src = NoImagePng;
-                    return imgElement;
-                }
-            }
+            const ImgElement = await loadImage({
+                fileName: fileName,
+                width: 130,
+                height: 130
+            });
 
             const imageDiv: HTMLDivElement = ImageDiv();
-            const imgElement: HTMLImageElement = ImgElement();
+            const imgElement: HTMLImageElement = ImgElement;
 
             imgElement.addEventListener("dragstart", (event: MouseEvent) => {
                 event.preventDefault();

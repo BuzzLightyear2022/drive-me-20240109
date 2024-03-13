@@ -1,5 +1,6 @@
 import { appendOptions } from "./common_modules.mjs";
 import { ReservationData, LicensePlatesData, VehicleAttributes } from "../@types/types";
+import { getRadioValue, setRadioValue } from "./common_modules.mjs";
 
 const reservationName: HTMLInputElement = document.querySelector("#reservation-name");
 const rentalCategoryRadios: NodeListOf<HTMLInputElement> = document.getElementsByName("rental-category") as NodeListOf<HTMLInputElement>;
@@ -14,27 +15,6 @@ const licensePlateSelect: HTMLSelectElement = document.querySelector("#license-p
 const commentTextarea: HTMLTextAreaElement = document.querySelector("#comment-textarea") as HTMLTextAreaElement;
 
 const submitButton: HTMLButtonElement = document.querySelector("#submit-button") as HTMLButtonElement;
-
-const setRadioValue = (args: { radios: NodeListOf<HTMLInputElement>, checkedValue: string }) => {
-    const { radios, checkedValue } = args;
-    for (let i = 0; i < radios.length; i++) {
-        if (radios[i].value === checkedValue) {
-            radios[i].checked = true;
-        }
-    }
-}
-
-const getRadioValue = (args: { radios: NodeListOf<HTMLInputElement>, defaultValue: string }): string => {
-    const { radios, defaultValue } = args;
-
-    let selectedValue: string = defaultValue;
-    radios.forEach((radio: HTMLInputElement): void => {
-        if (radio.checked) {
-            selectedValue = radio.value;
-        }
-    });
-    return selectedValue;
-}
 
 const setRentalClassSelectValue = async () => {
     const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-spacification" });
@@ -57,16 +37,18 @@ const setLicensePlateSelectValue = async () => {
     const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-spacification" });
     const selectedCarModel: string = carModelSelect.value;
     const licensePlatesData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
-    const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }): string => {
+    const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }): string => {
         return licensePlateData.licensePlate;
     });
-    const idsArray: string[] = licensePlatesData.map((licensePlateData: { id: string, licensePlate: string }) => {
+    const idsArray: number[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }) => {
         return licensePlateData.id;
     });
     appendOptions({ selectbox: licensePlateSelect, options: licensePlatesArray, values: idsArray });
 }
 
-window.contextMenu.getReservationId(async (reservationId: string) => {
+(async () => {
+    const reservationId: number = await window.contextmenu.getReservationId();
+
     const reservationData: ReservationData = await window.sqlSelect.reservationDataById({ reservationId: reservationId });
     const vehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: reservationData.vehicleId });
 
@@ -88,7 +70,7 @@ window.contextMenu.getReservationId(async (reservationId: string) => {
     await setCarModelSelectValue();
     carModelSelect.value = vehicleAttributes.carModel;
     await setLicensePlateSelectValue();
-    licensePlateSelect.value = vehicleAttributes.id;
+    licensePlateSelect.value = String(vehicleAttributes.id);
 
     commentTextarea.value = reservationData.comment;
 
@@ -100,7 +82,7 @@ window.contextMenu.getReservationId(async (reservationId: string) => {
 
         const postReservationData: ReservationData = {
             id: reservationData.id,
-            vehicleId: licensePlateSelect.value,
+            vehicleId: Number(licensePlateSelect.value),
             reservationName: reservationName.value,
             rentalCategory: selectedRentalCategory,
             pickupLocation: pickupLocationSelect.value,
@@ -108,7 +90,8 @@ window.contextMenu.getReservationId(async (reservationId: string) => {
             pickupDateObject: selectedDepartureDatetime,
             returnDateObject: selectedReturnDatetime,
             nonSmoking: selectedSmoking,
-            comment: commentTextarea.value
+            comment: commentTextarea.value,
+            isCanceled: false
         }
 
         try {
@@ -117,7 +100,7 @@ window.contextMenu.getReservationId(async (reservationId: string) => {
             console.error(`Failed to invoke reservationData: ${error}`);
         }
     }, false);
-});
+})();
 
 nonSmokingRadios.forEach((nonSmokingRadio: HTMLInputElement) => {
     nonSmokingRadio.addEventListener("change", async () => {

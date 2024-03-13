@@ -1,3 +1,5 @@
+import NoImagePng from "../assets/NoImage.png";
+
 export const appendOptions = (
     args: {
         selectbox: HTMLSelectElement,
@@ -82,4 +84,52 @@ export const replaceFullWidthNumToHalfWidthNum = (args: { element: HTMLInputElem
 export const generateUniqueId = (): number => {
     const randomNumStr: string = Math.random().toString(36).substring(2, 9);
     return parseInt(randomNumStr, 36);
+}
+
+export const getRadioValue = (args: { radios: NodeListOf<HTMLInputElement>, defaultValue: string }): string => {
+    const { radios, defaultValue } = args;
+
+    let selectedValue: string = defaultValue;
+    radios.forEach((radio: HTMLInputElement): void => {
+        if (radio.checked) {
+            selectedValue = radio.value;
+        }
+    });
+    return selectedValue;
+}
+
+export const setRadioValue = (args: { radios: NodeListOf<HTMLInputElement>, checkedValue: string }) => {
+    const { radios, checkedValue } = args;
+    for (let i = 0; i < radios.length; i++) {
+        if (radios[i].value === checkedValue) {
+            radios[i].checked = true;
+        }
+    }
+}
+
+export const loadImage = async (args: { fileName: string, width: number, height: number }): Promise<HTMLImageElement> => {
+    const { fileName, width, height } = args;
+
+    const serverHost: string = await window.serverInfo.serverHost();
+    const serverPort: string = await window.serverInfo.port();
+    const imageDirectory: string = await window.serverInfo.imageDirectory();
+
+    const imgElement: HTMLImageElement = new Image();
+    Object.assign(imgElement.style, {
+        objectFit: "contain",
+        width: `${width}px`,
+        height: `${height}px`
+    });
+
+    imgElement.onerror = () => {
+        imgElement.src = NoImagePng;
+    };
+
+    if (fileName) {
+        imgElement.src = `https://${serverHost}:${serverPort}/${imageDirectory}/${fileName}`;
+        return imgElement;
+    } else {
+        imgElement.src = NoImagePng;
+        return imgElement;
+    }
 }

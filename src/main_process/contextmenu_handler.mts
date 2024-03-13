@@ -14,7 +14,11 @@ export class ContextmenuHandler {
                 label: "予約管理",
                 submenu: [
                     {
-                        label: "予約変更"
+                        label: "新規予約",
+                        click: () => WindowHandler.createInsertReservationWindow()
+                    },
+                    {
+                        label: "予約一覧"
                     },
                     {
                         label: "シミュレーションモード"
@@ -25,10 +29,11 @@ export class ContextmenuHandler {
                 label: "車両管理",
                 submenu: [
                     {
+                        label: "車両一覧"
+                    },
+                    {
                         label: "車両新規登録",
-                        click: async () => {
-                            WindowHandler.createInsertVehicleAttributesWindow();
-                        }
+                        click: () => WindowHandler.createInsertVehicleAttributesWindow()
                     }
                 ]
             },
@@ -61,7 +66,7 @@ export class ContextmenuHandler {
                 {
                     label: "ステータス",
                     click: async () => {
-
+                        WindowHandler.createInsertVehicleStatusWindow(vehicleId);
                     }
                 }
             ]);
@@ -70,9 +75,33 @@ export class ContextmenuHandler {
         });
     }
 
+    static displayScheduleBarMenu = () => {
+        ipcMain.on("contextmenu:schedule-bar", (event: Electron.IpcMainEvent, reservationId: string) => {
+            const contextMenu = Menu.buildFromTemplate([
+                {
+                    label: "予約変更",
+                    click: async () => WindowHandler.createEditReservationWindow(reservationId)
+                },
+                {
+                    label: "キャンセル",
+                    click: () => {
+                        // console.log("cancel", reservationId);
+                    }
+                }
+            ]);
+            contextMenu.popup(WindowHandler.windows.displayReservationWindow);
+        });
+    }
+
     static displayVehicleItemMenu = () => {
         ipcMain.on("contextmenu:vehicleAttributesItem", (event: Electron.IpcMainEvent, vehicleId: number) => {
             const menuTemplate = Menu.buildFromTemplate([
+                {
+                    label: "ステータス",
+                    click: async () => {
+                        WindowHandler.createInsertVehicleStatusWindow(vehicleId);
+                    }
+                },
                 {
                     label: "車両情報更新",
                     click: async () => {

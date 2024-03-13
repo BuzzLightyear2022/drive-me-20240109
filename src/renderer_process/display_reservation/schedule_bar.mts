@@ -209,8 +209,9 @@ export const ScheduleBar = class {
         this.scheduleBarElement.addEventListener("contextmenu", this.displayContextmenu, false);
     }
 
-    displayContextmenu = () => {
-        window.contextMenu.scheduleBar(this.reservationData.id);
+    displayContextmenu = (event: Event) => {
+        window.contextmenu.scheduleBar(this.reservationData.id);
+        event.stopPropagation();
     }
 
     ModalBackgroundDiv = (): HTMLDivElement => {

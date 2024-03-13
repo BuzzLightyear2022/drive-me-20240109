@@ -6,7 +6,8 @@ export type Windows = {
     displayReservationWindow: BrowserWindow,
     editReservationWindow: BrowserWindow,
     editVehicleAttributesWindow: BrowserWindow,
-    editCarCatalogWindow: BrowserWindow
+    editCarCatalogWindow: BrowserWindow,
+    insertVehicleStatusWindow: BrowserWindow
 }
 
 export type CarCatalog = {
@@ -63,7 +64,8 @@ export type ReservationData = {
     pickupDateObject: Date,
     returnDateObject: Date,
     nonSmoking: string,
-    comment?: string
+    comment?: string,
+    isCanceled: boolean
 }
 
 export type LicensePlatesData = Array<{
@@ -91,4 +93,8 @@ export type ScheduleBarInfo = {
 export type IntersectObject = {
     observer: IntersectionObserver;
     divElement: HTMLDivElement;
+}
+
+export type CarLocation = {
+    location: string[];
 }
