@@ -174,3 +174,20 @@ const imageDirectory: string = import.meta.env.VITE_IMAGE_DIRECTORY;
         }
     });
 })();
+
+(async () => {
+    ipcMain.handle("sqlSelect:latestVehicleStatuses", async (event: Electron.IpcMainInvokeEvent, args: { rentalClass?: string }) => {
+        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleStatuses/latest`;
+        try {
+            const response: AxiosResponse = await axios.post(serverEndPoint, args, {
+                headers: {
+                    "Authorization": accessToken
+                },
+                withCredentials: true
+            });
+            return response.data;
+        } catch (error: unknown) {
+            return error;
+        }
+    });
+})();

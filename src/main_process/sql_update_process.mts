@@ -55,6 +55,9 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
         postData.append("data", JSON.stringify(textData));
 
         try {
+            WindowHandler.windows.editVehicleAttributesWindow.close();
+            WindowHandler.windows.editVehicleAttributesWindow = undefined;
+
             const response: AxiosResponse = await axios.post(serverEndPoint, postData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
@@ -64,12 +67,9 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
                 withCredentials: true
             });
 
-            WindowHandler.windows.editVehicleAttributesWindow.close();
-            WindowHandler.windows.editVehicleAttributesWindow = undefined;
-
             return response.status;
         } catch (error: unknown) {
-            return "Failed to send vehicleAttributes data: " + error;
+            console.log("Failed to send vehicleAttributes data: " + error);
         }
     });
 })();

@@ -33,8 +33,6 @@ export const ScheduleContainer = class {
         VehicleItem.instances.forEach(async (instance) => {
             const vehicleItem: HTMLDivElement = instance.vehicleItem;
 
-            const vehicleItemHeight: number = vehicleItem.getBoundingClientRect().height;
-
             const scheduleCellInstance: ScheduleCellType = new ScheduleCell(instance);
             scheduleCellInstance.daysContainer = this.daysContainer;
             await scheduleCellInstance.createScheduleCell();

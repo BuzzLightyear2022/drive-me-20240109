@@ -1,4 +1,5 @@
-import { CarCatalog, LicensePlatesData, ReservationData, Navigations, VehicleAttributes, VehicleAttributesArray } from "../types";
+import { CarCatalog, LicensePlatesData, ReservationData, Navigations, VehicleAttributes, VehicleAttributesArray, VehicleStatus } from "../types";
+import { VehicleStatus } from "./types";
 
 export interface serverInfo {
     serverHost: () => Promise<string>;
@@ -35,11 +36,13 @@ export interface sqlSelect {
     licensePlates: (args: { selectedSmoking: string, selectedCarModel: string }) => Promise<LicensePlatesData>;
     reservationData: (args: { startDate: Date, endDate: Date }) => Promise<>;
     reservationDataById: (args: { reservationId: number }) => Promise<ReservationData>;
+    latestVehicleStatuses: (args: { rentalClass?: string }) => Promise<any>;
 }
 
 export interface sqlInsert {
     vehicleAttributes: (args: { vehicleAttributes: VehicleAttributes }) => Promise<string>;
-    reservationData: (reservationData: ReservationData) => Promise<string>
+    reservationData: (reservationData: ReservationData) => Promise<string>;
+    vehicleStatus: (args: { vehicleStatus: VehicleStatus }) => Promise<void>;
 }
 
 export interface sqlUpdate {

@@ -1,5 +1,13 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { CarCatalog, VehicleAttributes, Navigations, LicensePlatesData, ReservationData, CarLocation } from "./@types/types";
+import {
+    CarCatalog,
+    VehicleAttributes,
+    Navigations,
+    LicensePlatesData,
+    ReservationData,
+    CarLocation,
+    VehicleStatus
+} from "./@types/types";
 import { generateUniqueId } from "./renderer_process/common_modules.mjs";
 
 const wsReservationUpdateListeners: any[] = [];
@@ -87,6 +95,9 @@ contextBridge.exposeInMainWorld(
         },
         vehicleAttributesById: async (vehicleId: string) => {
             return await ipcRenderer.invoke("sqlSelect:vehicleAttributesById", vehicleId);
+        },
+        latestVehicleStatuses: async (args: { rentalClass: string }) => {
+            return await ipcRenderer.invoke("sqlSelect:latestVehicleStatuses", args);
         }
     }
 );
@@ -99,6 +110,9 @@ contextBridge.exposeInMainWorld(
         },
         reservationData: async (reservationData: ReservationData): Promise<string> => {
             return await ipcRenderer.invoke("sqlInsert:reservationData", reservationData);
+        },
+        vehicleStatus: async (args: { vehicleStatus: VehicleStatus }) => {
+            return await ipcRenderer.invoke("sqlInsert:vehicleStatus", args);
         }
     }
 );

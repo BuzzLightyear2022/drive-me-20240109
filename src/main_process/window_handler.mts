@@ -162,7 +162,7 @@ export class WindowHandler {
             },
         });
 
-        // win.webContents.openDevTools();
+        win.webContents.openDevTools();
 
         ContextmenuHandler.displayMenubarMenu();
         ContextmenuHandler.displayScheduleCellMenu();

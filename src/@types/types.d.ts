@@ -1,3 +1,5 @@
+import { Datetime } from "aws-sdk/clients/costoptimizationhub"
+
 export type Windows = {
     loginWindow: BrowserWindow,
     menuWindow: BrowserWindow,
@@ -97,4 +99,14 @@ export type IntersectObject = {
 
 export type CarLocation = {
     location: string[];
+}
+
+export type VehicleStatus = {
+    id?: number,
+    vehicleId: number,
+    currentLocation: string,
+    washState: string,
+    comment: string,
+    createdAt: Datetime,
+    updatedAt: Datetime
 }

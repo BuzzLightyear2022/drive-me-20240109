@@ -107,7 +107,7 @@ export const setRadioValue = (args: { radios: NodeListOf<HTMLInputElement>, chec
     }
 }
 
-export const loadImage = async (args: { fileName: string, width: number, height: number }): Promise<HTMLImageElement> => {
+export const loadImage = async (args: { fileName: string, width: string, height: string }): Promise<HTMLImageElement> => {
     const { fileName, width, height } = args;
 
     const serverHost: string = await window.serverInfo.serverHost();
@@ -117,9 +117,13 @@ export const loadImage = async (args: { fileName: string, width: number, height:
     const imgElement: HTMLImageElement = new Image();
     Object.assign(imgElement.style, {
         objectFit: "contain",
-        width: `${width}px`,
-        height: `${height}px`
+        width: width,
+        height: height
     });
+
+    imgElement.addEventListener("dragstart", (event: MouseEvent) => {
+        event.preventDefault();
+    }, false);
 
     imgElement.onerror = () => {
         imgElement.src = NoImagePng;

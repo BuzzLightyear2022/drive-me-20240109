@@ -1,9 +1,11 @@
-import { VehicleAttributes } from "../../@types/types";
+import { VehicleAttributes, VehicleStatus } from "../../@types/types";
 import { VehicleItem, VehicleItemType } from "./vehicle_item.mjs";
 import { DaysContainer, DaysContainerType, Calendar } from "./days_container.mjs";
 import { ScheduleContainer, ScheduleContainerType } from "./schedule_container.mjs";
 import { ScheduleBarType } from "./schedule_bar.mjs";
+import { ScheduleCell, ScheduleCellType } from "./schedule_cell.mjs";
 
+const windowContainer = document.querySelector("#window-container");
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class-select");
 const previousMonthButton: HTMLDivElement = document.querySelector("#previous-month-button");
 const nextMonthButton: HTMLDivElement = document.querySelector("#next-month-button");
@@ -23,22 +25,16 @@ const appendVehicleItems = async (vehicleAttributesArray?: VehicleAttributes[]) 
     VehicleItem.instances.length = 0;
 
     if (vehicleAttributesArray) {
-        const promises = vehicleAttributesArray.map(async (vehicleAttributes) => {
+        vehicleAttributesArray.map(async (vehicleAttributes) => {
             const vehicleItemInstance: VehicleItemType = new VehicleItem(vehicleAttributes);
             vehicleItemInstance.createVehicleItem();
 
             const vehicleItem: HTMLDivElement = vehicleItemInstance.vehicleItem;
             vehicleItemsContainer.append(vehicleItem);
-
-            await new Promise(requestAnimationFrame);
-
-            return Promise.resolve();
         });
-
-        await Promise.all(promises);
     }
 
-    await new Promise((resolve: any): any => setTimeout(resolve, 100));
+    await new Promise((resolve) => { setTimeout(resolve, 100) });
 }
 
 const appendScheduleContainers = (
@@ -60,6 +56,104 @@ const appendScheduleContainers = (
 
     scheduleContainer.append(previousScheduleContainer, currentScheduleContainer, nextScheduleContainer);
 }
+
+const vehicleStatusHandler = async () => {
+    const vehicleStatusDivs = document.querySelectorAll(".vehicle-status");
+    vehicleStatusDivs.forEach((div: HTMLDivElement) => {
+        if (div) {
+            scheduleContainer.removeChild(div);
+        }
+    });
+
+    const vehicleStatuses: VehicleStatus[] = await window.sqlSelect.latestVehicleStatuses({});
+    const scheduleContainerWidth: number = scheduleContainer.getBoundingClientRect().width;
+
+    const vehicleItemDivs = document.querySelectorAll(".vehicle-item");
+    vehicleItemDivs.forEach((vehicleItem) => {
+        const vehicleItemId: number = Number(vehicleItem.getAttribute("data-vehicle-id"));
+        const vehicleItemRect: DOMRect = vehicleItem.getBoundingClientRect();
+        const vehicleItemTop: number = vehicleItemRect.top;
+        const vehicleItemWidth: number = vehicleItemRect.width;
+        const vehicleItemHeight: number = vehicleItemRect.height;
+        vehicleStatuses.forEach((vehicleStatus) => {
+            if (vehicleStatus.vehicleId === vehicleItemId) {
+                const vehicleStatusDiv: HTMLDivElement = document.createElement("div");
+                vehicleStatusDiv.className = "vehicle-status";
+                vehicleStatusDiv.setAttribute("data-vehicle-id", String(vehicleStatus.vehicleId));
+
+                let currentLocation: string;
+                switch (vehicleStatus.currentLocation) {
+                    case "本店":
+                        currentLocation = "本";
+                        break;
+                    case "空港店":
+                        currentLocation = "空";
+                        break;
+                    case "駅前店":
+                        currentLocation = "駅";
+                        break;
+                    default:
+                        currentLocation = vehicleStatus.currentLocation;
+                }
+
+                let washState: string;
+                switch (vehicleStatus.washState) {
+                    case "洗車済み":
+                        washState = "";
+                        break;
+                    case "未洗車":
+                        washState = "×";
+                        break;
+                    default:
+                        washState = vehicleStatus.washState;
+                }
+
+                vehicleStatusDiv.textContent = `${currentLocation}${washState}`;
+                scheduleContainer.append(vehicleStatusDiv);
+
+                const vehicleStatusDivWidth: number = vehicleStatusDiv.getBoundingClientRect().width;
+
+                Object.assign(vehicleStatusDiv.style, {
+                    display: "flex",
+                    position: "fixed",
+                    top: `${vehicleItemTop + (vehicleItemHeight / 2)}px`,
+                    left: `${(scheduleContainerWidth / 2) + vehicleItemWidth - (vehicleStatusDivWidth / 2)}px`,
+                    fontSize: "250%",
+                });
+            }
+        });
+    });
+}
+
+const handleVehicleStatusPosition = () => {
+    const scheduleContainerWidth = scheduleContainer.getBoundingClientRect().width;
+    const currentVehicleStatusDivs = document.querySelectorAll(".vehicle-status");
+    const currentVehicleItems = document.querySelectorAll(".vehicle-item");
+
+    currentVehicleItems.forEach((vehicleItem) => {
+        const vehicleItemId: number = Number(vehicleItem.getAttribute("data-vehicle-id"));
+        currentVehicleStatusDivs.forEach((statusDiv: HTMLDivElement) => {
+            const statusId: number = Number(statusDiv.getAttribute("data-vehicle-id"));
+            const vehicleStatusDivWidth: number = statusDiv.getBoundingClientRect().width;
+            if (vehicleItemId === statusId) {
+                const vehicleItemRect: DOMRect = vehicleItem.getBoundingClientRect();
+                const vehicleItemTop: number = vehicleItemRect.top;
+                const vehicleItemWidth: number = vehicleItemRect.width;
+                const vehicleItemHeight: number = vehicleItemRect.height;
+                Object.assign(statusDiv.style, {
+                    display: "flex",
+                    position: "fixed",
+                    top: `${vehicleItemTop + (vehicleItemHeight / 2)}px`,
+                    left: `${(scheduleContainerWidth / 2) + vehicleItemWidth - (vehicleStatusDivWidth / 2)}px`,
+                });
+            }
+        });
+    });
+}
+
+scheduleContainer.addEventListener("scroll", handleVehicleStatusPosition, false);
+
+window.addEventListener("resize", handleVehicleStatusPosition, false);
 
 const calendarInitializer = async () => {
     const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass({ rentalClass: rentalClassSelect.value });
@@ -108,6 +202,8 @@ const calendarInitializer = async () => {
     );
 
     handleInitialScrollPosition();
+
+    vehicleStatusHandler();
 }
 
 const calendarUpdater = async () => {
@@ -163,6 +259,8 @@ const calendarUpdater = async () => {
     nextMonthScheduleContainer.append(nextScheduleContainer);
 
     scheduleContainer.scrollLeft = currentScrollPositionX;
+
+    vehicleStatusHandler();
 }
 
 const handleDaysContainerScroll = (): void => {

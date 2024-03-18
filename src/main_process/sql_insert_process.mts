@@ -1,7 +1,7 @@
 import { ipcMain } from "electron";
 import axios, { AxiosResponse } from "axios";
 import FormData from "form-data";
-import { VehicleAttributes, ReservationData } from "../@types/types";
+import { VehicleAttributes, ReservationData, VehicleStatus } from "../@types/types";
 import { makeImageFileName } from "./common_modules.mjs";
 import { accessToken } from "./login_process.mjs";
 import { WindowHandler } from "./window_handler.mjs";
@@ -90,11 +90,32 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
             });
 
             WindowHandler.windows.insertReservationWindow.close();
-            WindowHandler.windows.insertReservationWindow = undefined;
 
             return response.status;
         } catch (error: unknown) {
             return `Failed to send reservation data: ${error}`;
+        }
+    });
+})();
+
+(async () => {
+    ipcMain.handle("sqlInsert:vehicleStatus", async (event: Electron.IpcMainEvent, args: { vehicleStatus: VehicleStatus }) => {
+        const serverEndPoint = `https://${serverHost}:${port}/sqlInsert/vehicleStatus`;
+
+        try {
+            WindowHandler.windows.insertVehicleStatusWindow.close();
+
+            const response: AxiosResponse = await axios.post(serverEndPoint, args, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": accessToken
+                },
+                withCredentials: true
+            });
+
+            return response.status;
+        } catch (error: unknown) {
+            console.error(error);
         }
     });
 })()

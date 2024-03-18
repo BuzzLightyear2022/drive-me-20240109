@@ -1,5 +1,5 @@
 import { CarCatalog, VehicleAttributes, Navigations } from "../@types/types";
-import { appendOptions, replaceFullWidthNumToHalfWidthNum } from "./common_modules.mjs";
+import { appendOptions, replaceFullWidthNumToHalfWidthNum, loadImage } from "./common_modules.mjs";
 import NoImagePng from "../assets/NoImage.png";
 import squareAndArrowUpCircleFill from "../assets/square.and.arrow.up.circle.fill@2x.png";
 
@@ -94,33 +94,12 @@ replaceFullWidthNumToHalfWidthNum({ element: JAFCardNumberInput, limitDigits: 3 
 
     const currentImageUrl = `http://${serverHost}:${port}/${imageDirectory}/${currentVehicleAttributes.imageFileName}`;
 
-    const ImageElm = () => {
-        const imageElm: HTMLImageElement = new Image();
-        Object.assign(imageElm.style, {
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            userSelect: "none"
-        });
+    const imageElm = await loadImage({
+        fileName: currentVehicleAttributes.imageFileName,
+        width: "100%",
+        height: "100%"
+    });
 
-        imageElm.addEventListener("dragstart", (event: Event) => {
-            event.preventDefault();
-        }, false);
-
-        if (currentVehicleAttributes.imageFileName) {
-            imageElm.src = currentImageUrl;
-        } else {
-            imageElm.src = NoImagePng;
-        }
-
-        imageElm.onerror = () => {
-            imageElm.src = NoImagePng;
-        }
-
-        return imageElm;
-    }
-
-    const imageElm: HTMLImageElement = ImageElm();
     imagePreviewContainer.append(imageElm);
 
     const rentalClasses: string[] = Object.keys(carCatalog.rentalClass);

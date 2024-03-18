@@ -1,6 +1,5 @@
 import { loadImage } from "../common_modules.mjs";
 import { VehicleAttributes } from "../../@types/types";
-import NoImagePng from "../../assets/NoImage.png";
 
 export type VehicleItemType = InstanceType<typeof VehicleItem>;
 
@@ -17,6 +16,8 @@ export const VehicleItem = class {
 
     createVehicleItem = async (): Promise<void> => {
         this.vehicleItem = document.createElement("div");
+        this.vehicleItem.className = "vehicle-item"
+        this.vehicleItem.setAttribute("data-vehicle-id", String(this.vehicleAttributes.id));
         Object.assign(this.vehicleItem.style, {
             display: "flex",
             flexDirection: "row",
@@ -33,10 +34,6 @@ export const VehicleItem = class {
         });
 
         const ImageDiv = async (fileName: string | null): Promise<HTMLDivElement> => {
-            const serverHost: string = await window.serverInfo.serverHost();
-            const port: string = await window.serverInfo.port();
-            const imageDirectory: string = await window.serverInfo.imageDirectory();
-
             const ImageDiv = (): HTMLDivElement => {
                 const imageDiv: HTMLDivElement = document.createElement("div");
                 Object.assign(imageDiv.style, {
@@ -49,8 +46,8 @@ export const VehicleItem = class {
 
             const ImgElement = await loadImage({
                 fileName: fileName,
-                width: 130,
-                height: 130
+                width: "150px",
+                height: "150px"
             });
 
             const imageDiv: HTMLDivElement = ImageDiv();
