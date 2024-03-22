@@ -12,6 +12,7 @@ import { generateUniqueId } from "./renderer_process/common_modules.mjs";
 
 const wsReservationUpdateListeners: any[] = [];
 const wsVehicleAttributesUpdateListeners: any[] = [];
+const wsVehicleStatusUpdateListeners: any[] = [];
 
 contextBridge.exposeInMainWorld(
     "serverInfo",
@@ -200,6 +201,25 @@ contextBridge.exposeInMainWorld(
             });
 
             wsVehicleAttributesUpdateListeners[eventId] = {
+                event: eventName,
+                listener: listener
+            }
+
+            return eventId;
+        },
+        updateVehicleStatus: (callback: () => void) => {
+            const eventId: number = generateUniqueId();
+            const eventName: string = "wssUpdate:vehicleStatus";
+
+            const listener = () => {
+                callback();
+            }
+
+            ipcRenderer.on(eventName, () => {
+                return callback();
+            });
+
+            wsVehicleStatusUpdateListeners[eventId] = {
                 event: eventName,
                 listener: listener
             }

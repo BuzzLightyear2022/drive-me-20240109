@@ -11,7 +11,8 @@ export default defineConfig({
                 edit_reservation_window: path.join(__dirname, "html", "edit_reservation.html"),
                 insert_reservation_window: path.join(__dirname, "html", "insert_reservation.html"),
                 insert_vehicleAttributes_window: path.join(__dirname, "html", "insert_vehicleAttributes.html"),
-                edit_vehicleAttributes_widnow: path.join(__dirname, "html", "edit_vehicleAttributes.html")
+                edit_vehicleAttributes_widnow: path.join(__dirname, "html", "edit_vehicleAttributes.html"),
+                insert_vehicle_status_window: path.join(__dirname, "html", "insert_vehicle_status.html")
             }
         }
     }

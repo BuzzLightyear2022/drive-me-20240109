@@ -3,9 +3,7 @@ import { VehicleItem, VehicleItemType } from "./vehicle_item.mjs";
 import { DaysContainer, DaysContainerType, Calendar } from "./days_container.mjs";
 import { ScheduleContainer, ScheduleContainerType } from "./schedule_container.mjs";
 import { ScheduleBarType } from "./schedule_bar.mjs";
-import { ScheduleCell, ScheduleCellType } from "./schedule_cell.mjs";
 
-const windowContainer = document.querySelector("#window-container");
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class-select");
 const previousMonthButton: HTMLDivElement = document.querySelector("#previous-month-button");
 const nextMonthButton: HTMLDivElement = document.querySelector("#next-month-button");
@@ -75,7 +73,7 @@ const vehicleStatusHandler = async () => {
         const vehicleItemTop: number = vehicleItemRect.top;
         const vehicleItemWidth: number = vehicleItemRect.width;
         const vehicleItemHeight: number = vehicleItemRect.height;
-        vehicleStatuses.forEach((vehicleStatus) => {
+        vehicleStatuses.forEach(async (vehicleStatus) => {
             if (vehicleStatus.vehicleId === vehicleItemId) {
                 const vehicleStatusDiv: HTMLDivElement = document.createElement("div");
                 vehicleStatusDiv.className = "vehicle-status";
@@ -119,7 +117,13 @@ const vehicleStatusHandler = async () => {
                     top: `${vehicleItemTop + (vehicleItemHeight / 2)}px`,
                     left: `${(scheduleContainerWidth / 2) + vehicleItemWidth - (vehicleStatusDivWidth / 2)}px`,
                     fontSize: "250%",
+                    cursor: "default",
+                    userSelect: "none"
                 });
+
+                vehicleStatusDiv.addEventListener("contextmenu", () => {
+                    window.contextmenu.scheduleCell(Number(vehicleItem.getAttribute("data-vehicle-id")));
+                }, false);
             }
         });
     });
@@ -141,19 +145,13 @@ const handleVehicleStatusPosition = () => {
                 const vehicleItemWidth: number = vehicleItemRect.width;
                 const vehicleItemHeight: number = vehicleItemRect.height;
                 Object.assign(statusDiv.style, {
-                    display: "flex",
-                    position: "fixed",
                     top: `${vehicleItemTop + (vehicleItemHeight / 2)}px`,
-                    left: `${(scheduleContainerWidth / 2) + vehicleItemWidth - (vehicleStatusDivWidth / 2)}px`,
+                    left: `${(scheduleContainerWidth / 2) + vehicleItemWidth - (vehicleStatusDivWidth / 2)}px`
                 });
             }
         });
     });
 }
-
-scheduleContainer.addEventListener("scroll", handleVehicleStatusPosition, false);
-
-window.addEventListener("resize", handleVehicleStatusPosition, false);
 
 const calendarInitializer = async () => {
     const vehicleAttributesArray: VehicleAttributes[] = await window.sqlSelect.vehicleAttributesByRentalClass({ rentalClass: rentalClassSelect.value });
@@ -218,9 +216,13 @@ const calendarUpdater = async () => {
         vehicleItemsContainer.removeChild(vehicleItemsContainer.firstChild);
     }
 
-    const previousMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[0].scheduleContainer.scheduleContainer;
-    const currentMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[1].scheduleContainer.scheduleContainer;
-    const nextMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[2].scheduleContainer.scheduleContainer;
+    const scheduleContainers = document.querySelectorAll(".schedule-container");
+    // const previousMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[0].scheduleContainer.scheduleContainer;
+    // const currentMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[1].scheduleContainer.scheduleContainer;
+    // const nextMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[2].scheduleContainer.scheduleContainer;
+    const previousMonthScheduleContainer = scheduleContainers[0];
+    const currentMonthScheduleContainer = scheduleContainers[1];
+    const nextMonthScheduleContainer = scheduleContainers[2];
 
     while (previousMonthScheduleContainer.firstChild) {
         previousMonthScheduleContainer.removeChild(previousMonthScheduleContainer.firstChild);
@@ -305,8 +307,11 @@ const handleAppendPreviousMonthCalendar = async () => {
     const newPreviousMonthScheduleContainer: HTMLDivElement = newPreviousScheduleContainerInstance.scheduleContainer;
     scheduleContainer.firstChild.before(newPreviousMonthScheduleContainer);
 
-    daysContainer.removeChild(daysContainer.lastChild);
-    scheduleContainer.removeChild(scheduleContainer.lastChild);
+    const daysContainers = document.querySelectorAll(".days-container");
+    console.log(daysContainers);
+    const scheduleContainers = document.querySelectorAll(".schedule-container");
+    daysContainer.removeChild(daysContainers[3]);
+    scheduleContainer.removeChild(scheduleContainers[3]);
 
     const removedElement: Calendar = DaysContainer.calendars.pop();
     const removedScheduleBars: ScheduleBarType[] = removedElement.scheduleContainer.scheduleBars;
@@ -333,8 +338,11 @@ const handleAppendNextMonthCalendar = async () => {
     const newNextScheduleContainer: HTMLDivElement = newNextScheduleContainerInstance.scheduleContainer;
     scheduleContainer.lastChild.after(newNextScheduleContainer);
 
-    daysContainer.removeChild(daysContainer.firstChild);
-    scheduleContainer.removeChild(scheduleContainer.firstChild);
+    const daysContainers = document.querySelectorAll(".days-container");
+    const scheduleContainers = document.querySelectorAll(".schedule-container");
+
+    daysContainer.removeChild(daysContainers[0]);
+    scheduleContainer.removeChild(scheduleContainers[0]);
 
     const removedElement: Calendar = DaysContainer.calendars.shift();
     const removedScheduleBars: ScheduleBarType[] = removedElement.scheduleContainer.scheduleBars;
@@ -376,6 +384,9 @@ vehicleItemsContainer.addEventListener("scroll", handleScheduleContainerScrollY,
 previousMonthButton.addEventListener("click", handleAppendPreviousMonthCalendar, false);
 nextMonthButton.addEventListener("click", handleAppendNextMonthCalendar, false);
 
+scheduleContainer.addEventListener("scroll", handleVehicleStatusPosition, false);
+window.addEventListener("resize", handleVehicleStatusPosition, false);
+
 window.webSocket.updateVehicleAttributes(async () => {
     const currentSelectedRentalClass: string = rentalClassSelect.value;
     const currentScrollPositionX: number = scheduleContainer.scrollLeft;
@@ -403,4 +414,8 @@ window.webSocket.updateVehicleAttributes(async () => {
 
     scheduleContainer.scrollLeft = currentScrollPositionX;
     scheduleContainer.scrollTop = currentScrollPositionY;
+});
+
+window.webSocket.updateVehicleStatus(async () => {
+    vehicleStatusHandler()
 });

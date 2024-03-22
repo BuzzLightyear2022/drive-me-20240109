@@ -63,6 +63,7 @@ export interface contextmenu {
 export interface webSocket {
     updateReservationData: (callback: () => void) => number;
     updateVehicleAttributes: (callback: () => void) => number;
+    updateVehicleStatus: (callback: () => void) => number;
 }
 
 export interface dialog {
@@ -72,6 +73,8 @@ export interface dialog {
 
 export interface removeEvent {
     wsUpdateReservationData: (eventId: number) => void;
+    wsUpdateVehicleAttributes: (eventId: number) => void;
+    wsUpdateVehicleStaus: (eventId: number) => void;
 }
 
 export interface accessToken {

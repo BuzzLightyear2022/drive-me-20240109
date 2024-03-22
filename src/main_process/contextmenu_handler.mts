@@ -52,6 +52,12 @@ export class ContextmenuHandler {
         ipcMain.on("contextmenu:schedule-cell", (event: Electron.IpcMainEvent, vehicleId: number) => {
             const menuTemplate = Menu.buildFromTemplate([
                 {
+                    label: "ステータス",
+                    click: async () => {
+                        WindowHandler.createInsertVehicleStatusWindow(vehicleId);
+                    }
+                },
+                {
                     label: "新規予約",
                     click: async () => {
                         WindowHandler.createInsertReservationWindow(vehicleId);
@@ -61,12 +67,6 @@ export class ContextmenuHandler {
                     label: "点検修理",
                     click: async () => {
 
-                    }
-                },
-                {
-                    label: "ステータス",
-                    click: async () => {
-                        WindowHandler.createInsertVehicleStatusWindow(vehicleId);
                     }
                 }
             ]);

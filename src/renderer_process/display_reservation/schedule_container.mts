@@ -29,6 +29,7 @@ export const ScheduleContainer = class {
             minWidth: `${daysContainerWidth}px`,
             whiteSpace: "nowrap"
         });
+        this.scheduleContainer.className = "schedule-container";
 
         VehicleItem.instances.forEach(async (instance) => {
             const vehicleItem: HTMLDivElement = instance.vehicleItem;

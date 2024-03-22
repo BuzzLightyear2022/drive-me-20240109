@@ -1,10 +1,13 @@
-import { appendOptions, setRadioValue } from "./common_modules.mjs";
+import { appendOptions, setRadioValue, getRadioValue } from "./common_modules.mjs";
 import { VehicleAttributes, ReservationData, LicensePlatesData } from "../@types/types";
-import { getRadioValue } from "./common_modules.mjs";
 
+const title = document.querySelector("#title");
+const reservationInputForm = document.querySelector("#reservation-input-form");
 const reservationName: HTMLInputElement = document.querySelector("#reservation-name") as HTMLInputElement;
+const reservationNameLabel: HTMLLabelElement = document.querySelector("#reservation-name-label");
 const rentalCategoryRadios: NodeListOf<HTMLInputElement> = document.getElementsByName("rental-category") as NodeListOf<HTMLInputElement>;
-const departureStore: HTMLSelectElement = document.querySelector("#departure-store") as HTMLSelectElement;
+const pickupLocation: HTMLSelectElement = document.querySelector("#pickup-location");
+const pickupLocationLabel: HTMLLabelElement = document.querySelector("#pickup-location-label");
 const returnStore: HTMLSelectElement = document.querySelector("#return-store") as HTMLSelectElement;
 const departureDatetime: HTMLInputElement = document.querySelector("#departure-datetime") as HTMLInputElement;
 const returnDatetime: HTMLInputElement = document.querySelector("#return-datetime") as HTMLInputElement;
@@ -137,6 +140,40 @@ carModelSelect.addEventListener("change", async () => {
     appendOptions({ selectbox: licensePlateSelect, options: licensePlatesArray, values: idsArray });
 }, false);
 
+rentalCategoryRadios.forEach((radio: HTMLInputElement) => {
+    radio.addEventListener("change", () => {
+        const selectedRentalCategory: string = getRadioValue({ radios: rentalCategoryRadios });
+        if (selectedRentalCategory === "loanerRental") {
+            const firstRow = document.createElement("div");
+            firstRow.className = "row";
+            const firstCol = document.createElement("div");
+            firstCol.className = "col-md";
+            const form = document.createElement("div");
+            form.className = "form-floating p-1";
+            firstRow.append(firstCol);
+            firstCol.append(form);
+
+            const receptionBranches = ["本店", "AP"];
+            const receptionBranchSelect: HTMLSelectElement = document.createElement("select");
+            receptionBranchSelect.id = "reception-branch-select";
+            receptionBranchSelect.className = "form-select";
+            receptionBranches.forEach((branch) => {
+                const option = document.createElement("option");
+                option.textContent = branch;
+                receptionBranchSelect.append(option);
+            });
+            const label = document.createElement("label");
+            label.htmlFor = "reception-branch-select";
+            label.textContent = "損保受付";
+            form.append(receptionBranchSelect, label);
+            title.after(firstRow);
+
+            reservationNameLabel.textContent = "使用者名";
+            pickupLocationLabel.textContent = "配車場所";
+        }
+    }, false);
+});
+
 (async () => {
     submitButton.addEventListener("click", async () => {
         const selectedRentalCategory: string = getRadioValue({ radios: rentalCategoryRadios, defaultValue: "general-rental" });
@@ -148,7 +185,7 @@ carModelSelect.addEventListener("change", async () => {
             vehicleId: Number(licensePlateSelect.value),
             reservationName: reservationName.value,
             rentalCategory: selectedRentalCategory,
-            pickupLocation: departureStore.value,
+            pickupLocation: pickupLocation.value,
             returnLocation: returnStore.value,
             pickupDateObject: selectedDepartureDatetime,
             returnDateObject: selectedReturnDatetime,

@@ -86,10 +86,10 @@ export const generateUniqueId = (): number => {
     return parseInt(randomNumStr, 36);
 }
 
-export const getRadioValue = (args: { radios: NodeListOf<HTMLInputElement>, defaultValue: string }): string => {
+export const getRadioValue = (args: { radios: NodeListOf<HTMLInputElement>, defaultValue?: string }): string => {
     const { radios, defaultValue } = args;
 
-    let selectedValue: string = defaultValue;
+    let selectedValue = defaultValue;
     radios.forEach((radio: HTMLInputElement): void => {
         if (radio.checked) {
             selectedValue = radio.value;

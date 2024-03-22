@@ -8,8 +8,6 @@ dotenv.config();
 const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST;
 // @ts-ignore
 const port: string = import.meta.env.VITE_HTTPS_PORT;
-// @ts-ignore
-const imageDirectory: string = import.meta.env.VITE_IMAGE_DIRECTORY;
 
 (async () => {
     ipcMain.handle("sqlSelect:vehicleAttributes", async (event: Electron.IpcMainEvent) => {

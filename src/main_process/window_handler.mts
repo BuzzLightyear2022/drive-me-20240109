@@ -106,7 +106,7 @@ export class WindowHandler {
             },
         });
 
-        // win.webContents.openDevTools();
+        win.webContents.openDevTools();
 
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
             win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/insert_reservation.html`);
@@ -133,7 +133,7 @@ export class WindowHandler {
                 },
             });
 
-            win.webContents.openDevTools();
+            // win.webContents.openDevTools();
 
             if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
                 win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_reservation.html`);
@@ -162,7 +162,7 @@ export class WindowHandler {
             },
         });
 
-        win.webContents.openDevTools();
+        // win.webContents.openDevTools();
 
         ContextmenuHandler.displayMenubarMenu();
         ContextmenuHandler.displayScheduleCellMenu();
@@ -246,7 +246,7 @@ export class WindowHandler {
                 }
             });
 
-            win.webContents.openDevTools();
+            // win.webContents.openDevTools();
 
             win.menuBarVisible = false;
 

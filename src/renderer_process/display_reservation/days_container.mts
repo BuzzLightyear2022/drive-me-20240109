@@ -52,6 +52,7 @@ export const DaysContainer = class {
             whiteSpace: "nowrap",
             overflow: "visible",
         });
+        this.daysContainer.className = "days-container";
 
         const currentDate: Date = new Date();
 
@@ -83,6 +84,8 @@ export const DaysContainer = class {
                 fontSize: "150%",
                 border: "solid",
                 borderWidth: "1px 0.5px",
+                cursor: "default",
+                userSelect: "none"
             });
 
             const dayIndex: number = new Date(calendarYear, calendarMonthIndex, i).getDay();
