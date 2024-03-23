@@ -1,3 +1,12 @@
+.input-group-text {
+    width: 8em;
+    text-align: center;
+}
+
+.btn {
+    width: 5em;
+}
+
 #reservation-input-form {
     min-width: 800px;
 }
@@ -13,11 +22,6 @@
 }
 
 #rental-category-container {
-    flex-wrap: nowrap;
-    text-align: center;
-}
-
-#non-smoking-container {
     flex-wrap: nowrap;
     text-align: center;
 }
