@@ -1,6 +1,6 @@
 .container {
-    overflow: auto;
     white-space: nowrap;
+    min-width: 800px;
 }
 
 .input-group-text {
