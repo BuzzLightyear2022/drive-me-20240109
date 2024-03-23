@@ -1,3 +1,8 @@
+.container {
+    overflow: auto;
+    white-space: nowrap;
+}
+
 .input-group-text {
     width: 8em;
     text-align: center;
@@ -7,11 +12,7 @@
     width: 5em;
 }
 
-#reservation-input-form {
-    min-width: 800px;
-}
-
-.row {
+/* .row {
     display: flex;
     flex-wrap: nowrap;
 }
@@ -19,13 +20,13 @@
 .col-md {
     max-width: 50%;
     box-sizing: border-box;
-}
+} */
 
-#rental-category-container {
+/* #rental-category-container {
     flex-wrap: nowrap;
     text-align: center;
 }
 
 #comment-textarea {
     min-height: 200px;
-}
+} */

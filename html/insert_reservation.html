@@ -30,9 +30,11 @@
         </div>
         <div class="row">
             <div class="col">
-                <div class="input-group">
-                    <span class="input-group-text">担当</span>
-                    <select id="order-handler"></select>
+                <div class="form-floating">
+                    <select class="form-select" id="order-handler">
+                        <option>髙田</option>
+                    </select>
+                    <label for="order-handler">担当</label>
                 </div>
             </div>
             <div class="col">
@@ -43,7 +45,7 @@
             </div>
             <div class="col">
                 <div class="row">
-                    <div class="input-group">
+                    <div class="input-group mb-3">
                         <span class="input-group-text">返信日時</span>
                         <input class="form-control" id="replied-date" type="datetime-local">
                     </div>
