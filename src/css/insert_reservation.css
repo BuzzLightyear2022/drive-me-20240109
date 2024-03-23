@@ -4,29 +4,26 @@
 }
 
 .input-group-text {
-    width: 8em;
+    width: 6em;
     text-align: center;
+}
+
+.flight-number-span {
+    width: 3em;
+}
+
+.input-form {
+    text-align: center;
+}
+
+#new-return-datetime {
+    width: 9em;
+}
+
+#comment-textarea {
+    height: 10em;
 }
 
 .btn {
     width: 5em;
 }
-
-/* .row {
-    display: flex;
-    flex-wrap: nowrap;
-}
-
-.col-md {
-    max-width: 50%;
-    box-sizing: border-box;
-} */
-
-/* #rental-category-container {
-    flex-wrap: nowrap;
-    text-align: center;
-}
-
-#comment-textarea {
-    min-height: 200px;
-} */
