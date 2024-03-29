@@ -86,7 +86,7 @@ export const generateUniqueId = (): number => {
     return parseInt(randomNumStr, 36);
 }
 
-export const getRadioValue = (args: { radios: any[], defaultValue?: string }): string => {
+export const getRadioValue = (args: { radios: NodeListOf<HTMLElement>, defaultValue?: string }): string => {
     const { radios, defaultValue } = args;
 
     let selectedValue = defaultValue;

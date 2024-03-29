@@ -1,28 +1,81 @@
 import { appendOptions, setRadioValue, getRadioValue } from "./common_modules.mjs";
-import { VehicleAttributes, ReservationData, LicensePlatesData } from "../@types/types";
+import { VehicleAttributes, ReservationData, LicensePlatesData, CarCatalog } from "../@types/types";
 
-const title = document.querySelector("#title");
-const reservationInputForm = document.querySelector("#reservation-input-form");
-const reservationName: HTMLInputElement = document.querySelector("#reservation-name");
-const reservationNameLabel: HTMLLabelElement = document.querySelector("#reservation-name-label");
-const rentalCategoryRadios: NodeListOf<HTMLInputElement> = document.getElementsByName("rental-category") as NodeListOf<HTMLInputElement>;
-const pickupLocation: HTMLSelectElement = document.querySelector("#pickup-location");
-const pickupLocationLabel: HTMLLabelElement = document.querySelector("#pickup-location-label");
-const returnStore: HTMLSelectElement = document.querySelector("#return-store") as HTMLSelectElement;
-const departureDatetime: HTMLInputElement = document.querySelector("#departure-datetime") as HTMLInputElement;
-const returnDatetime: HTMLInputElement = document.querySelector("#return-datetime") as HTMLInputElement;
-const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class-select") as HTMLSelectElement;
-const nonSmokingRadios = document.getElementsByName("non-smoking");
-const carModelSelect: HTMLSelectElement = document.querySelector("#car-model") as HTMLSelectElement;
-const licensePlateSelect: HTMLSelectElement = document.querySelector("#license-plate") as HTMLSelectElement;
-const commentTextarea: HTMLTextAreaElement = document.querySelector("#comment-textarea") as HTMLTextAreaElement;
+const isRepliedCheck: HTMLInputElement = document.querySelector("#replied-check");
+const receptionDateInput: HTMLInputElement = document.querySelector("#reception-date");
+const repliedDateInput: HTMLInputElement = document.querySelector("#replied-date");
+const salesBranchSelect: HTMLSelectElement = document.querySelector("#sales-branch");
+const orderHandlerSelect: HTMLSelectElement = document.querySelector("#order-handler");
+const orderSourceSelect: HTMLSelectElement = document.querySelector("#order-source");
+const furiganaInput: HTMLInputElement = document.querySelector("#furigana");
+const nonSmokingRadios: NodeListOf<HTMLElement> = document.getElementsByName("non-smoking");
+const userNameInput: HTMLInputElement = document.querySelector("#user-name");
+const preferredRentalClassSelect: HTMLSelectElement = document.querySelector("#preferred-rental-class");
+const isElevatableCheck: HTMLInputElement = document.querySelector("#is-elevatable");
+const isClassSpecifiedCheck: HTMLInputElement = document.querySelector("#is-class-specified");
+const applicantNameInput: HTMLInputElement = document.querySelector("#applicantName");
+const preferredCarModelSelect: HTMLSelectElement = document.querySelector("#preferred-car-model");
+const zipCodeInput: HTMLInputElement = document.querySelector("#zip-code");
+const addressInput: HTMLInputElement = document.querySelector("#address");
+const phoneNumberInput: HTMLInputElement = document.querySelector("#phone-number");
+const pickupLocationSelect: HTMLSelectElement = document.querySelector("#pickup-location");
+const returnLocationSelect: HTMLSelectElement = document.querySelector("#return-location");
+const pickupDatetimeInput: HTMLInputElement = document.querySelector("#pickup-datetime");
+const arrivalFlightCarrierSelect: HTMLSelectElement = document.querySelector("#arrival-flight-carrier");
+const arrivalFlightNumberInput: HTMLInputElement = document.querySelector("#arrival-flight-number");
+const arrivalFlightTimeInput: HTMLInputElement = document.querySelector("#arrival-flight-time");
+const returnDatetimeInput: HTMLInputElement = document.querySelector("#return-datetime");
+const departureFlightCarrierSelect: HTMLSelectElement = document.querySelector("#departure-flight-carrier");
+const departureFlightNumberInput: HTMLInputElement = document.querySelector("#departure-flight-number");
+const departureFlightTimeInput: HTMLInputElement = document.querySelector("#departure-flight-time");
+const newReturnDatetime: HTMLInputElement = document.querySelector("#new-return-datetime");
+const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class");
+const carModelSelect: HTMLSelectElement = document.querySelector("#car-model");
+const selectedVehicleId: HTMLSelectElement = document.querySelector("#license-plate");
+const commentTextArea: HTMLTextAreaElement = document.querySelector("#comment-textarea");
 
-const submitButton: HTMLButtonElement = document.querySelector("#submit-button") as HTMLButtonElement;
+const submitButton: HTMLButtonElement = document.querySelector("#submit-button");
 
 (async () => {
     const vehicleId: number = await window.contextmenu.getVehicleId();
+    const selectOptions: any = await window.fetchJson.selectOptions();
+    const carCatalog: CarCatalog = await window.fetchJson.carCatalog();
+
+    const branches = selectOptions.branches;
+    const staffMembers = selectOptions.staffMembers;
+    const orderSources = selectOptions.orderSources;
+    const rentalClasses: string[] = Object.keys(carCatalog.rentalClass);
+
+    branches.forEach((branch: string) => {
+        const option = document.createElement("option");
+        option.textContent = branch;
+        salesBranchSelect.append(option);
+    });
+
+    staffMembers.forEach((staff: string) => {
+        const option = document.createElement("option");
+        option.textContent = staff;
+        orderHandlerSelect.append(option);
+    });
+
+    orderSources.forEach((orderSource: string) => {
+        const option = document.createElement("option");
+        option.textContent = orderSource;
+        orderSourceSelect.append(option);
+    });
+
+    rentalClasses.forEach((rentalClass: string) => {
+        const option = document.createElement("option");
+        option.textContent = rentalClass;
+        preferredRentalClassSelect.append(option);
+    });
+
+    preferredRentalClassSelect.addEventListener("change", () => {
+        console.log(preferredRentalClassSelect.value);
+    }, false);
 
     if (vehicleId) {
+
         // const vehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: vehicleId });
 
         // if (vehicleAttributes.nonSmoking) {
@@ -58,7 +111,6 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
         // licensePlateSelect.value = String(vehicleId);
     } else {
         const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-spacification" });
-        console.log(selectedSmoking);
 
         // const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: selectedSmoking });
         // appendOptions({ selectbox: rentalClassSelect, options: rentalClasses });
@@ -175,30 +227,52 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
 //     }, false);
 // });
 
-// (async () => {
-//     submitButton.addEventListener("click", async () => {
-//         const selectedRentalCategory: string = getRadioValue({ radios: rentalCategoryRadios, defaultValue: "general-rental" });
-//         const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-specification" });
-//         const selectedDepartureDatetime: Date = new Date(departureDatetime.value);
-//         const selectedReturnDatetime: Date = new Date(returnDatetime.value);
+(async () => {
+    submitButton.addEventListener("click", async () => {
+        const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-specification" });
 
-//         const reservationData: ReservationData = {
-//             vehicleId: Number(licensePlateSelect.value),
-//             reservationName: reservationName.value,
-//             rentalCategory: selectedRentalCategory,
-//             pickupLocation: pickupLocation.value,
-//             returnLocation: returnStore.value,
-//             pickupDateObject: selectedDepartureDatetime,
-//             returnDateObject: selectedReturnDatetime,
-//             nonSmoking: selectedSmoking,
-//             comment: commentTextarea.value,
-//             isCanceled: false
-//         }
+        const reservationData: ReservationData = {
+            isReplied: isRepliedCheck.checked,
+            receptionDate: new Date(receptionDateInput.value),
+            repliedDate: new Date(repliedDateInput.value),
+            salesBranch: salesBranchSelect.value,
+            orderHandler: orderHandlerSelect.value,
+            orderSource: orderSourceSelect.value,
+            furigana: furiganaInput.value,
+            nonSmoking: selectedSmoking,
+            userName: userNameInput.value,
+            preferredRentalClass: preferredRentalClassSelect.value,
+            isElevatable: isElevatableCheck.checked,
+            isClassSpecified: isClassSpecifiedCheck.checked,
+            applicantName: applicantNameInput.value,
+            preferredCarModel: preferredCarModelSelect.value,
+            zipCode: Number(zipCodeInput.value),
+            address: addressInput.value,
+            phoneNumber: Number(phoneNumberInput.value),
+            pickupLocation: pickupLocationSelect.value,
+            returnLocation: returnLocationSelect.value,
+            pickupDatetime: new Date(pickupDatetimeInput.value),
+            arrivalFlightCarrier: arrivalFlightCarrierSelect.value,
+            arrivalFlightNumber: Number(arrivalFlightNumberInput.value),
+            arrivalFlightTime: arrivalFlightTimeInput.value,
+            returnDatetime: new Date(returnDatetimeInput.value),
+            departureFlightCarrier: departureFlightCarrierSelect.value,
+            departureFlightNumber: Number(departureFlightNumberInput.value),
+            departureFlightTime: departureFlightTimeInput.value,
+            newReturnDatetime: new Date(newReturnDatetime.value),
+            selectedRentalClass: rentalClassSelect.value,
+            selectedCarModel: carModelSelect.value,
+            selectedVehicleId: Number(selectedVehicleId.value),
+            comment: commentTextArea.value,
+            isCanceled: false
+        }
 
-//         try {
-//             await window.sqlInsert.reservationData(reservationData);
-//         } catch (error: unknown) {
-//             console.error(`Failed to invoke reservationData: ${error}`);
-//         }
-//     }, false);
-// })();
+        console.log(reservationData);
+
+        // try {
+        //     await window.sqlInsert.reservationData(reservationData);
+        // } catch (error: unknown) {
+        //     console.error(`Failed to invoke reservationData: ${error}`);
+        // }
+    }, false);
+})();

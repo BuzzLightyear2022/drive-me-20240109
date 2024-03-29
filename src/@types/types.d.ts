@@ -1,4 +1,5 @@
 import { Datetime } from "aws-sdk/clients/costoptimizationhub"
+import { time } from "aws-sdk/clients/frauddetector"
 
 export type Windows = {
     loginWindow: BrowserWindow,
@@ -58,15 +59,38 @@ export type VehicleAttributes = {
 
 export type ReservationData = {
     id?: number
-    vehicleId: number,
-    reservationName: string,
-    rentalCategory: string,
+    isReplied: boolean,
+    receptionDate: Date,
+    repliedDate: Date,
+    salesBranch: string,
+    orderHandler: string,
+    orderSource: string,
+    furigana: string,
+    nonSmoking: string,
+    userName: string,
+    preferredRentalClass: string,
+    isElevatable: boolean,
+    isClassSpecified: boolean,
+    applicantName: string,
+    preferredCarModel: string,
+    zipCode: number,
+    address: string,
+    phoneNumber: number,
     pickupLocation: string,
     returnLocation: string,
-    pickupDateObject: Date,
-    returnDateObject: Date,
-    nonSmoking: string,
-    comment?: string,
+    pickupDatetime: Datetime,
+    arrivalFlightCarrier: string,
+    arrivalFlightNumber: number,
+    arrivalFlightTime: time,
+    returnDatetime: Datetime,
+    departureFlightCarrier: string,
+    departureFlightNumber: number,
+    departureFlightTime: time,
+    newReturnDatetime: Datetime,
+    selectedRentalClass: string,
+    selectedCarModel: string,
+    selectedVehicleId: number,
+    comment: string,
     isCanceled: boolean
 }
 

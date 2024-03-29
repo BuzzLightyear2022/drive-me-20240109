@@ -60,3 +60,20 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
         }
     });
 })();
+
+(async () => {
+    ipcMain.handle("fetchJson:selectOptions", async (event: Electron.IpcMainEvent): Promise<JSON | unknown> => {
+        const serverEndPoint = `https://${serverHost}:${port}/fetchJson/selectOptions`;
+        try {
+            const response: AxiosResponse = await axios.post(serverEndPoint, null, {
+                headers: {
+                    "Authorization": accessToken
+                },
+                withCredentials: true
+            });
+            return response.data;
+        } catch (error: unknown) {
+            return error
+        }
+    });
+})();

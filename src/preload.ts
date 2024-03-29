@@ -48,6 +48,9 @@ contextBridge.exposeInMainWorld(
         },
         carLocation: async (): Promise<CarLocation | unknown> => {
             return await ipcRenderer.invoke("fetchJson:carLocation");
+        },
+        selectOptions: async () => {
+            return await ipcRenderer.invoke("fetchJson:selectOptions");
         }
     }
 );

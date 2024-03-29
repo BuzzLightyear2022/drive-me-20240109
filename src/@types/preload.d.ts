@@ -25,6 +25,7 @@ export interface fetchJson {
     carCatalog: () => Promise<CarCatalog | unknown>;
     navigations: () => Promise<Navigations | unknown>;
     carLocation: () => Promise<CarLocation | unknown>;
+    selectOptions: () => Promise<JSON | unknown>;
 }
 
 export interface sqlSelect {
