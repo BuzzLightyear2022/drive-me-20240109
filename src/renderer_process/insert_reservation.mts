@@ -42,14 +42,25 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
     const carCatalog: CarCatalog = await window.fetchJson.carCatalog();
 
     const branches = selectOptions.branches;
+    const branchNames: string[] = Object.keys(branches);
+
     const staffMembers = selectOptions.staffMembers;
     const orderSources = selectOptions.orderSources;
     const rentalClasses: string[] = Object.keys(carCatalog.rentalClass);
+    const flightCarriers: string[] = selectOptions.flightCarriers;
 
-    branches.forEach((branch: string) => {
+    branchNames.forEach((branchName: string, index: number) => {
         const option = document.createElement("option");
-        option.textContent = branch;
+        option.textContent = `${branchName}(${branches[branchName].phoneNumber})`;
         salesBranchSelect.append(option);
+
+        const pickupLocationOption = document.createElement("option");
+        pickupLocationOption.textContent = branchName;
+        pickupLocationSelect.append(pickupLocationOption);
+
+        const returnLocationOption = document.createElement("option");
+        returnLocationOption.textContent = branchName
+        returnLocationSelect.append(returnLocationOption);
     });
 
     staffMembers.forEach((staff: string) => {
@@ -70,48 +81,61 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
         preferredRentalClassSelect.append(option);
     });
 
+    const initialSelectedRentalClass = preferredRentalClassSelect.value;
+    const initialCarModels: string[] = Object.keys(carCatalog.rentalClass[initialSelectedRentalClass]);
+    initialCarModels.forEach((carModel: string) => {
+        const option = document.createElement("option");
+        option.textContent = carModel;
+        preferredCarModelSelect.append(option);
+    });
+
+    flightCarriers.forEach((flightCarrier: string) => {
+        const arrivalOption = document.createElement("option");
+        arrivalOption.textContent = flightCarrier;
+        arrivalFlightCarrierSelect.append(arrivalOption);
+
+        const departureOption = document.createElement("option");
+        departureOption.textContent = flightCarrier;
+        departureFlightCarrierSelect.append(departureOption);
+    });
+
     preferredRentalClassSelect.addEventListener("change", () => {
-        console.log(preferredRentalClassSelect.value);
+        while (preferredCarModelSelect.firstChild) {
+            preferredCarModelSelect.removeChild(preferredCarModelSelect.firstChild);
+        }
+
+        const selectedRentalClass: string = preferredRentalClassSelect.value;
+        const carModels = Object.keys(carCatalog.rentalClass[selectedRentalClass]);
+        carModels.forEach((carModel) => {
+            const option = document.createElement("option");
+            option.textContent = carModel;
+            preferredCarModelSelect.append(option);
+        });
     }, false);
 
     if (vehicleId) {
+        const vehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: vehicleId });
 
-        // const vehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: vehicleId });
+        rentalClassSelect.disabled = true;
+        const rentalClassOption = document.createElement("option");
+        rentalClassOption.textContent = vehicleAttributes.rentalClass;
+        rentalClassSelect.append(rentalClassOption);
+        rentalClassSelect.value = vehicleAttributes.rentalClass;
 
-        // if (vehicleAttributes.nonSmoking) {
-        //     setRadioValue({ radios: nonSmokingRadios, checkedValue: "non-smoking" });
-        // } else {
-        //     setRadioValue({ radios: nonSmokingRadios, checkedValue: "ok-smoking" });
-        // }
+        carModelSelect.disabled = true;
+        const carModelOption = document.createElement("option");
+        carModelOption.textContent = vehicleAttributes.carModel;
+        carModelSelect.append(carModelOption);
+        carModelSelect.value = vehicleAttributes.carModel;
 
-        // const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-specification" });
-        // const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: selectedSmoking });
-        // appendOptions({ selectbox: rentalClassSelect, options: rentalClasses });
-        // rentalClassSelect.value = vehicleAttributes.rentalClass;
-
-        // const selectedRentalClass: string = rentalClassSelect.value;
-        // const carModels: string[] = await window.sqlSelect.carModels({ selectedSmoking: selectedSmoking, selectedRentalClass: selectedRentalClass });
-        // appendOptions({ selectbox: carModelSelect, options: carModels });
-        // carModelSelect.value = vehicleAttributes.carModel;
-
-        // const selectedCarModel: string = carModelSelect.value;
-        // const licensePlateData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
-
-        // while (licensePlateSelect.firstChild) {
-        //     licensePlateSelect.removeChild(licensePlateSelect.firstChild);
-        // }
-
-        // licensePlateData.map((licensePlateData: { id: number, licensePlate: string }) => {
-        //     const option = document.createElement("option");
-        //     option.textContent = licensePlateData.licensePlate;
-        //     option.value = String(licensePlateData.id);
-        //     licensePlateSelect.append(option);
-        // });
-
-        // licensePlateSelect.value = String(vehicleId);
+        selectedVehicleId.disabled = true;
+        const selectedVehicleIdOption = document.createElement("option");
+        selectedVehicleId.setAttribute("vehicleId", String(vehicleAttributes.id));
+        const nonSmokingString = vehicleAttributes.nonSmoking ? "禁煙車" : "喫煙車";
+        const selectedVehicleIdString = `${vehicleAttributes.licensePlateRegion} ${vehicleAttributes.licensePlateCode} ${vehicleAttributes.licensePlateHiragana} ${vehicleAttributes.licensePlateNumber} (${nonSmokingString})`;
+        selectedVehicleIdOption.textContent = selectedVehicleIdString;
+        selectedVehicleId.append(selectedVehicleIdOption);
     } else {
-        const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-spacification" });
-
         // const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: selectedSmoking });
         // appendOptions({ selectbox: rentalClassSelect, options: rentalClasses });
 
