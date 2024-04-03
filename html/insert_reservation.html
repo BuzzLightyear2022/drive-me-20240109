@@ -143,7 +143,9 @@
             <div class="col-md-3 mb-3">
                 <div class="input-group">
                     <span class="input-group-text">〒</span>
-                    <input type="text" class="form-control" id="zip-code">
+                    <input type="text" class="form-control" id="zip-code-first">
+                    <span class="input-group-text">-</span>
+                    <input type="text" class="form-control" id="zip-code-last">
                 </div>
             </div>
             <div class="col-md-9 mb-3">
@@ -204,7 +206,7 @@
 
         <div class="row">
             <div class="col-md-5 mb-3">
-                <div class="input-group">
+                <div class="input-group has-validation">
                     <span class="input-group-text">返却日時</span>
                     <input type="datetime-local" class="form-control" id="return-datetime">
                 </div>
@@ -225,13 +227,6 @@
                 <div class="input-group">
                     <input type="time" class="form-control" id="departure-flight-time">
                 </div>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="input-group">
-                <span class="input-group-text" id="new-return-datetime">変更後返却日時</span>
-                <input type="datetime-local" class="form-control">
             </div>
         </div>
 

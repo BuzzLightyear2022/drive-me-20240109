@@ -61,11 +61,11 @@ export type ReservationData = {
     id?: number
     isReplied: boolean,
     receptionDate: Date,
-    repliedDate: Date,
+    repliedDatetime: Date,
     salesBranch: string,
     orderHandler: string,
     orderSource: string,
-    furigana: string,
+    userNameFurigana: string,
     nonSmoking: string,
     userName: string,
     preferredRentalClass: string,
@@ -73,9 +73,9 @@ export type ReservationData = {
     isClassSpecified: boolean,
     applicantName: string,
     preferredCarModel: string,
-    zipCode: number,
-    address: string,
-    phoneNumber: number,
+    applicantZipCode: number,
+    applicantAddress: string,
+    applicantPhoneNumber: number,
     pickupLocation: string,
     returnLocation: string,
     pickupDatetime: Datetime,
@@ -86,12 +86,13 @@ export type ReservationData = {
     departureFlightCarrier: string,
     departureFlightNumber: number,
     departureFlightTime: time,
-    newReturnDatetime: Datetime,
     selectedRentalClass: string,
     selectedCarModel: string,
     selectedVehicleId: number,
     comment: string,
     isCanceled: boolean
+    createdAt: datetime,
+    updatedAt: datetime
 }
 
 export type LicensePlatesData = Array<{

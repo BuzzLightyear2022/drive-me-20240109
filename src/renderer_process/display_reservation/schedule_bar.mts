@@ -60,7 +60,7 @@ export const ScheduleBar = class {
                         gridRow: "1"
                     });
 
-                    const pickupDateObject: Date = new Date(this.reservationData.pickupDateObject);
+                    const pickupDateObject: Date = new Date(this.reservationData.pickupDatetime);
 
                     const pickupHours: number = pickupDateObject.getHours();
                     const pickupMinutes: number = pickupDateObject.getMinutes();
@@ -82,7 +82,7 @@ export const ScheduleBar = class {
                         gridRow: "2"
                     });
 
-                    const returnDateObject: Date = new Date(this.reservationData.returnDateObject);
+                    const returnDateObject: Date = new Date(this.reservationData.returnDatetime);
 
                     const returnHours: number = returnDateObject.getHours();
                     const returnMinutes: number = returnDateObject.getMinutes();
@@ -142,7 +142,7 @@ export const ScheduleBar = class {
                     display: "flex",
                     padding: "1em"
                 });
-                reservationNameDiv.textContent = `${this.reservationData.reservationName} 様`;
+                reservationNameDiv.textContent = `${this.reservationData.applicantName} 様`;
 
                 return reservationNameDiv;
             }
@@ -160,8 +160,8 @@ export const ScheduleBar = class {
 
         const totalMsOfCalendar: number = this.endMsOfCalendar - this.startMsOfCalendar;
 
-        const pickupDateMs: number = new Date(this.reservationData.pickupDateObject).getTime();
-        const returnDateMs: number = new Date(this.reservationData.returnDateObject).getTime();
+        const pickupDateMs: number = new Date(this.reservationData.pickupDatetime).getTime();
+        const returnDateMs: number = new Date(this.reservationData.returnDatetime).getTime();
 
         const diffInTime: number = returnDateMs - pickupDateMs;
         const relativeWidth = `${(diffInTime / totalMsOfCalendar) * 100}%`;
@@ -249,37 +249,12 @@ export const ScheduleBar = class {
                     gridRow: "1"
                 });
 
-                const reservationName: string = this.reservationData.reservationName;
+                const reservationName: string = this.reservationData.applicantName;
                 const reservationNameString = `${reservationName} 様`;
 
                 reservationNameDiv.textContent = reservationNameString;
 
                 return reservationNameDiv;
-            }
-
-            const RentalCategoryDiv = (): HTMLDivElement => {
-                const rentalCategoryDiv: HTMLDivElement = document.createElement("div");
-                Object.assign(rentalCategoryDiv.style, {
-                    display: "flex",
-                    gridColumn: "1",
-                    gridRow: "2"
-                });
-
-                const rentalCategory: string = this.reservationData.rentalCategory;
-
-                switch (rentalCategory) {
-                    case "generalRental":
-                        rentalCategoryDiv.textContent = "一般貸出";
-                        break;
-                    case "loanerRental":
-                        rentalCategoryDiv.textContent = "損保貸出";
-                        break;
-                    case "booking":
-                        rentalCategoryDiv.textContent = "仮押さえ";
-                        break;
-                }
-
-                return rentalCategoryDiv;
             }
 
             const PickupLocationDiv = (): HTMLDivElement => {
@@ -315,7 +290,7 @@ export const ScheduleBar = class {
                     gridRow: "1"
                 });
 
-                const pickupDatetime: Date = this.reservationData.pickupDateObject;
+                const pickupDatetime: Date = this.reservationData.pickupDatetime;
 
                 return pickupDatetimeDiv;
             }

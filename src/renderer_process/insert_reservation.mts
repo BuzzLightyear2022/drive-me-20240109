@@ -1,4 +1,4 @@
-import { appendOptions, setRadioValue, getRadioValue } from "./common_modules.mjs";
+import { appendOptions, setRadioValue, getRadioValue, convertToKatakana, replaceFullWidthNumToHalfWidthNum } from "./common_modules.mjs";
 import { VehicleAttributes, ReservationData, LicensePlatesData, CarCatalog } from "../@types/types";
 
 const isRepliedCheck: HTMLInputElement = document.querySelector("#replied-check");
@@ -15,7 +15,8 @@ const isElevatableCheck: HTMLInputElement = document.querySelector("#is-elevatab
 const isClassSpecifiedCheck: HTMLInputElement = document.querySelector("#is-class-specified");
 const applicantNameInput: HTMLInputElement = document.querySelector("#applicantName");
 const preferredCarModelSelect: HTMLSelectElement = document.querySelector("#preferred-car-model");
-const zipCodeInput: HTMLInputElement = document.querySelector("#zip-code");
+const zipCodeFirstInput: HTMLInputElement = document.querySelector("#zip-code-first");
+const zipCodeLastInput: HTMLInputElement = document.querySelector("#zip-code-last");
 const addressInput: HTMLInputElement = document.querySelector("#address");
 const phoneNumberInput: HTMLInputElement = document.querySelector("#phone-number");
 const pickupLocationSelect: HTMLSelectElement = document.querySelector("#pickup-location");
@@ -28,7 +29,6 @@ const returnDatetimeInput: HTMLInputElement = document.querySelector("#return-da
 const departureFlightCarrierSelect: HTMLSelectElement = document.querySelector("#departure-flight-carrier");
 const departureFlightNumberInput: HTMLInputElement = document.querySelector("#departure-flight-number");
 const departureFlightTimeInput: HTMLInputElement = document.querySelector("#departure-flight-time");
-const newReturnDatetime: HTMLInputElement = document.querySelector("#new-return-datetime");
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class");
 const carModelSelect: HTMLSelectElement = document.querySelector("#car-model");
 const selectedVehicleId: HTMLSelectElement = document.querySelector("#license-plate");
@@ -49,17 +49,33 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
     const rentalClasses: string[] = Object.keys(carCatalog.rentalClass);
     const flightCarriers: string[] = selectOptions.flightCarriers;
 
+    const today: Date = new Date();
+    const year: string = today.getFullYear().toString();
+    const month: string = (today.getMonth() + 1).toString().padStart(2, "0");
+    const date: string = today.getDate().toString().padStart(2, "0");
+    const formattedDate: string = `${year}-${month}-${date}`;
+
+    receptionDateInput.value = formattedDate;
+
+    isRepliedCheck.checked ? repliedDateInput.disabled = false : repliedDateInput.disabled = true;
+    isRepliedCheck.addEventListener("change", () => {
+        isRepliedCheck.checked ? repliedDateInput.disabled = false : repliedDateInput.disabled = true;
+    }, false);
+
     branchNames.forEach((branchName: string, index: number) => {
         const option = document.createElement("option");
         option.textContent = `${branchName}(${branches[branchName].phoneNumber})`;
+        option.value = branchName;
         salesBranchSelect.append(option);
 
         const pickupLocationOption = document.createElement("option");
         pickupLocationOption.textContent = branchName;
+        option.value = branchName;
         pickupLocationSelect.append(pickupLocationOption);
 
         const returnLocationOption = document.createElement("option");
         returnLocationOption.textContent = branchName
+        option.value = branchName;
         returnLocationSelect.append(returnLocationOption);
     });
 
@@ -75,6 +91,12 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
         orderSourceSelect.append(option);
     });
 
+    furiganaInput.addEventListener("input", () => {
+        const inputValue: string = furiganaInput.value;
+        const convertedValue: string = convertToKatakana(inputValue);
+        furiganaInput.value = convertedValue;
+    }, false);
+
     rentalClasses.forEach((rentalClass: string) => {
         const option = document.createElement("option");
         option.textContent = rentalClass;
@@ -82,6 +104,12 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
     });
 
     const initialSelectedRentalClass = preferredRentalClassSelect.value;
+
+    const carModelNoneSpecificationOption = document.createElement("option");
+    carModelNoneSpecificationOption.textContent = "なし";
+    carModelNoneSpecificationOption.value = null;
+    preferredCarModelSelect.append(carModelNoneSpecificationOption);
+
     const initialCarModels: string[] = Object.keys(carCatalog.rentalClass[initialSelectedRentalClass]);
     initialCarModels.forEach((carModel: string) => {
         const option = document.createElement("option");
@@ -105,12 +133,68 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
         }
 
         const selectedRentalClass: string = preferredRentalClassSelect.value;
+
+        const carModelNoneSpecificationOption = document.createElement("option");
+        carModelNoneSpecificationOption.textContent = "なし";
+        carModelNoneSpecificationOption.value = null;
+        preferredCarModelSelect.append(carModelNoneSpecificationOption);
+
         const carModels = Object.keys(carCatalog.rentalClass[selectedRentalClass]);
         carModels.forEach((carModel) => {
             const option = document.createElement("option");
             option.textContent = carModel;
             preferredCarModelSelect.append(option);
         });
+    }, false);
+
+    replaceFullWidthNumToHalfWidthNum({ element: zipCodeFirstInput, limitDigits: 3 });
+    replaceFullWidthNumToHalfWidthNum({ element: zipCodeLastInput, limitDigits: 4 });
+    replaceFullWidthNumToHalfWidthNum({ element: phoneNumberInput });
+    replaceFullWidthNumToHalfWidthNum({ element: arrivalFlightNumberInput, limitDigits: 4 })
+    replaceFullWidthNumToHalfWidthNum({ element: departureFlightNumberInput, limitDigits: 4 });
+
+    pickupDatetimeInput.addEventListener("change", () => {
+        const pickupDatetimeValue = pickupDatetimeInput.value;
+        const returnDatetimeValue = returnDatetimeInput.value;
+
+        if (returnDatetimeValue < pickupDatetimeValue) {
+            const invalidFeedbackDiv = document.createElement("div");
+            invalidFeedbackDiv.className = "alert alert-danger";
+            invalidFeedbackDiv.role = "alert";
+            invalidFeedbackDiv.textContent = "貸出日時より過去の日付を指定することはできません";
+
+            const existingError = document.querySelector(".alert");
+            if (existingError) {
+                existingError.remove();
+            }
+
+            returnDatetimeInput.parentElement.appendChild(invalidFeedbackDiv);
+        } else {
+            const warningElement = document.querySelector(".alert");
+            warningElement.remove();
+        }
+    }, false);
+
+    returnDatetimeInput.addEventListener("change", () => {
+        const pickupDatetimeValue = pickupDatetimeInput.value;
+        const returnDatetimeValue = returnDatetimeInput.value;
+
+        if (returnDatetimeValue < pickupDatetimeValue) {
+            const invalidFeedbackDiv = document.createElement("div");
+            invalidFeedbackDiv.className = "alert alert-danger";
+            invalidFeedbackDiv.role = "alert";
+            invalidFeedbackDiv.textContent = "貸出日時より過去の日付を指定することはできません";
+
+            const existingError = document.querySelector(".alert");
+            if (existingError) {
+                existingError.remove();
+            }
+
+            returnDatetimeInput.parentElement.appendChild(invalidFeedbackDiv);
+        } else {
+            const warningElement = document.querySelector(".alert");
+            warningElement.remove();
+        }
     }, false);
 
     if (vehicleId) {
@@ -130,7 +214,7 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
 
         selectedVehicleId.disabled = true;
         const selectedVehicleIdOption = document.createElement("option");
-        selectedVehicleId.setAttribute("vehicleId", String(vehicleAttributes.id));
+        selectedVehicleIdOption.value = String(vehicleAttributes.id);
         const nonSmokingString = vehicleAttributes.nonSmoking ? "禁煙車" : "喫煙車";
         const selectedVehicleIdString = `${vehicleAttributes.licensePlateRegion} ${vehicleAttributes.licensePlateCode} ${vehicleAttributes.licensePlateHiragana} ${vehicleAttributes.licensePlateNumber} (${nonSmokingString})`;
         selectedVehicleIdOption.textContent = selectedVehicleIdString;
@@ -254,15 +338,16 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
 (async () => {
     submitButton.addEventListener("click", async () => {
         const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-specification" });
+        const repliedDatetime = isRepliedCheck.checked ? new Date(repliedDateInput.value) : null;
 
         const reservationData: ReservationData = {
             isReplied: isRepliedCheck.checked,
             receptionDate: new Date(receptionDateInput.value),
-            repliedDate: new Date(repliedDateInput.value),
+            repliedDatetime: repliedDatetime,
             salesBranch: salesBranchSelect.value,
             orderHandler: orderHandlerSelect.value,
             orderSource: orderSourceSelect.value,
-            furigana: furiganaInput.value,
+            userNameFurigana: furiganaInput.value,
             nonSmoking: selectedSmoking,
             userName: userNameInput.value,
             preferredRentalClass: preferredRentalClassSelect.value,
@@ -270,9 +355,9 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
             isClassSpecified: isClassSpecifiedCheck.checked,
             applicantName: applicantNameInput.value,
             preferredCarModel: preferredCarModelSelect.value,
-            zipCode: Number(zipCodeInput.value),
-            address: addressInput.value,
-            phoneNumber: Number(phoneNumberInput.value),
+            applicantZipCode: Number(`${zipCodeFirstInput.value}${zipCodeLastInput.value}`),
+            applicantAddress: addressInput.value,
+            applicantPhoneNumber: Number(phoneNumberInput.value),
             pickupLocation: pickupLocationSelect.value,
             returnLocation: returnLocationSelect.value,
             pickupDatetime: new Date(pickupDatetimeInput.value),
@@ -283,20 +368,21 @@ const submitButton: HTMLButtonElement = document.querySelector("#submit-button")
             departureFlightCarrier: departureFlightCarrierSelect.value,
             departureFlightNumber: Number(departureFlightNumberInput.value),
             departureFlightTime: departureFlightTimeInput.value,
-            newReturnDatetime: new Date(newReturnDatetime.value),
             selectedRentalClass: rentalClassSelect.value,
             selectedCarModel: carModelSelect.value,
             selectedVehicleId: Number(selectedVehicleId.value),
             comment: commentTextArea.value,
-            isCanceled: false
+            isCanceled: false,
+            createdAt: null,
+            updatedAt: null
         }
 
         console.log(reservationData);
 
-        // try {
-        //     await window.sqlInsert.reservationData(reservationData);
-        // } catch (error: unknown) {
-        //     console.error(`Failed to invoke reservationData: ${error}`);
-        // }
+        try {
+            await window.sqlInsert.reservationData(reservationData);
+        } catch (error: unknown) {
+            console.error(`Failed to invoke reservationData: ${error}`);
+        }
     }, false);
 })();

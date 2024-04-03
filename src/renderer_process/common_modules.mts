@@ -137,3 +137,10 @@ export const loadImage = async (args: { fileName: string, width: string, height:
         return imgElement;
     }
 }
+
+export const convertToKatakana = (input: string): string => {
+    return input.replace(/[\u3041-\u3096]/g, (match: string) => {
+        const chr = match.charCodeAt(0) + 0x60;
+        return String.fromCharCode(chr);
+    });
+}
