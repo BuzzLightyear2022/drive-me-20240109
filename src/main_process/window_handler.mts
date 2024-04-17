@@ -24,7 +24,7 @@ export class WindowHandler {
         const loginWindow: BrowserWindow = new BrowserWindow(
             {
                 width: 300,
-                height: 200,
+                height: 300,
                 webPreferences: {
                     preload: WindowHandler.preloadScript
                 },
@@ -121,35 +121,35 @@ export class WindowHandler {
         });
     }
 
-    static createEditReservationWindow = (reservationId: string): void => {
-        if (!WindowHandler.windows.editReservationWindow) {
-            const win: BrowserWindow = new BrowserWindow({
-                width: 1000,
-                height: 800,
-                webPreferences: {
-                    preload: WindowHandler.preloadScript
-                },
-            });
+    // static createEditReservationWindow = (reservationId: string): void => {
+    //     if (!WindowHandler.windows.editReservationWindow) {
+    //         const win: BrowserWindow = new BrowserWindow({
+    //             width: 1000,
+    //             height: 800,
+    //             webPreferences: {
+    //                 preload: WindowHandler.preloadScript
+    //             },
+    //         });
 
-            win.webContents.openDevTools();
+    //         win.webContents.openDevTools();
 
-            if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-                win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_reservation.html`);
-                WindowHandler.windows.editReservationWindow = win;
-            } else {
-                win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_reservation.html`));
-                WindowHandler.windows.editReservationWindow = win;
-            }
+    //         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    //             win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_reservation.html`);
+    //             WindowHandler.windows.editReservationWindow = win;
+    //         } else {
+    //             win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_reservation.html`));
+    //             WindowHandler.windows.editReservationWindow = win;
+    //         }
 
-            win.webContents.on("dom-ready", () => {
-                win.webContents.send("contextmenu:getReservationId", reservationId);
-            });
+    //         win.webContents.on("dom-ready", () => {
+    //             win.webContents.send("contextmenu:getReservationId", reservationId);
+    //         });
 
-            win.on("closed", () => {
-                WindowHandler.windows.editReservationWindow = undefined;
-            });
-        }
-    }
+    //         win.on("closed", () => {
+    //             WindowHandler.windows.editReservationWindow = undefined;
+    //         });
+    //     }
+    // }
 
     static createDisplayReservationWindow = () => {
         const win: BrowserWindow = new BrowserWindow({

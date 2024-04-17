@@ -28,7 +28,7 @@ export type CarCatalog = {
 }
 
 export type VehicleAttributes = {
-    id?: number,
+    id?: string,
     imageFileName?: string,
     carModel: string,
     modelCode: string,
@@ -58,7 +58,7 @@ export type VehicleAttributes = {
 }
 
 export type ReservationData = {
-    id?: number
+    id?: string
     isReplied: boolean,
     receptionDate: Date,
     repliedDatetime: Date,
@@ -73,22 +73,22 @@ export type ReservationData = {
     isClassSpecified: boolean,
     applicantName: string,
     preferredCarModel: string,
-    applicantZipCode: number,
+    applicantZipCode: string,
     applicantAddress: string,
-    applicantPhoneNumber: number,
+    applicantPhoneNumber: string,
     pickupLocation: string,
     returnLocation: string,
     pickupDatetime: Datetime,
     arrivalFlightCarrier: string,
-    arrivalFlightNumber: number,
+    arrivalFlightNumber: string,
     arrivalFlightTime: time,
     returnDatetime: Datetime,
     departureFlightCarrier: string,
-    departureFlightNumber: number,
+    departureFlightNumber: string,
     departureFlightTime: time,
     selectedRentalClass: string,
     selectedCarModel: string,
-    selectedVehicleId: number,
+    selectedVehicleId: string,
     comment: string,
     isCanceled: boolean
     createdAt: datetime,

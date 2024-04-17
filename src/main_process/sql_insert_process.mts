@@ -89,7 +89,7 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
                 withCredentials: true
             });
 
-            WindowHandler.windows.insertReservationWindow.close();
+            // WindowHandler.windows.insertReservationWindow.close();
 
             return response.status;
         } catch (error: unknown) {

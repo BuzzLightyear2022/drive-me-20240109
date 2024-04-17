@@ -10,7 +10,6 @@ export const ScheduleContainer = class {
     scheduleContainer: HTMLDivElement;
     daysContainer: DaysContainerType;
     scheduleCells: ScheduleCellType[] = [];
-    scheduleBars: ScheduleBarType[] = [];
 
     constructor(daysContainer: DaysContainerType) {
         this.daysContainer = daysContainer;
@@ -65,7 +64,6 @@ export const ScheduleContainer = class {
 
         const startDate: Date = new Date(calendarYear, calendarMonthIndex, 1, 0, 0, 0, 0);
         const endDate: Date = new Date(calendarYear, calendarMonthIndex + 1, 0, 23, 59, 59, 999);
-        // const totalMsOfMonth: number = endDate.getTime() - startDate.getTime();
 
         const monthReservationData: ReservationData[] | null = await window.sqlSelect.reservationData({
             startDate: startDate,
@@ -76,6 +74,7 @@ export const ScheduleContainer = class {
             scheduleCellInstance: ScheduleCellType,
             reservationData: ReservationData
         }) => {
+            console.log(true);
             const {
                 scheduleCellInstance,
                 reservationData
@@ -99,22 +98,21 @@ export const ScheduleContainer = class {
             const scheduleBar: HTMLDivElement = scheduleBarInstance.scheduleBarElement;
 
             reservationScheduleDiv.append(scheduleBar);
-            this.scheduleBars.push(scheduleBarInstance);
         }
 
         if (monthReservationData) {
             monthReservationData.forEach((reservationData: ReservationData) => {
                 this.scheduleCells.forEach(scheduleCellInstance => {
 
-                    const vehicleId: number = scheduleCellInstance.vehicleItem.vehicleAttributes.id;
+                    const vehicleId: string = scheduleCellInstance.vehicleItem.vehicleAttributes.id;
                     const pickupDate: Date = new Date(reservationData.pickupDatetime);
 
-                    if (reservationData.selectedVehicleId === vehicleId && pickupDate.getTime() >= startDate.getTime()) {
+                    if ((reservationData.selectedVehicleId == vehicleId) && (pickupDate.getTime() >= startDate.getTime())) {
                         processScheduleBar({
                             scheduleCellInstance: scheduleCellInstance,
                             reservationData: reservationData
                         });
-                    } else if (reservationData.selectedVehicleId === vehicleId && pickupDate.getTime() <= startDate.getTime()) {
+                    } else if ((reservationData.selectedVehicleId == vehicleId) && (pickupDate.getTime() <= startDate.getTime())) {
                         processScheduleBar({
                             scheduleCellInstance: scheduleCellInstance,
                             reservationData: reservationData

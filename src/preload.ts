@@ -142,7 +142,7 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "contextmenu",
     {
-        scheduleBar: async (reservationId: number) => {
+        scheduleBar: async (reservationId: string) => {
             ipcRenderer.send("contextmenu:schedule-bar", reservationId);
         },
         vehicleAttributesItem: async (vehicleId: number) => {

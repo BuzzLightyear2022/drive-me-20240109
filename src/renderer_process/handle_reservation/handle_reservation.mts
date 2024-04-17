@@ -1,5 +1,6 @@
-import { appendOptions, setRadioValue, getRadioValue, convertToKatakana, replaceFullWidthNumToHalfWidthNum, asyncAppendOptionElements } from "./common_modules.mjs";
-import { VehicleAttributes, ReservationData, LicensePlate, CarCatalog, SelectOptions } from "../@types/types";
+import { appendOptions, setRadioValue, getRadioValue, convertToKatakana, replaceFullWidthNumToHalfWidthNum, asyncAppendOptionElements, formatDateForInput } from "../common_modules.mjs";
+import { updateCarOptions, appendCarOptions } from "./handle_reservation_module.mjs";
+import { VehicleAttributes, ReservationData, LicensePlate, CarCatalog, SelectOptions } from "../../@types/types";
 
 const isRepliedCheck: HTMLInputElement = document.querySelector("#replied-check");
 const receptionDateInput: HTMLInputElement = document.querySelector("#reception-date");
@@ -46,6 +47,7 @@ replaceFullWidthNumToHalfWidthNum({ element: zipCodeLastInput, limitDigits: 4 })
 replaceFullWidthNumToHalfWidthNum({ element: phoneNumberInput });
 replaceFullWidthNumToHalfWidthNum({ element: arrivalFlightNumberInput, limitDigits: 4 })
 replaceFullWidthNumToHalfWidthNum({ element: departureFlightNumberInput, limitDigits: 4 });
+convertToKatakana(furiganaInput);
 
 pickupDatetimeInput.addEventListener("change", () => {
     const pickupDatetimeValue = pickupDatetimeInput.value;
@@ -148,17 +150,8 @@ returnDatetimeInput.addEventListener("change", () => {
     preferredCarModelSelect.append(carModelNoneSpecificationOption);
 
     const flightCarriers: string[] = selectOptions.flightCarriers;
-    flightCarriers.forEach((flightCarrier: string) => {
-        const arrivalFlightCarrierOption: HTMLOptionElement = document.createElement("option");
-        arrivalFlightCarrierOption.textContent = flightCarrier;
-        arrivalFlightCarrierOption.value = flightCarrier;
-        arrivalFlightCarrierSelect.append(arrivalFlightCarrierOption);
-
-        const departureFlightCarrierOption: HTMLOptionElement = document.createElement("option");
-        departureFlightCarrierOption.textContent = flightCarrier;
-        departureFlightCarrierOption.value = flightCarrier;
-        departureFlightCarrierSelect.append(departureFlightCarrierOption);
-    });
+    await asyncAppendOptionElements({ selectElement: arrivalFlightCarrierSelect, appendedOptionStrings: flightCarriers });
+    await asyncAppendOptionElements({ selectElement: departureFlightCarrierSelect, appendedOptionStrings: flightCarriers });
 
     preferredRentalClassSelect.addEventListener("change", () => {
         while (preferredCarModelSelect.hasChildNodes()) {
@@ -180,50 +173,7 @@ returnDatetimeInput.addEventListener("change", () => {
         preferredCarModelSelect.append(newCarModelNoneSpecificationOption);
     }, false);
 
-    rentalClassSelect.addEventListener("change", async () => {
-        while (carModelSelect.firstChild) {
-            carModelSelect.removeChild(carModelSelect.firstChild);
-        }
-
-        while (vehicleIdSelect.firstChild) {
-            vehicleIdSelect.removeChild(vehicleIdSelect.firstChild);
-        }
-
-        const selectedRentalClass: string = rentalClassSelect.value;
-        const newCarModels: string[] = await window.sqlSelect.carModels({ selectedSmoking: "none-specification", selectedRentalClass: selectedRentalClass });
-        newCarModels.forEach((newCarModel: string) => {
-            const newCarModelOption: HTMLOptionElement = document.createElement("option");
-            newCarModelOption.textContent = newCarModel;
-            newCarModelOption.value = newCarModel;
-            carModelSelect.append(newCarModelOption);
-        });
-
-        const selectedCarModel: string = carModelSelect.value;
-        const newLicensePlates: LicensePlate[] = await window.sqlSelect.licensePlates({ selectedSmoking: "none-specification", selectedCarModel: selectedCarModel });
-        newLicensePlates.forEach((newLicensePlate: LicensePlate) => {
-            const newVehicleIdOption: HTMLOptionElement = document.createElement("option");
-            newVehicleIdOption.textContent = `${newLicensePlate.licensePlate} (${newLicensePlate.nonSmoking ? "禁煙" : "喫煙"
-                })`;
-            newVehicleIdOption.value = String(newLicensePlate.id);
-            vehicleIdSelect.append(newVehicleIdOption);
-        });
-    }, false);
-
-    carModelSelect.addEventListener("change", async () => {
-        while (vehicleIdSelect.firstChild) {
-            vehicleIdSelect.removeChild(vehicleIdSelect.firstChild);
-        }
-
-        const selectedCarModel: string = carModelSelect.value;
-        const newVehicleIdArray: LicensePlate[] = await window.sqlSelect.licensePlates({ selectedSmoking: "none-specification", selectedCarModel: selectedCarModel });
-        newVehicleIdArray.forEach((newVehicleId: LicensePlate) => {
-            const newVehicleIdOption: HTMLOptionElement = document.createElement("option");
-            newVehicleIdOption.textContent = `${newVehicleId.licensePlate} (${newVehicleId.nonSmoking ? "禁煙" : "喫煙"
-                })`;
-            newVehicleIdOption.value = String(newVehicleId.id);
-            vehicleIdSelect.append(newVehicleIdOption);
-        });
-    }, false);
+    updateCarOptions();
 
     switch (crudArgs.crudAction) {
         case "create":
@@ -257,32 +207,7 @@ returnDatetimeInput.addEventListener("change", () => {
                 vehicleIdOption.value = String(vehicleAttributes.id);
                 vehicleIdSelect.disabled = true;
             } else {
-                const rentalClassOptions: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: null });
-                rentalClassOptions.forEach((rentalClass: string) => {
-                    const rentalClassOption: HTMLOptionElement = document.createElement("option");
-                    rentalClassOption.textContent = rentalClass;
-                    rentalClassOption.value = rentalClass;
-                    rentalClassSelect.append(rentalClassOption);
-                });
-
-                const selectedRentalClass = rentalClassSelect.value;
-                const carModelOptions: string[] = await window.sqlSelect.carModels({ selectedSmoking: "none-specification", selectedRentalClass: selectedRentalClass });
-                carModelOptions.forEach((carModel: string) => {
-                    const carModelOption: HTMLOptionElement = document.createElement("option");
-                    carModelOption.textContent = carModel;
-                    carModelOption.value = carModel;
-                    carModelSelect.append(carModelOption);
-                });
-
-                const selectedCarModel: string = carModelSelect.value;
-                const licensePlates: LicensePlate[] = await window.sqlSelect.licensePlates({ selectedSmoking: "none-specification", selectedCarModel: selectedCarModel });
-                licensePlates.forEach((licensePlate: LicensePlate) => {
-                    const licensePlateOption: HTMLOptionElement = document.createElement("option");
-                    licensePlateOption.textContent = `${licensePlate.licensePlate} (${licensePlate.nonSmoking ? "禁煙" : "喫煙"
-                        })`;
-                    licensePlateOption.value = String(licensePlate.id);
-                    vehicleIdSelect.append(licensePlateOption);
-                })
+                await appendCarOptions({});
             }
             break;
         case "update":
@@ -296,13 +221,7 @@ returnDatetimeInput.addEventListener("change", () => {
             }
 
             if (existingReservationData.repliedDatetime) {
-                const repliedDateObject: Date = new Date(existingReservationData.repliedDatetime);
-                const repliedYear: number = repliedDateObject.getFullYear();
-                const repliedMonth: string = String(repliedDateObject.getMonth() + 1).padStart(2, "0");
-                const repliedDate: string = String(repliedDateObject.getDate()).padStart(2, "0");
-                const repliedTime: string = String(repliedDateObject.getHours()).padStart(2, "0");
-                const repliedMinutes: string = String(repliedDateObject.getMinutes()).padStart(2, "0");
-                const repliedDateString: string = `${repliedYear}-${repliedMonth}-${repliedDate}T${repliedTime}:${repliedMinutes}`;
+                const repliedDateString: string = formatDateForInput({ dateObject: new Date(existingReservationData.repliedDatetime) });
                 repliedDateInput.value = repliedDateString;
             }
 
@@ -337,10 +256,20 @@ returnDatetimeInput.addEventListener("change", () => {
             pickupLocationSelect.value = existingReservationData.pickupLocation;
             returnLocationSelect.value = existingReservationData.returnLocation;
 
-            const existingPickupDatetime: Date = new Date(existingReservationData.pickupDatetime);
-            const existingPickupDatetimeString: String = existingPickupDatetime.toISOString();
-            console.log(existingPickupDatetimeString);
-            // pickupDatetimeInput.value = String(existingReservationData.pickupDatetime);
+            const pickupDatetimeString: string = formatDateForInput({ dateObject: new Date(existingReservationData.pickupDatetime) });
+            pickupDatetimeInput.value = pickupDatetimeString;
+
+            arrivalFlightCarrierSelect.value = existingReservationData.arrivalFlightCarrier;
+            arrivalFlightNumberInput.value = String(existingReservationData.arrivalFlightNumber);
+            arrivalFlightTimeInput.value = existingReservationData.arrivalFlightTime;
+
+            const returnDatetimeString: string = formatDateForInput({ dateObject: new Date(existingReservationData.returnDatetime) });
+            returnDatetimeInput.value = returnDatetimeString;
+            departureFlightCarrierSelect.value = existingReservationData.departureFlightCarrier;
+            departureFlightNumberInput.value = String(existingReservationData.departureFlightNumber);
+            departureFlightTimeInput.value = existingReservationData.departureFlightTime;
+
+            appendCarOptions({ existingReservationData: existingReservationData });
             break;
     }
 
@@ -363,22 +292,22 @@ returnDatetimeInput.addEventListener("change", () => {
             isClassSpecified: isClassSpecifiedCheck.checked,
             applicantName: applicantNameInput.value,
             preferredCarModel: preferredCarModelSelect.value,
-            applicantZipCode: Number(`${zipCodeFirstInput.value}${zipCodeLastInput.value}`),
+            applicantZipCode: `${zipCodeFirstInput.value}${zipCodeLastInput.value}`,
             applicantAddress: addressInput.value,
-            applicantPhoneNumber: Number(phoneNumberInput.value),
+            applicantPhoneNumber: phoneNumberInput.value,
             pickupLocation: pickupLocationSelect.value,
             returnLocation: returnLocationSelect.value,
             pickupDatetime: new Date(pickupDatetimeInput.value),
             arrivalFlightCarrier: arrivalFlightCarrierSelect.value,
-            arrivalFlightNumber: Number(arrivalFlightNumberInput.value),
+            arrivalFlightNumber: arrivalFlightNumberInput.value,
             arrivalFlightTime: arrivalFlightTimeInput.value,
             returnDatetime: new Date(returnDatetimeInput.value),
             departureFlightCarrier: departureFlightCarrierSelect.value,
-            departureFlightNumber: Number(departureFlightNumberInput.value),
+            departureFlightNumber: departureFlightNumberInput.value,
             departureFlightTime: departureFlightTimeInput.value,
             selectedRentalClass: rentalClassSelect.value,
             selectedCarModel: carModelSelect.value,
-            selectedVehicleId: Number(vehicleIdSelect.value),
+            selectedVehicleId: vehicleIdSelect.value,
             comment: commentTextArea.value,
             isCanceled: false,
             createdAt: null,
@@ -400,137 +329,4 @@ returnDatetimeInput.addEventListener("change", () => {
                 }
         }
     }, false)
-
-    // if (vehicleId) {
-    //     const vehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: vehicleId });
-
-    //     rentalClassSelect.disabled = true;
-    //     const rentalClassOption = document.createElement("option");
-    //     rentalClassOption.textContent = vehicleAttributes.rentalClass;
-    //     rentalClassSelect.append(rentalClassOption);
-    //     rentalClassSelect.value = vehicleAttributes.rentalClass;
-
-    //     carModelSelect.disabled = true;
-    //     const carModelOption = document.createElement("option");
-    //     carModelOption.textContent = vehicleAttributes.carModel;
-    //     carModelSelect.append(carModelOption);
-    //     carModelSelect.value = vehicleAttributes.carModel;
-
-    //     selectedVehicleId.disabled = true;
-    //     const selectedVehicleIdOption = document.createElement("option");
-    //     selectedVehicleIdOption.value = String(vehicleAttributes.id);
-    //     const nonSmokingString = vehicleAttributes.nonSmoking ? "禁煙車" : "喫煙車";
-    //     const selectedVehicleIdString = `${vehicleAttributes.licensePlateRegion} ${vehicleAttributes.licensePlateCode} ${vehicleAttributes.licensePlateHiragana} ${vehicleAttributes.licensePlateNumber} (${nonSmokingString})`;
-    //     selectedVehicleIdOption.textContent = selectedVehicleIdString;
-    //     selectedVehicleId.append(selectedVehicleIdOption);
-    // } else {
-    //     const reservationId: number = await window.contextmenu.getReservationId();
-    //     const currentReservationData: ReservationData = await window.sqlSelect.reservationDataById({ reservationId: reservationId })
-
-    //     if (currentReservationData.repliedDatetime) {
-    //         const systemTimezone: string = await window.systemTimezone.getSystemTimezone();
-
-    //         const formatter = new Intl.DateTimeFormat("ja-JP", {
-    //             timeZone: systemTimezone,
-    //             year: "numeric",
-    //             month: "2-digit",
-    //             day: "2-digit",
-    //             hour: "2-digit",
-    //             minute: "2-digit"
-    //         });
-
-    //         const formattedRepliedDatetime: string = formatter.format(new Date(currentReservationData.repliedDatetime));
-    //         const formattedDatetimeString: string = formattedRepliedDatetime.replaceAll("/", "-").replace(" ", "T");
-    // repliedDatetimeInput.value = formattedDatetimeString;
-    // }
-
-    // salesBranchSelect.value = currentReservationData.salesBranch;
-    // orderHandlerSelect.value = currentReservationData.orderHandler;
-    // const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: selectedSmoking });
-    // appendOptions({ selectbox: rentalClassSelect, options: rentalClasses });
-
-    // const selectedRentalClass: string = rentalClassSelect.value;
-    // const carModels: string[] = await window.sqlSelect.carModels({ selectedSmoking: selectedSmoking, selectedRentalClass: selectedRentalClass });
-
-    // appendOptions({ selectbox: carModelSelect, options: carModels });
-
-    // const selectedCarModel: string = carModelSelect.value;
-    // const licensePlatesData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
-    // const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }): string => {
-    //     return licensePlateData.licensePlate;
-    // });
-    // const idsArray: number[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }) => {
-    //     return licensePlateData.id;
-    // });
-
-    // appendOptions({ selectbox: licensePlateSelect, options: licensePlatesArray, values: idsArray });
-    // }
 })();
-
-// nonSmokingRadios.forEach((nonSmokingRadio: HTMLInputElement) => {
-//     nonSmokingRadio.addEventListener("change", async () => {
-//         const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-spacification" });
-
-//         const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: selectedSmoking });
-
-//         appendOptions({ selectbox: rentalClassSelect, options: rentalClasses });
-
-//         const selectedRentalClass: string = rentalClassSelect.value;
-//         const carModels: string[] = await window.sqlSelect.carModels({ selectedSmoking: selectedSmoking, selectedRentalClass: selectedRentalClass });
-
-//         appendOptions({ selectbox: carModelSelect, options: carModels });
-
-//         const selectedCarModel: string = carModelSelect.value;
-//         const licensePlatesData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
-//         const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }): string => {
-//             return licensePlateData.licensePlate;
-//         });
-//         const idsArray: number[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }) => {
-//             return licensePlateData.id;
-//         });
-
-//         appendOptions({ selectbox: licensePlateSelect, options: licensePlatesArray, values: idsArray });
-//     }, false);
-// });
-
-// rentalClassSelect.addEventListener("change", async () => {
-//     const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-spacification" });
-
-//     const selectedRentalClass: string = rentalClassSelect.value;
-//     const carModels: string[] = await window.sqlSelect.carModels({ selectedSmoking: selectedSmoking, selectedRentalClass: selectedRentalClass });
-
-//     appendOptions({ selectbox: carModelSelect, options: carModels });
-
-//     const selectedCarModel: string = carModelSelect.value;
-//     const licensePlatesData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
-//     const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }): string => {
-//         return licensePlateData.licensePlate;
-//     });
-//     const idsArray: number[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }) => {
-//         return licensePlateData.id;
-//     });
-
-//     appendOptions({ selectbox: licensePlateSelect, options: licensePlatesArray, values: idsArray });
-// }, false);
-
-// carModelSelect.addEventListener("change", async () => {
-//     const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-spacification" });
-//     const selectedCarModel: string = carModelSelect.value;
-//     const licensePlatesData: LicensePlatesData = await window.sqlSelect.licensePlates({ selectedSmoking: selectedSmoking, selectedCarModel: selectedCarModel });
-//     const licensePlatesArray: string[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }): string => {
-//         return licensePlateData.licensePlate;
-//     });
-//     const idsArray: number[] = licensePlatesData.map((licensePlateData: { id: number, licensePlate: string }) => {
-//         return licensePlateData.id;
-//     });
-
-//     appendOptions({ selectbox: licensePlateSelect, options: licensePlatesArray, values: idsArray });
-// }, false);
-
-// (async () => {
-//     submitButton.addEventListener("click", async () => {
-//         // const crudArgs = await window.contextmenu.getCrudArgs();
-//         // console.log(crudArgs);
-
-//     }, false);
-// })();

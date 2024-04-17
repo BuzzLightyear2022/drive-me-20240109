@@ -217,9 +217,6 @@ const calendarUpdater = async () => {
     }
 
     const scheduleContainers = document.querySelectorAll(".schedule-container");
-    // const previousMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[0].scheduleContainer.scheduleContainer;
-    // const currentMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[1].scheduleContainer.scheduleContainer;
-    // const nextMonthScheduleContainer: HTMLDivElement = DaysContainer.calendars[2].scheduleContainer.scheduleContainer;
     const previousMonthScheduleContainer = scheduleContainers[0];
     const currentMonthScheduleContainer = scheduleContainers[1];
     const nextMonthScheduleContainer = scheduleContainers[2];
@@ -308,7 +305,6 @@ const handleAppendPreviousMonthCalendar = async () => {
     scheduleContainer.firstChild.before(newPreviousMonthScheduleContainer);
 
     const daysContainers = document.querySelectorAll(".days-container");
-    console.log(daysContainers);
     const scheduleContainers = document.querySelectorAll(".schedule-container");
     daysContainer.removeChild(daysContainers[3]);
     scheduleContainer.removeChild(scheduleContainers[3]);
