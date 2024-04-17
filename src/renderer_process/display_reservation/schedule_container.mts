@@ -107,14 +107,14 @@ export const ScheduleContainer = class {
                 this.scheduleCells.forEach(scheduleCellInstance => {
 
                     const vehicleId: number = scheduleCellInstance.vehicleItem.vehicleAttributes.id;
-                    const pickupDate: Date = new Date(reservationData.pickupDateObject);
+                    const pickupDate: Date = new Date(reservationData.pickupDatetime);
 
-                    if (reservationData.vehicleId === vehicleId && pickupDate.getTime() >= startDate.getTime()) {
+                    if (reservationData.selectedVehicleId === vehicleId && pickupDate.getTime() >= startDate.getTime()) {
                         processScheduleBar({
                             scheduleCellInstance: scheduleCellInstance,
                             reservationData: reservationData
                         });
-                    } else if (reservationData.vehicleId === vehicleId && pickupDate.getTime() <= startDate.getTime()) {
+                    } else if (reservationData.selectedVehicleId === vehicleId && pickupDate.getTime() <= startDate.getTime()) {
                         processScheduleBar({
                             scheduleCellInstance: scheduleCellInstance,
                             reservationData: reservationData

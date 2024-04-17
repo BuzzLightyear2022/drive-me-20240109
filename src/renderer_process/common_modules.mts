@@ -144,3 +144,14 @@ export const convertToKatakana = (input: string): string => {
         return String.fromCharCode(chr);
     });
 }
+
+export const asyncAppendOptionElements = async (args: { selectElement: HTMLSelectElement, appendedOptionStrings: string[] }): Promise<void> => {
+    const { selectElement, appendedOptionStrings } = args;
+
+    await Promise.all(appendedOptionStrings.map(async (appendedOptionString: string) => {
+        const option: HTMLOptionElement = document.createElement("option");
+        option.textContent = appendedOptionString;
+        option.value = appendedOptionString;
+        selectElement.append(option);
+    }));
+}

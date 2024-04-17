@@ -3,7 +3,7 @@ import {
     CarCatalog,
     VehicleAttributes,
     Navigations,
-    LicensePlatesData,
+    LicensePlate,
     ReservationData,
     CarLocation,
     VehicleStatus
@@ -28,6 +28,12 @@ contextBridge.exposeInMainWorld(
         }
     }
 );
+
+contextBridge.exposeInMainWorld("systemTimezone", {
+    getSystemTimezone: async (): Promise<string> => {
+        return await ipcRenderer.invoke("systemTimezone:getSystemTimezone");
+    }
+});
 
 contextBridge.exposeInMainWorld(
     "login", {
@@ -61,7 +67,7 @@ contextBridge.exposeInMainWorld(
         vehicleInputWindow: (): void => {
             ipcRenderer.send("openWindow:vehicleInputWindow");
         },
-        reservationInputWindow: (): void => {
+        handleReservationWindow: (): void => {
             ipcRenderer.send("openWindow:reservationInputWindow");
         },
         displayReservationWindow: (): void => {
@@ -88,7 +94,7 @@ contextBridge.exposeInMainWorld(
         carModels: async (args: { selectedSmoking: string, selectedRentalClass: string }): Promise<string[]> => {
             return await ipcRenderer.invoke("sqlSelect:carModels", args);
         },
-        licensePlates: async (args: { selectedSmoking: string, selectedCarModel: string }): Promise<LicensePlatesData> => {
+        licensePlates: async (args: { selectedSmoking: string, selectedCarModel: string }): Promise<LicensePlate> => {
             return await ipcRenderer.invoke("sqlSelect:licensePlates", args);
         },
         reservationData: async (args: { startDate: Date, endDate: Date }) => {
@@ -144,6 +150,13 @@ contextBridge.exposeInMainWorld(
         },
         scheduleCell: async (vehicleId: number) => {
             ipcRenderer.send("contextmenu:schedule-cell", vehicleId)
+        },
+        getCrudArgs: async () => {
+            return new Promise((resolve, reject) => {
+                ipcRenderer.on("contextmenu:getCrudArgs", (event: Electron.IpcRendererEvent, args) => {
+                    resolve(args);
+                });
+            });
         },
         getReservationId: async () => {
             return new Promise((resolve, reject) => {

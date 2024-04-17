@@ -20,6 +20,8 @@ const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST;
 const port: string = import.meta.env.VITE_HTTPS_PORT;
 // @ts-ignore
 const imageDirectory: string = import.meta.env.VITE_IMAGE_DIRECTORY;
+// @ts-ignore
+const systemTimezone: string = import.meta.env.VITE_TZ;
 
 app.on("ready", WindowHandler.createLoginWindow);
 
@@ -33,4 +35,8 @@ ipcMain.handle("serverInfo:port", (): string => {
 
 ipcMain.handle("serverInfo:imageDirectory", (): string => {
     return imageDirectory;
+});
+
+ipcMain.handle("systemTimezone:getSystemTimezone", (): string => {
+    return systemTimezone;
 });

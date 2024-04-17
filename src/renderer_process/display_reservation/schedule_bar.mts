@@ -8,7 +8,6 @@ export const ScheduleBar = class {
     reservationData: ReservationData;
     startMsOfCalendar: number;
     endMsOfCalendar: number;
-    // totalMsOfCalendar: number;
     previousScheduleBarWidth: number;
     scheduleBarColor: string
 
@@ -16,7 +15,6 @@ export const ScheduleBar = class {
         reservationData: ReservationData,
         startMsOfCalendar: number,
         endMsOfCalendar: number,
-        // totalMsOfCalendar: number,
         previousScheduleBarWidth: number,
         scheduleBarColor: string
     }) {
@@ -24,7 +22,6 @@ export const ScheduleBar = class {
             reservationData,
             startMsOfCalendar,
             endMsOfCalendar,
-            // totalMsOfCalendar,
             previousScheduleBarWidth,
             scheduleBarColor
         } = args;
@@ -32,7 +29,6 @@ export const ScheduleBar = class {
         this.reservationData = reservationData;
         this.startMsOfCalendar = startMsOfCalendar;
         this.endMsOfCalendar = endMsOfCalendar;
-        // this.totalMsOfCalendar = totalMsOfCalendar;
         this.previousScheduleBarWidth = previousScheduleBarWidth;
         this.scheduleBarColor = scheduleBarColor;
     }
@@ -142,7 +138,7 @@ export const ScheduleBar = class {
                     display: "flex",
                     padding: "1em"
                 });
-                reservationNameDiv.textContent = `${this.reservationData.applicantName} 様`;
+                reservationNameDiv.textContent = `${this.reservationData.userName} 様`;
 
                 return reservationNameDiv;
             }

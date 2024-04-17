@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, screen, Menu } from "electron";
+import { BrowserWindow, screen } from "electron";
 import path from "path";
 import { Windows } from "../@types/types";
 import { ContextmenuHandler } from "./contextmenu_handler.mjs";
@@ -97,7 +97,7 @@ export class WindowHandler {
         }
     }
 
-    static createInsertReservationWindow = (vehicleId?: number): void => {
+    static createHandleReservationWindow = (args: { vehicleId?: number, reservationId?: number, crudAction: string }): void => {
         const win: BrowserWindow = new BrowserWindow({
             width: 1000,
             height: 800,
@@ -109,18 +109,16 @@ export class WindowHandler {
         win.webContents.openDevTools();
 
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/insert_reservation.html`);
+            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/handle_reservation.html`);
             WindowHandler.windows.insertReservationWindow = win;
         } else {
-            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/insert_reservation.html`));
+            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/handle_reservation.html`));
             WindowHandler.windows.insertReservationWindow = win;
         }
 
-        if (vehicleId) {
-            win.webContents.on("dom-ready", () => {
-                win.webContents.send("contextmenu:getVehicleId", vehicleId);
-            });
-        }
+        win.webContents.on("dom-ready", () => {
+            win.webContents.send("contextmenu:getCrudArgs", args);
+        });
     }
 
     static createEditReservationWindow = (reservationId: string): void => {
@@ -133,7 +131,7 @@ export class WindowHandler {
                 },
             });
 
-            // win.webContents.openDevTools();
+            win.webContents.openDevTools();
 
             if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
                 win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_reservation.html`);

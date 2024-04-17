@@ -1,10 +1,11 @@
-import { CarCatalog, LicensePlatesData, ReservationData, Navigations, VehicleAttributes, VehicleAttributesArray, VehicleStatus } from "../types";
-import { VehicleStatus } from "./types";
-
 export interface serverInfo {
     serverHost: () => Promise<string>;
     port: () => Promise<string>;
     imageDirectory: () => Promise<string>;
+}
+
+export interface systemTimezone {
+    getSystemTimezone: () => Promise<string>;
 }
 
 export interface login {
@@ -25,7 +26,7 @@ export interface fetchJson {
     carCatalog: () => Promise<CarCatalog | unknown>;
     navigations: () => Promise<Navigations | unknown>;
     carLocation: () => Promise<CarLocation | unknown>;
-    selectOptions: () => Promise<JSON | unknown>;
+    selectOptions: () => Promise<SelectOptions | unknown>;
 }
 
 export interface sqlSelect {
@@ -59,6 +60,7 @@ export interface contextmenu {
     getVehicleId: () => Promise<number>;
     updateReservationData: (callback: () => void) => void;
     updateVehicleAttributes: (callback: () => void) => void;
+    getCrudArgs: () => any;
 }
 
 export interface webSocket {
@@ -85,6 +87,7 @@ export interface accessToken {
 declare global {
     interface Window {
         serverInfo: serverInfo;
+        systemTimezone: systemTimezone;
         login: login;
         openWindow: openWindow;
         fetchJson: fetchJson;

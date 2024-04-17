@@ -15,7 +15,7 @@ export class ContextmenuHandler {
                 submenu: [
                     {
                         label: "新規予約",
-                        click: () => WindowHandler.createInsertReservationWindow()
+                        click: () => WindowHandler.createHandleReservationWindow({ crudAction: "create" })
                     },
                     {
                         label: "予約一覧"
@@ -60,7 +60,7 @@ export class ContextmenuHandler {
                 {
                     label: "新規予約",
                     click: async () => {
-                        WindowHandler.createInsertReservationWindow(vehicleId);
+                        WindowHandler.createHandleReservationWindow({ vehicleId: vehicleId, crudAction: "create" });
                     },
                 },
                 {
@@ -80,7 +80,7 @@ export class ContextmenuHandler {
             const contextMenu = Menu.buildFromTemplate([
                 {
                     label: "予約変更",
-                    click: async () => WindowHandler.createEditReservationWindow(reservationId)
+                    click: async () => WindowHandler.createHandleReservationWindow({ reservationId: Number(reservationId), crudAction: "update" })
                 },
                 {
                     label: "キャンセル",

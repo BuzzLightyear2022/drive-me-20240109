@@ -14,7 +14,7 @@ export type Windows = {
 }
 
 export type CarCatalog = {
-    rentalClass: {
+    rentalClasses: {
         [rentalClassName: string]: {
             [carModel: string]: {
                 modelCode?: string[],
@@ -95,10 +95,11 @@ export type ReservationData = {
     updatedAt: datetime
 }
 
-export type LicensePlatesData = Array<{
+export type LicensePlate = {
     id: number,
-    licensePlate: string
-}>
+    licensePlate: string,
+    nonSmoking: boolean
+}
 
 export type Navigations = {
     navigations: string[]
@@ -134,4 +135,17 @@ export type VehicleStatus = {
     comment: string,
     createdAt: Datetime,
     updatedAt: Datetime
+}
+
+interface Branch {
+    phoneNumber: number
+}
+
+export type SelectOptions = {
+    branches: {
+        [branchName: string]: { phoneNumber: number }
+    },
+    staffMembers: string[],
+    orderSources: string[],
+    flightCarriers: string[]
 }

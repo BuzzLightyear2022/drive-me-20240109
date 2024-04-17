@@ -8,90 +8,241 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net/ data:">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <link rel="stylesheet" href="../src/css/edit_reservation.css">
+    <link rel="stylesheet" href="../src/css/insert_reservation.css">
 </head>
 
 <body>
-    <div id="reservation-input-form" class="form-floating p-3">
-        <h1>予約情報を更新します</h1>
+    <div class="container">
+
+        <h1 class="title mt-4 mb-4">予約情報を入力してください</h1>
+
         <div class="row">
-            <div class="col-md">
-                <div class="form-floating p-1">
-                    <input type="text" class="form-control" id="reservation-name" placeholder="予約者名">
-                    <label for="reservation-name">予約者名</label>
-                </div>
-            </div>
-            <div class="col-md align-self-center">
-                <div class="p-1" id="rental-category-container">
-                    <input type="radio" class="btn-check" id="general-rental" name="rental-category"
-                        value="general-rental" autocomplete="off" checked>
-                    <label for="general-rental" class="btn btn-outline-primary">一般貸出</label>
-                    <input type="radio" class="btn-check" id="loaner-rental" name="rental-category"
-                        value="loaner-rental" autocomplete="off">
-                    <label for="loaner-rental" class="btn btn-outline-secondary">損保代車</label>
-                    <input type="radio" class="btn-check" id="booking" name="rental-category" value="booking"
-                        autocomplete="off">
-                    <label for="booking" class="btn btn-outline-danger">仮押さえ</label>
+            <div class="col"></div>
+            <div class="col">
+                <div class="input-group">
+                    <div class="form-check">
+                        <input class="form-check-input" id="is-replied-check" type="checkbox">
+                        <label class="form-check-label" for="is-replied-check">メール返信済</label>
+                    </div>
                 </div>
             </div>
         </div>
+
         <div class="row">
-            <div class="col-md">
-                <div class="form-floating p-1">
-                    <select class="form-select" id="pickup-location">
-                        <option>本店</option>
-                        <option>駅前店</option>
-                        <option>空港店</option>
-                    </select>
-                    <label for="#pickup-location">出発店舗</label>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">受注日</span>
+                    <input class="form-control" id="reception-date" type="date">
                 </div>
             </div>
-            <div class="col-md">
-                <div class="form-floating p-1">
-                    <select class="form-select" id="return-location">
-                        <option>本店</option>
-                        <option>駅前店</option>
-                        <option>空港店</option>
-                    </select>
-                    <label for="#return-location">帰着店舗</label>
+            <div class="col">
+                <div class="row">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">返信日時</span>
+                        <input class="form-control" id="replied-datetime" type="datetime-local">
+                    </div>
                 </div>
             </div>
         </div>
+
         <div class="row">
-            <div class="col-md">
-                <div class="input-group p-1">
-                    <span class="input-group-text" for="#pickup-datetime">出発日時</span>
-                    <input class="form-control" id="pickup-datetime" type="datetime-local">
+            <div class="col mb-1">
+                <div class="form-floating">
+                    <select id="sales-branch" class="form-select"></select>
+                    <label for="sales-branch">申込営業所</label>
                 </div>
             </div>
-            <div class="col-md">
-                <div class="input-group p-1">
-                    <span class="input-group-text" for="#return-datetime">帰着日時</span>
-                    <input class="form-control" id="return-datetime" type="datetime-local">
+            <div class="col mb-1">
+                <div class="form-floating">
+                    <select class="form-select" id="order-handler"></select>
+                    <label for="order-handler">担当</label>
                 </div>
             </div>
         </div>
+
+        <hr>
+
+        <div class="row">
+            <div class="col mt-1 mb-3">
+                <div class="form-floating">
+                    <select class="form-select" id="order-source"></select>
+                    <label for="order-source">源泉</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="row">
+                    <div class="col mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text">フリガナ</span>
+                            <input type="text" class="form-control" id="furigana">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-form">
+                    <div>
+                        <input type="radio" class="btn-check" id="non-smoking-radio" name="non-smoking"
+                            value="non-smoking" autocomplete="off">
+                        <label for="non-smoking-radio" class="btn btn-outline-success">禁煙車</label>
+                        <input type="radio" class="btn-check" id="ok-smoking-radio" name="non-smoking"
+                            value="ok-smoking" autocomplete="off">
+                        <label for="ok-smoking-radio" class="btn btn-outline-danger">喫煙車</label>
+                        <input type="radio" class="btn-check" id="non-smoking-none-specification" name="non-smoking"
+                            value="none-specification" autocomplete="off" checked>
+                        <label for="non-smoking-none-specification" class="btn btn-outline-secondary">両適</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="input-group">
+                    <span class="input-group-text">使用者名</span>
+                    <input type="text" class="form-control" id="user-name">
+                </div>
+            </div>
+            <div class="col mb-3">
+                <div class="form-floating">
+                    <select class="form-select" id="preferred-rental-class"></select>
+                    <label for="preferred-rental-class">希望クラス</label>
+                </div>
+            </div>
+            <div class="col mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="is-elevatable">
+                    <label for="is-elevatable" class="form-check-label">クラスUP可</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="is-class-specified">
+                    <label for="is-class-specified" class="form-check-label">指定</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-3">
+                <div class="input-group">
+                    <span class="input-group-text">依頼者名</span>
+                    <input type="text" class="form-control" id="applicantName">
+                </div>
+            </div>
+            <div class="col mb-3">
+                <div class="form-floating">
+                    <select id="preferred-car-model" class="form-select"></select>
+                    <label for="preferred-car-model">希望車種</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <div class="input-group">
+                    <span class="input-group-text">〒</span>
+                    <input type="text" class="form-control" id="zip-code-first">
+                    <span class="input-group-text">-</span>
+                    <input type="text" class="form-control" id="zip-code-last">
+                </div>
+            </div>
+            <div class="col-md-9 mb-3">
+                <div class="input-group">
+                    <span class="input-group-text">住所</span>
+                    <input type="text" class="form-control" id="address">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-group mb-3">
+                <span class="input-group-text">連絡先</span>
+                <input type="text" class="form-control" id="phone-number">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-3">
+                <div class="form-floating">
+                    <select id="pickup-location" class="form-select"></select>
+                    <label for="pickup-location">出発営業所</label>
+                </div>
+            </div>
+            <div class="col mb-3">
+                <div class="form-floating">
+                    <select id="return-location" class="form-select"></select>
+                    <label for="return-location">帰着営業所</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-5 mb-3">
+                <div class="input-group">
+                    <span class="input-group-text">貸渡日時</span>
+                    <input type="datetime-local" class="form-control" id="pickup-datetime">
+                </div>
+            </div>
+            <div class="col mb-3">
+                <div class="form-floating">
+                    <select id="arrival-flight-carrier" class="form-select"></select>
+                    <label for="arrival-flight-carrier">到着便</label>
+                </div>
+            </div>
+            <div class="col mb-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="arrival-flight-number">
+                    <span class="input-group-text flight-number-span">便</span>
+                </div>
+            </div>
+            <div class="col mb-3">
+                <div class="input-group">
+                    <input class="form-control" type="time" id="arrival-flight-time">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-5 mb-3">
+                <div class="input-group has-validation">
+                    <span class="input-group-text">返却日時</span>
+                    <input type="datetime-local" class="form-control" id="return-datetime">
+                </div>
+            </div>
+            <div class="col mb-3">
+                <div class="form-floating">
+                    <select id="departure-flight-carrier" class="form-select"></select>
+                    <label for="departure-flight-carrier">出発便</label>
+                </div>
+            </div>
+            <div class="col mb-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="departure-flight-number">
+                    <span class="input-group-text flight-number-span">便</span>
+                </div>
+            </div>
+            <div class="col mb-3">
+                <div class="input-group">
+                    <input type="time" class="form-control" id="departure-flight-time">
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <h3 class="title">使用車種・車番</h3>
+
         <div class="row">
             <div class="col-md">
                 <div class="form-floating p-1">
-                    <select class="form-select" id="rental-class-select">
+                    <select class="form-select" id="rental-class">
                     </select>
                     <label for="rental-class-select">クラス</label>
                 </div>
             </div>
-            <div class="col-md align-self-center">
-                <div class="p-1" id="non-smoking-container">
-                    <input type="radio" class="btn-check" id="non-smoking-radio" name="non-smoking" value="non-smoking"
-                        autocomplete="off">
-                    <label for="non-smoking-radio" class="btn btn-outline-success">禁煙車</label>
-                    <input type="radio" class="btn-check" id="ok-smoking-radio" name="non-smoking" value="ok-smoking"
-                        autocomplete="off">
-                    <label for="ok-smoking-radio" class="btn btn-outline-danger">喫煙車</label>
-                    <input type="radio" class="btn-check" id="non-smoking-none-specification" name="non-smoking"
-                        value="none-specification" autocomplete="off" checked>
-                    <label for="non-smoking-none-specification" class="btn btn-outline-secondary">指定なし</label>
-                </div>
-            </div>
+
         </div>
         <div class="form-floating p-1">
             <select id="car-model" class="form-select"></select>
@@ -101,10 +252,18 @@
             <select id="license-plate" class="form-select"></select>
             <label for="license-plate">ナンバー</label>
         </div>
-        <div class="form-floating p-1">
-            <textarea class="form-control" id="comment-textarea" placeholder="連絡事項・その他"></textarea>
-            <label for="comment-textarea">連絡事項・その他</label>
+
+        <hr>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-floating">
+                    <textarea id="comment-textarea" class="form-control"></textarea>
+                    <label for="comment-textarea">通信欄</label>
+                </div>
+            </div>
         </div>
+
         <button class="btn btn-primary m-1" id="submit-button">送信</button>
     </div>
 
