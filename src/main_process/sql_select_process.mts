@@ -10,23 +10,6 @@ const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST;
 const port: string = import.meta.env.VITE_HTTPS_PORT;
 
 (async () => {
-    ipcMain.handle("sqlSelect:vehicleAttributes", async (event: Electron.IpcMainEvent) => {
-        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleAttributes`;
-        try {
-            const response: AxiosResponse = await axios.post(serverEndPoint, null, {
-                headers: {
-                    "Authorization": accessToken
-                },
-                withCredentials: true
-            });
-            return response.data;
-        } catch (error: unknown) {
-            return console.error(`Failed to select vehicleAttributes: ${error}`);
-        }
-    });
-})();
-
-(async () => {
     ipcMain.handle("sqlSelect:vehicleAttributesById", async (event: Electron.IpcMainEvent, args: { vehicleId: string }) => {
         const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleAttributesById`;
         try {
@@ -45,10 +28,10 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
 })();
 
 (async () => {
-    ipcMain.handle("sqlSelect:vehicleAttributesByRentalClass", async (event: Electron.IpcMainEvent, args: { rentalClass: string }) => {
-        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleAttributesByClass`;
+    ipcMain.handle("sqlSelect:rentalCars", async (event: Electron.IpcMainEvent, args: { rentalClass?: string }) => {
+        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/rentalCars`;
         try {
-            if (args.rentalClass === "全て") {
+            if (!args.rentalClass) {
                 const response: AxiosResponse = await axios.post(serverEndPoint, {
                     rentalClass: null
                 }, {
@@ -70,7 +53,7 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
                 return response.data;
             }
         } catch (error: unknown) {
-            return console.error(`Failed to select vehicleAttributes by class ${error}`);
+            return console.error(`Failed to select rentalCars ${error}`);
         }
     });
 })();
