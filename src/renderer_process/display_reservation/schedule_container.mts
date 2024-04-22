@@ -1,6 +1,6 @@
-import { ReservationData } from "../../@types/types";
-import { VehicleItem } from "./vehicle_item.mjs";
-import { DaysContainerType } from "./days_container.mjs";
+import { Reservation } from "../../@types/types";
+import { RentalCarItem } from "./rentalCar_item.mjs";
+import { DaysContainerType } from "./calendar_date.mjs";
 import { ScheduleCell, ScheduleCellType } from "./schedule_cell.mjs";
 import { ScheduleBar, ScheduleBarType } from "./schedule_bar.mjs";
 
@@ -10,6 +10,7 @@ export const ScheduleContainer = class {
     scheduleContainer: HTMLDivElement;
     daysContainer: DaysContainerType;
     scheduleCells: ScheduleCellType[] = [];
+    scheduleBars: ScheduleBarType[] = [];
 
     constructor(daysContainer: DaysContainerType) {
         this.daysContainer = daysContainer;
@@ -74,7 +75,6 @@ export const ScheduleContainer = class {
             scheduleCellInstance: ScheduleCellType,
             reservationData: ReservationData
         }) => {
-            console.log(true);
             const {
                 scheduleCellInstance,
                 reservationData

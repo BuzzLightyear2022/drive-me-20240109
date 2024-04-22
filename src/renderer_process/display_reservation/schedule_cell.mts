@@ -1,5 +1,5 @@
-import { VehicleItemType } from "./vehicle_item.mjs";
-import { DaysContainerType } from "./days_container.mjs";
+import { VehicleItemType } from "./rentalCar_item.mjs";
+import { DaysContainerType } from "./calendar_date.mjs";
 
 export type ScheduleCellType = InstanceType<typeof ScheduleCell>;
 

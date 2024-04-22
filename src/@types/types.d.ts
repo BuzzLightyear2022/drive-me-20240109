@@ -27,7 +27,7 @@ export type CarCatalog = {
     }
 }
 
-export type VehicleAttributes = {
+export type RentalCar = {
     id?: string,
     imageFileName?: string,
     carModel: string,
@@ -57,7 +57,7 @@ export type VehicleAttributes = {
     otherFeatures?: string
 }
 
-export type ReservationData = {
+export type Reservation = {
     id?: string
     isReplied: boolean,
     receptionDate: Date,

@@ -24,25 +24,9 @@ export const appendOptions = (
     }
 }
 
-export const getMonthName = (monthIndex: number): string => {
-    const monthNames: string[] = [
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "12"
-    ];
-    return monthNames[monthIndex];
-}
+export const getDayString = (args: { dayIndex: number }): string => {
+    const { dayIndex } = args;
 
-export const getDayName = (dayIndex: number): string => {
     const dayNames: string[] = [
         "日",
         "月",
@@ -52,6 +36,7 @@ export const getDayName = (dayIndex: number): string => {
         "金",
         "土"
     ]
+
     return dayNames[dayIndex];
 }
 

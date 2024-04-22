@@ -9,22 +9,22 @@ const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST;
 // @ts-ignore
 const port: string = import.meta.env.VITE_HTTPS_PORT;
 
-(async () => {
-    ipcMain.handle("sqlSelect:vehicleAttributes", async (event: Electron.IpcMainEvent) => {
-        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleAttributes`;
-        try {
-            const response: AxiosResponse = await axios.post(serverEndPoint, null, {
-                headers: {
-                    "Authorization": accessToken
-                },
-                withCredentials: true
-            });
-            return response.data;
-        } catch (error: unknown) {
-            return console.error(`Failed to select vehicleAttributes: ${error}`);
-        }
-    });
-})();
+// (async () => {
+// ipcMain.handle("sqlSelect:vehicleAttributes", async (event: Electron.IpcMainEvent) => {
+//     const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleAttributes`;
+//     try {
+//         const response: AxiosResponse = await axios.post(serverEndPoint, null, {
+//             headers: {
+//                 "Authorization": accessToken
+//             },
+//             withCredentials: true
+//         });
+//         return response.data;
+//     } catch (error: unknown) {
+//         return console.error(`Failed to select vehicleAttributes: ${error}`);
+//     }
+// });
+// })();
 
 (async () => {
     ipcMain.handle("sqlSelect:vehicleAttributesById", async (event: Electron.IpcMainEvent, args: { vehicleId: string }) => {
@@ -45,13 +45,11 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
 })();
 
 (async () => {
-    ipcMain.handle("sqlSelect:vehicleAttributesByRentalClass", async (event: Electron.IpcMainEvent, args: { rentalClass: string }) => {
-        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleAttributesByClass`;
+    ipcMain.handle("sqlSelect:rentalCars", async (event: Electron.IpcMainEvent, args: { rentalClass?: string }) => {
+        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/rentalCars`;
         try {
-            if (args.rentalClass === "全て") {
-                const response: AxiosResponse = await axios.post(serverEndPoint, {
-                    rentalClass: null
-                }, {
+            if (args.rentalClass) {
+                const response: AxiosResponse = await axios.post(serverEndPoint, args, {
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": accessToken
@@ -60,7 +58,9 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
                 });
                 return response.data;
             } else {
-                const response: AxiosResponse = await axios.post(serverEndPoint, args, {
+                const response: AxiosResponse = await axios.post(serverEndPoint, {
+                    rentalClass: null
+                }, {
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": accessToken
@@ -76,8 +76,8 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
 })();
 
 (async () => {
-    ipcMain.handle("sqlSelect:rentalClasses", async (event: Electron.IpcMainInvokeEvent, args: { selectedSmoking: string }) => {
-        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleAttributes/rentalClasses`;
+    ipcMain.handle("sqlSelect:existingRentalClasses", async (event: Electron.IpcMainInvokeEvent, args: { nonSmoking?: string }) => {
+        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/existingRentalClasses`;
         try {
             const response: AxiosResponse = await axios.post(serverEndPoint, args, {
                 headers: {

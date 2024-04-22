@@ -1,10 +1,10 @@
 import { contextBridge, ipcRenderer } from "electron";
 import {
     CarCatalog,
-    VehicleAttributes,
+    RentalCar,
     Navigations,
     LicensePlate,
-    ReservationData,
+    Reservation,
     CarLocation,
     VehicleStatus
 } from "./@types/types";
@@ -82,14 +82,14 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "sqlSelect",
     {
-        vehicleAttributes: async (): Promise<VehicleAttributes[]> => {
-            return await ipcRenderer.invoke("sqlSelect:vehicleAttributes")
+        rentalCars: async (args: { rentalClass?: string }): Promise<RentalCar[]> => {
+            return await ipcRenderer.invoke("sqlSelect:rentalCars", args);
+        },
+        existingRentalClasses: async (args: { nonSmoking?: string }): Promise<string[]> => {
+            return await ipcRenderer.invoke("sqlSelect:existingRentalClasses", args);
         },
         vehicleAttributesByRentalClass: async (args: { rentalClass: string }): Promise<VehicleAttributes[]> => {
             return await ipcRenderer.invoke("sqlSelect:vehicleAttributesByRentalClass", args);
-        },
-        rentalClasses: async (args: { selectedSmoking?: string }): Promise<string[]> => {
-            return await ipcRenderer.invoke("sqlSelect:rentalClasses", args);
         },
         carModels: async (args: { selectedSmoking: string, selectedRentalClass: string }): Promise<string[]> => {
             return await ipcRenderer.invoke("sqlSelect:carModels", args);
