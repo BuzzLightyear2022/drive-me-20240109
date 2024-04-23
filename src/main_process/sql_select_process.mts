@@ -9,23 +9,6 @@ const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST;
 // @ts-ignore
 const port: string = import.meta.env.VITE_HTTPS_PORT;
 
-// (async () => {
-// ipcMain.handle("sqlSelect:vehicleAttributes", async (event: Electron.IpcMainEvent) => {
-//     const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleAttributes`;
-//     try {
-//         const response: AxiosResponse = await axios.post(serverEndPoint, null, {
-//             headers: {
-//                 "Authorization": accessToken
-//             },
-//             withCredentials: true
-//         });
-//         return response.data;
-//     } catch (error: unknown) {
-//         return console.error(`Failed to select vehicleAttributes: ${error}`);
-//     }
-// });
-// })();
-
 (async () => {
     ipcMain.handle("sqlSelect:vehicleAttributesById", async (event: Electron.IpcMainEvent, args: { vehicleId: string }) => {
         const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleAttributesById`;
@@ -131,11 +114,11 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
 })();
 
 (async () => {
-    ipcMain.handle("sqlSelect:reservationData/filterByDateRange", async (event: Electron.IpcMainInvokeEvent, args: {
-        startDate: Date,
-        endDate: Date
+    ipcMain.handle("sqlSelect:reservations", async (event: Electron.IpcMainInvokeEvent, args: {
+        startDate?: Date,
+        endDate?: Date
     }) => {
-        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/reservationData/filterByDateRange`;
+        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/reservations`;
 
         try {
             const response: AxiosResponse = await axios.post(serverEndPoint, args, {

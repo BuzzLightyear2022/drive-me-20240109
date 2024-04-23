@@ -57,7 +57,7 @@
     padding: 2%;
 }
 
-#days-container {
+#date-container {
     display: flex;
     grid-column: 2;
     grid-row: 1;
@@ -83,7 +83,7 @@
     display: none;
 }
 
-#schedule-container {
+#visual-schedule-container {
     display: flex;
     grid-column: 2;
     grid-row: 2;

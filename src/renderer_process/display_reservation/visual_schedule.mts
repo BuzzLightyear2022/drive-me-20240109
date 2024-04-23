@@ -1,21 +1,63 @@
 import { Reservation } from "../../@types/types";
 import { RentalCarItem } from "./rentalCar_item.mjs";
-import { DaysContainerType } from "./calendar_date.mjs";
-import { ScheduleCell, ScheduleCellType } from "./schedule_cell.mjs";
-import { ScheduleBar, ScheduleBarType } from "./schedule_bar.mjs";
+import { ScheduleCell } from "./schedule_cell.mjs";
+import { ScheduleBar } from "./schedule_bar.mjs";
 
-export type ScheduleContainerType = InstanceType<typeof ScheduleContainer>;
+export class VisualSchedule extends HTMLElement {
+    constructor(args: { calendarDateElement: Element }) {
+        const { calendarDateElement } = args;
 
-export const ScheduleContainer = class {
-    scheduleContainer: HTMLDivElement;
-    daysContainer: DaysContainerType;
-    scheduleCells: ScheduleCellType[] = [];
-    scheduleBars: ScheduleBarType[] = [];
+        super();
 
-    constructor(daysContainer: DaysContainerType) {
-        this.daysContainer = daysContainer;
-        // @ts-ignore
-        daysContainer.calendar.scheduleContainer = this;
+        const calendarDateWidth: number = calendarDateElement.getBoundingClientRect().width;
+
+        Object.assign(this.style, {
+            display: "flex",
+            flexDirection: "column",
+            minWidth: `${calendarDateWidth}px`,
+            whiteSpace: "nowrap"
+        });
+
+        this.appendScheduleCells();
+        this.appendScheduleBars({ calendarDateElement: calendarDateElement });
+    }
+
+    appendScheduleCells = (): void => {
+        const rentalCarItems: NodeListOf<Element> = document.querySelectorAll("rental-car-item");
+
+        rentalCarItems.forEach((rentalCarItem: Element) => {
+            const scheduleCell: ScheduleCell = new ScheduleCell({ rentalCarItem: rentalCarItem });
+            this.append(scheduleCell);
+        });
+    }
+
+    appendScheduleBars = async (args: { calendarDateElement: Element }) => {
+        const { calendarDateElement } = args;
+
+        const calendarStartTimestamp: number = Number(calendarDateElement.getAttribute("calendar-start-timestamp"));
+        const calendarEndTimestamp: number = Number(calendarDateElement.getAttribute("calendar-end-timestamp"));
+        const calendarStartDate: Date = new Date(calendarStartTimestamp);
+        const calendarEndDate: Date = new Date(calendarEndTimestamp);
+
+        const monthReservations: Reservation[] = await window.sqlSelect.reservations({ startDate: calendarStartDate, endDate: calendarEndDate });
+        const scheduleCells: HTMLCollection = this.children;
+
+        monthReservations.forEach((reservation: Reservation) => {
+            const selectedVehicleId: number = Number(reservation.selectedVehicleId);
+
+            for (let scheduleCell of scheduleCells) {
+                const scheduleCellVehicleId: number = Number(scheduleCell.getAttribute("data-vehicle-id"));
+
+                if (selectedVehicleId === scheduleCellVehicleId) {
+                    // rewritable
+                    const rentalScheduleCell: ChildNode = scheduleCell.childNodes[0];
+                    const scheduleBar: ScheduleBar = new ScheduleBar({ calendarDateElement: calendarDateElement, reservation: reservation });
+
+                    rentalScheduleCell.appendChild(scheduleBar);
+                }
+
+            }
+        });
     }
 
     createScheduleContainer = async () => {
@@ -152,3 +194,5 @@ export const ScheduleContainer = class {
         this.daysContainer.calendar.updateReservationEventId = eventId;
     }
 }
+
+customElements.define("visual-schedule", VisualSchedule);

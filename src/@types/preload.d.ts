@@ -36,7 +36,7 @@ export interface sqlSelect {
     vehicleAttributesByRentalClass: (args: { rentalClass: string }) => Promise<VehicleAttributes>;
     carModels: (args: { selectedSmoking: string, selectedRentalClass: string }) => Promise<string[]>;
     licensePlates: (args: { selectedSmoking: string, selectedCarModel: string }) => Promise<LicensePlatesData>;
-    reservationData: (args: { startDate: Date, endDate: Date }) => Promise<>;
+    reservations: (args: { startDate?: Date, endDate?: Date }) => Promise<Reservation[]>;
     reservationDataById: (args: { reservationId: number }) => Promise<ReservationData>;
     latestVehicleStatuses: (args: { rentalClass?: string }) => Promise<any>;
 }

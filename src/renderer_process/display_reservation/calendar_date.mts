@@ -1,40 +1,20 @@
 import { getDayString } from "../common_modules.mjs";
-import { ScheduleContainerType } from "./schedule_container.mjs";
-
-const windowContainer: HTMLDivElement = document.querySelector("#window-container");
-const tableHeader: HTMLDivElement = document.querySelector("#table-header");
-const monthDisplay: HTMLDivElement = document.querySelector("#month-display");
-
-// export type DaysContainerType = InstanceType<typeof DaysContainer>;
-
-// export type Calendar = {
-//     daysContainer: DaysContainerType,
-//     scheduleContainer: ScheduleContainerType,
-//     intersectionObserver: IntersectionObserver,
-//     updateReservationEventId: number
-// }
 
 export class CalendarDate extends HTMLElement {
-    // static calendars: Calendar[] = [];
-    // static previousMonthDiff: number = 0;
-    // static nextMonthDiff: number = 2;
-    // static isFirstElementVisible: boolean = false;
-    // static isThirdElementVisible: boolean = false;
-
-    // calendar: Calendar = {
-    //     daysContainer: this,
-    //     scheduleContainer: undefined,
-    //     intersectionObserver: undefined,
-    //     updateReservationEventId: undefined
-    // }
-
-    // daysContainer: HTMLDivElement;
-    // dateObject: Date;
-
     constructor(args: { dateObject: Date }) {
         super();
 
         const { dateObject } = args;
+
+        const calendarYear: number = dateObject.getFullYear();
+        const calendarMonthIndex: number = dateObject.getMonth();
+        const calendarDays: number = new Date(calendarYear, calendarMonthIndex + 1, 0).getDate();
+
+        const calendarStartTimestamp: string = String(new Date(calendarYear, calendarMonthIndex, 1, 0, 0, 0, 0).getTime());
+        const calendarEndTimestamp: string = String(new Date(calendarYear, calendarMonthIndex + 1, 0, 23, 59, 59, 999).getTime());
+
+        this.setAttribute("calendar-start-timestamp", calendarStartTimestamp);
+        this.setAttribute("calendar-end-timestamp", calendarEndTimestamp);
 
         Object.assign(this.style, {
             display: "flex",
@@ -47,11 +27,6 @@ export class CalendarDate extends HTMLElement {
         });
 
         (async () => {
-            const calendarYear: number = dateObject.getFullYear();
-            const calendarMonthIndex: number = dateObject.getMonth();
-
-            const calendarDays: number = new Date(calendarYear, calendarMonthIndex + 1, 0).getDate();
-
             const holidays: string[] | undefined = await this.getHolidays();
 
             for (let date = 1; date <= calendarDays; date++) {
@@ -64,7 +39,8 @@ export class CalendarDate extends HTMLElement {
                     lineHeight: "200%",
                     fontSize: "150%",
                     border: "solid",
-                    borderWidth: "1px 0.5px",
+                    marginLeft: "-1px",
+                    borderWidth: "1px",
                     cursor: "default",
                     userSelect: "none"
                 });
@@ -72,7 +48,9 @@ export class CalendarDate extends HTMLElement {
                 const dayIndex: number = new Date(calendarYear, calendarMonthIndex, date).getDay();
                 const dayString: string = getDayString({ dayIndex: dayIndex });
 
-                dateCell.textContent = date === 1 ? `${calendarMonthIndex + 1}/${date}(${dayString})` : `${date}(${dayString}))`;
+                dateCell.textContent = date === 1 ? `${calendarMonthIndex + 1}/${date}(${dayString})` : `${date}(${dayString})`;
+
+                this.append(dateCell);
             }
         })();
     }
@@ -244,4 +222,4 @@ export class CalendarDate extends HTMLElement {
     // }
 }
 
-customElements.define("days", CalendarDate);
+customElements.define("calendar-date", CalendarDate);

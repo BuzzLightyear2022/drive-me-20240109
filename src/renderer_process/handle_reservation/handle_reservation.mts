@@ -1,6 +1,6 @@
 import { appendOptions, setRadioValue, getRadioValue, convertToKatakana, replaceFullWidthNumToHalfWidthNum, asyncAppendOptionElements, formatDateForInput } from "../common_modules.mjs";
 import { updateCarOptions, appendCarOptions } from "./handle_reservation_module.mjs";
-import { VehicleAttributes, ReservationData, LicensePlate, CarCatalog, SelectOptions } from "../../@types/types";
+import { RentalCar, Reservation, LicensePlate, CarCatalog, SelectOptions } from "../../@types/types";
 
 const isRepliedCheck: HTMLInputElement = document.querySelector("#replied-check");
 const receptionDateInput: HTMLInputElement = document.querySelector("#reception-date");
@@ -185,7 +185,7 @@ returnDatetimeInput.addEventListener("change", () => {
             receptionDateInput.value = todayString;
 
             if (crudArgs.vehicleId) {
-                const vehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: crudArgs.vehicleId });
+                const vehicleAttributes: RentalCar = await window.sqlSelect.vehicleAttributesById({ vehicleId: crudArgs.vehicleId });
 
                 const rentalClassOption: HTMLOptionElement = document.createElement("option");
                 rentalClassOption.textContent = vehicleAttributes.rentalClass;
@@ -211,7 +211,7 @@ returnDatetimeInput.addEventListener("change", () => {
             }
             break;
         case "update":
-            const existingReservationData: ReservationData = await window.sqlSelect.reservationDataById({ reservationId: crudArgs.reservationId });
+            const existingReservationData: Reservation = await window.sqlSelect.reservationDataById({ reservationId: crudArgs.reservationId });
 
             isRepliedCheck.checked = existingReservationData.isReplied;
             receptionDateInput.value = String(existingReservationData.receptionDate);
@@ -277,7 +277,7 @@ returnDatetimeInput.addEventListener("change", () => {
         const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-specification" });
         const repliedDatetime = isRepliedCheck.checked ? new Date(repliedDateInput.value) : null;
 
-        const reservationData: ReservationData = {
+        const reservationData: Reservation = {
             isReplied: isRepliedCheck.checked,
             receptionDate: new Date(receptionDateInput.value),
             repliedDatetime: repliedDatetime,

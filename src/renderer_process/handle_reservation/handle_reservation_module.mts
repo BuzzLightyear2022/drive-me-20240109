@@ -1,14 +1,14 @@
-import { LicensePlate, ReservationData } from "../../@types/types";
+import { LicensePlate, Reservation } from "../../@types/types";
 import { asyncAppendOptionElements } from "../common_modules.mjs";
 
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class");
 const carModelSelect: HTMLSelectElement = document.querySelector("#car-model");
 const vehicleIdSelect: HTMLSelectElement = document.querySelector("#license-plate");
 
-export const appendCarOptions = async (args: { existingReservationData?: ReservationData }) => {
+export const appendCarOptions = async (args: { existingReservationData?: Reservation }) => {
     const { existingReservationData } = args;
 
-    const rentalClassOptions: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: null });
+    const rentalClassOptions: string[] = await window.sqlSelect.existingRentalClasses({ selectedSmoking: null });
     await asyncAppendOptionElements({ selectElement: rentalClassSelect, appendedOptionStrings: rentalClassOptions });
 
     if (existingReservationData) {

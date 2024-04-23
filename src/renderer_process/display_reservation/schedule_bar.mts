@@ -1,36 +1,46 @@
-import { ReservationData } from "../../@types/types";
+import { Reservation } from "../../@types/types";
+import { CalendarDate } from "./calendar_date.mjs";
 
-export type ScheduleBarType = InstanceType<typeof ScheduleBar>;
+export class ScheduleBar extends HTMLElement {
+    constructor(args: { calendarDateElement: Element, reservation: Reservation }) {
+        super();
 
-export const ScheduleBar = class {
-    scheduleBarElement: HTMLDivElement;
-    modalBackground: HTMLDivElement;
-    reservationData: ReservationData;
-    startMsOfCalendar: number;
-    endMsOfCalendar: number;
-    previousScheduleBarWidth: number;
-    scheduleBarColor: string
+        const { calendarDateElement, reservation } = args;
 
-    constructor(args: {
-        reservationData: ReservationData,
-        startMsOfCalendar: number,
-        endMsOfCalendar: number,
-        previousScheduleBarWidth: number,
-        scheduleBarColor: string
-    }) {
-        const {
-            reservationData,
-            startMsOfCalendar,
-            endMsOfCalendar,
-            previousScheduleBarWidth,
-            scheduleBarColor
-        } = args;
+        const calendarStartTimestamp: number = Number(calendarDateElement.getAttribute("calendar-start-timestamp"));
+        const calendarEndTimestamp: number = Number(calendarDateElement.getAttribute("calendar-end-timestamp"));
 
-        this.reservationData = reservationData;
-        this.startMsOfCalendar = startMsOfCalendar;
-        this.endMsOfCalendar = endMsOfCalendar;
-        this.previousScheduleBarWidth = previousScheduleBarWidth;
-        this.scheduleBarColor = scheduleBarColor;
+        const totalMsOfCalendar: number = calendarEndTimestamp - calendarStartTimestamp;
+
+        const pickupDateMs: number = new Date(reservation.pickupDatetime).getTime();
+        const returnDateMs: number = new Date(reservation.returnDatetime).getTime();
+
+        const diffInTime: number = returnDateMs - pickupDateMs;
+        const relativeWidth = `${(diffInTime / totalMsOfCalendar) * 100}%`;
+        const diffFromStart = `${((pickupDateMs - calendarStartTimestamp) / totalMsOfCalendar) * 100}%`
+
+        Object.assign(this.style, {
+            display: "flex",
+            flexDirection: "row",
+            position: "relative",
+            width: relativeWidth,
+            height: "100%",
+            left: diffFromStart,
+            backgroundColor: "green",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            border: "none",
+            cursor: "default",
+            userSelect: "none"
+        });
+
+        this.className = "card";
+    }
+
+    scheduleBarWidth = (args: { calendarDateElement: Element, reservation: Reservation }): string => {
+        const { calendarDateElement, reservation } = args;
+
+
     }
 
     createScheduleBar = (): void => {
@@ -309,3 +319,5 @@ export const ScheduleBar = class {
         // code to display modal widow goes on here.
     }
 }
+
+customElements.define("schedule-bar", ScheduleBar);

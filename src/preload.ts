@@ -97,8 +97,8 @@ contextBridge.exposeInMainWorld(
         licensePlates: async (args: { selectedSmoking: string, selectedCarModel: string }): Promise<LicensePlate> => {
             return await ipcRenderer.invoke("sqlSelect:licensePlates", args);
         },
-        reservationData: async (args: { startDate: Date, endDate: Date }) => {
-            return await ipcRenderer.invoke("sqlSelect:reservationData/filterByDateRange", args);
+        reservations: async (args: { startDate?: Date, endDate?: Date }) => {
+            return await ipcRenderer.invoke("sqlSelect:reservations", args);
         },
         reservationDataById: async (args: { reservationId: number }) => {
             return await ipcRenderer.invoke("sqlSelect:reservationDataById", args);

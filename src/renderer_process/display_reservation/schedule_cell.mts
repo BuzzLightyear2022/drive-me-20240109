@@ -1,85 +1,47 @@
-import { VehicleItemType } from "./rentalCar_item.mjs";
-import { DaysContainerType } from "./calendar_date.mjs";
+export class ScheduleCell extends HTMLElement {
+    constructor(args: { rentalCarItem: Element }) {
+        super();
 
-export type ScheduleCellType = InstanceType<typeof ScheduleCell>;
+        const { rentalCarItem } = args;
 
-export const ScheduleCell = class {
-    static instances: ScheduleCellType[] = [];
+        const rentalCarItemId: string = rentalCarItem.getAttribute("data-vehicle-id");
+        this.setAttribute("data-vehicle-id", rentalCarItemId);
 
-    scheduleCell: HTMLDivElement;
-    scheduleDivs: {
-        reservationScheduleDiv: HTMLDivElement | undefined,
-        maintenanceScheduleDiv: HTMLDivElement | undefined
-    } = {
-            reservationScheduleDiv: undefined,
-            maintenanceScheduleDiv: undefined
-        }
+        const rentalCarItemHeight: number = rentalCarItem.getBoundingClientRect().height;
 
-    vehicleItem: VehicleItemType;
-    daysContainer: DaysContainerType;
-
-    width: string;
-    height: string;
-
-    constructor(vehicleItem: VehicleItemType) {
-        this.vehicleItem = vehicleItem
-
-        ScheduleCell.instances.push(this);
-    }
-
-    createScheduleCell = async (): Promise<void> => {
-        const daysContainerElm: HTMLDivElement = this.daysContainer.daysContainer;
-        const daysContainerWidth: number = daysContainerElm.getBoundingClientRect().width;
-
-        const vehicleItemElm: HTMLDivElement = this.vehicleItem.vehicleItem;
-        const vehicleItemHeight: number = vehicleItemElm.getBoundingClientRect().height;
-
-        this.scheduleCell = document.createElement("div");
-        Object.assign(this.scheduleCell.style, {
+        Object.assign(this.style, {
             display: "flex",
             flexDirection: "column",
-            minWidth: `${daysContainerWidth}px`,
-            minHeight: `${vehicleItemHeight}px`,
+            minHeight: `${rentalCarItemHeight}px`,
             border: "solid",
             borderWidth: "1px",
             marginTop: "-1px",
+            marginLeft: "-1px",
             whiteSpace: "nowrap",
             overflow: "visible"
         });
 
-        const InnerScheduleDiv = (): HTMLDivElement => {
-            const innerScheduleDiv: HTMLDivElement = document.createElement("div");
-            Object.assign(innerScheduleDiv.style, {
-                display: "flex",
-                flexDirection: "row",
-                width: "100%",
-                height: "50%"
-            });
+        this.appendInnerScheduleCells();
+    }
 
-            return innerScheduleDiv;
+    appendInnerScheduleCells = (): void => {
+        const innerScheduleCellStyle = {
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            height: "50%"
         }
 
-        this.scheduleDivs.reservationScheduleDiv = InnerScheduleDiv();
-        this.scheduleDivs.maintenanceScheduleDiv = InnerScheduleDiv();
+        const rentalScheduleCell: HTMLDivElement = document.createElement("div");
+        Object.assign(rentalScheduleCell.style, innerScheduleCellStyle);
+        rentalScheduleCell.setAttribute("schedule-category", "rental");
 
-        this.scheduleCell.append(this.scheduleDivs.reservationScheduleDiv, this.scheduleDivs.maintenanceScheduleDiv);
+        const maintenanceScheduleCell: HTMLDivElement = document.createElement("div");
+        Object.assign(maintenanceScheduleCell.style, innerScheduleCellStyle);
+        maintenanceScheduleCell.setAttribute("schedule-category", "maintenance");
 
-        this.scheduleCell.addEventListener("contextmenu", (event: any) => {
-            const vehicleId: number = this.vehicleItem.vehicleAttributes.id;
-            window.contextmenu.scheduleCell(vehicleId);
-        }, false);
-    }
-
-    handleWindowResize = (args: {
-        width: string,
-        height: string
-    }): void => {
-        const { width, height } = args;
-
-        this.width = width;
-        this.height = height;
-
-        this.scheduleCell.style.minWidth = this.width;
-        this.scheduleCell.style.minHeight = this.height;
+        this.append(rentalScheduleCell, maintenanceScheduleCell);
     }
 }
+
+customElements.define("schedule-cell", ScheduleCell);
