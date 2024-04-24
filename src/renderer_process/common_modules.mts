@@ -156,3 +156,14 @@ export const formatDateForInput = (args: { dateObject: Date }): string => {
 
     return dateString;
 }
+
+export const getTimeString = (args: { dateObject: Date }): string => {
+    const { dateObject } = args;
+
+    const hours: number = dateObject.getHours();
+    const minutes: number = dateObject.getMinutes();
+
+    const minutesString: string = String(minutes).padStart(2, "0");
+
+    return `${hours}:${minutes}`;
+}

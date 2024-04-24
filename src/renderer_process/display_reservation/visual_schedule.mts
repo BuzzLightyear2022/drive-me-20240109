@@ -47,15 +47,12 @@ export class VisualSchedule extends HTMLElement {
 
             for (let scheduleCell of scheduleCells) {
                 const scheduleCellVehicleId: number = Number(scheduleCell.getAttribute("data-vehicle-id"));
+                const innerScheduleCell = scheduleCell.firstChild;
 
                 if (selectedVehicleId === scheduleCellVehicleId) {
-                    // rewritable
-                    const rentalScheduleCell: ChildNode = scheduleCell.childNodes[0];
                     const scheduleBar: ScheduleBar = new ScheduleBar({ calendarDateElement: calendarDateElement, reservation: reservation });
-
-                    rentalScheduleCell.appendChild(scheduleBar);
+                    innerScheduleCell.appendChild(scheduleBar);
                 }
-
             }
         });
     }
