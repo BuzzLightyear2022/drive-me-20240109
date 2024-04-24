@@ -64,6 +64,33 @@ const appendVisualSchedule = (): void => {
     visualScheduleContainer.append(previousMonthVisualSchedule, currentMonthVisualSchedule, nextMonthVisualSchedule);
 }
 
+const handleInitialScrollPosition = () => {
+    let totalCalendarWidth: number = 0;
+    let totalCalendarDays: number = 0;
+
+    const calendarDateElements: HTMLCollection = dateContainer.children;
+    for (let calendarDateElement of calendarDateElements) {
+        const calendarDateElementWidth: number = calendarDateElement.getBoundingClientRect().width;
+        totalCalendarWidth += calendarDateElementWidth;
+
+        const dayCells: HTMLCollection = calendarDateElement.children;
+        const calendarDays: number = dayCells.length;
+        totalCalendarDays += calendarDays;
+    }
+
+    const todayDate: number = new Date().getDate();
+    const firstCalendarDate: ChildNode = dateContainer.firstChild;
+    const datesOfFirstCalendar: number = firstCalendarDate.childNodes.length;
+
+    const eachDayWidth: number = totalCalendarWidth / totalCalendarDays;
+    const todayPosition: number = ((datesOfFirstCalendar + todayDate) * eachDayWidth) - (eachDayWidth / 2);
+
+    const calendarDateViewWidth: number = dateContainer.getBoundingClientRect().width;
+    const centerPosition: number = todayPosition - (calendarDateViewWidth / 2);
+
+    dateContainer.scrollLeft = centerPosition;
+}
+
 const calendarInitializer = async () => {
 
     // const previousMonthDaysContainerInstance: DaysContainerType = new DaysContainer(previousMonthDate, true);
@@ -449,4 +476,6 @@ window.webSocket.updateVehicleStatus(async () => {
     await appendRentalCarItems();
     await appendCalendarDateElements();
     appendVisualSchedule();
+
+    handleInitialScrollPosition();
 })();

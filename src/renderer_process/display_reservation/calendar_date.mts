@@ -6,6 +6,9 @@ export class CalendarDate extends HTMLElement {
 
         const { dateObject } = args;
 
+        const currentDateObject: Date = new Date();
+        const currentDate: Date = new Date(currentDateObject.getFullYear(), currentDateObject.getMonth(), currentDateObject.getDate());
+
         const calendarYear: number = dateObject.getFullYear();
         const calendarMonthIndex: number = dateObject.getMonth();
         const calendarDays: number = new Date(calendarYear, calendarMonthIndex + 1, 0).getDate();
@@ -45,10 +48,38 @@ export class CalendarDate extends HTMLElement {
                     userSelect: "none"
                 });
 
-                const dayIndex: number = new Date(calendarYear, calendarMonthIndex, date).getDay();
+                const dateCellDate: Date = new Date(calendarYear, calendarMonthIndex, date);
+
+                const dayIndex: number = dateCellDate.getDay();
                 const dayString: string = getDayString({ dayIndex: dayIndex });
 
                 dateCell.textContent = date === 1 ? `${calendarMonthIndex + 1}/${date}(${dayString})` : `${date}(${dayString})`;
+
+                if (currentDate.getTime() === dateCellDate.getTime()) {
+                    Object.assign(dateCell.style, {
+                        borderColor: "yellow",
+                        borderWidth: "10px",
+                        lineHeight: "calc(200% - 20px)"
+                    });
+                }
+
+                if (dayIndex === 0) {
+                    dateCell.style.background = "#ff0033";
+                } else if (dayIndex === 6) {
+                    dateCell.style.background = "#0582ff";
+                }
+
+                holidays.forEach((holiday: string) => {
+                    const holidayDate: Date = new Date(holiday);
+                    holidayDate.setHours(holidayDate.getHours() - 9);
+
+                    if (dateCellDate.getTime() === holidayDate.getTime()) {
+                        Object.assign(dateCell.style, {
+                            color: "black",
+                            background: "radial-gradient(circle closest-corner, rgba(255, 0, 0, 1) 25%, rgba(255, 255, 255, 1) 20%)"
+                        })
+                    }
+                });
 
                 this.append(dateCell);
             }
