@@ -2,10 +2,14 @@ import { Reservation } from "../../@types/types";
 import { getTimeString } from "../common_modules.mjs";
 
 export class ScheduleBar extends HTMLElement {
+    reservationId: string;
+
     constructor(args: { calendarDateElement: Element, reservation: Reservation }) {
         super();
 
         const { calendarDateElement, reservation } = args;
+
+        this.reservationId = reservation.id;
 
         const scheduleBarStyle = this.scheduleBarStyle({ calendarDateElement: calendarDateElement, reservation: reservation });
         Object.assign(this.style, scheduleBarStyle);
@@ -13,6 +17,14 @@ export class ScheduleBar extends HTMLElement {
 
         const scheduleBarLabel: HTMLDivElement = this.scheduleBarLabel({ reservation: reservation });
         this.append(scheduleBarLabel);
+
+        this.addEventListener("contextmenu", this.contextmenuHandler, false);
+    }
+
+    contextmenuHandler = {
+        handleEvent: (event: Event) => {
+            window.contextmenu.scheduleBar(this.reservationId);
+        }
     }
 
     scheduleBarStyle = (args: { calendarDateElement: Element, reservation: Reservation }) => {

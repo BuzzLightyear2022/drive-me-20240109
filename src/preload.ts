@@ -82,13 +82,13 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "sqlSelect",
     {
-        rentalCars: async (args: { rentalClass?: string }): Promise<RentalCar[]> => {
+        rentalCars: async (args: { rentalClass?: string | null }): Promise<RentalCar[]> => {
             return await ipcRenderer.invoke("sqlSelect:rentalCars", args);
         },
         existingRentalClasses: async (args: { nonSmoking?: string }): Promise<string[]> => {
             return await ipcRenderer.invoke("sqlSelect:existingRentalClasses", args);
         },
-        vehicleAttributesByRentalClass: async (args: { rentalClass: string }): Promise<VehicleAttributes[]> => {
+        vehicleAttributesByRentalClass: async (args: { rentalClass: string }): Promise<RentalCar[]> => {
             return await ipcRenderer.invoke("sqlSelect:vehicleAttributesByRentalClass", args);
         },
         carModels: async (args: { selectedSmoking: string, selectedRentalClass: string }): Promise<string[]> => {

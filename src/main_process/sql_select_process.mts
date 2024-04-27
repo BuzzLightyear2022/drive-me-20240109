@@ -28,30 +28,17 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
 })();
 
 (async () => {
-    ipcMain.handle("sqlSelect:rentalCars", async (event: Electron.IpcMainEvent, args: { rentalClass?: string }) => {
+    ipcMain.handle("sqlSelect:rentalCars", async (event: Electron.IpcMainEvent, args: { rentalClass?: string | null }) => {
         const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/rentalCars`;
         try {
-            if (args.rentalClass) {
-                const response: AxiosResponse = await axios.post(serverEndPoint, args, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": accessToken
-                    },
-                    withCredentials: true
-                });
-                return response.data;
-            } else {
-                const response: AxiosResponse = await axios.post(serverEndPoint, {
-                    rentalClass: null
-                }, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": accessToken
-                    },
-                    withCredentials: true
-                });
-                return response.data;
-            }
+            const response: AxiosResponse = await axios.post(serverEndPoint, args, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": accessToken
+                },
+                withCredentials: true
+            });
+            return response.data;
         } catch (error: unknown) {
             return console.error(`Failed to select vehicleAttributes by class ${error}`);
         }

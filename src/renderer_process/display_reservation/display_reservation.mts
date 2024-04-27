@@ -5,11 +5,6 @@ import { CalendarDate } from "./calendar_date.mjs";
 import { VisualSchedule } from "./visual_schedule.mjs";
 
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class-select");
-const previousMonthButton: HTMLDivElement = document.querySelector("#previous-month-button");
-const nextMonthButton: HTMLDivElement = document.querySelector("#next-month-button");
-const dateContainer: HTMLDivElement = document.querySelector("#date-container");
-const vehicleItemsContainer: HTMLDivElement = document.querySelector("#vehicle-items-container");
-const visualScheduleContainer: HTMLDivElement = document.querySelector("#visual-schedule-container");
 
 const appendRentalClassOptions = async (): Promise<void> => {
     const existingRentalClasses: string[] | null = await window.sqlSelect.existingRentalClasses({});
@@ -20,20 +15,29 @@ const appendRentalClassOptions = async (): Promise<void> => {
             rentalClassSelect.append(rentalClassOption);
         }));
     }
+
+    const allOption: HTMLOptionElement = document.createElement("option");
+    allOption.textContent = "全て";
+    allOption.value = "";
+    rentalClassSelect.append(allOption);
 }
 
 const appendRentalCarItems = async (): Promise<void> => {
+    const rentalCarItemsContainer: HTMLDivElement = document.querySelector("#rental-car-items-container");
+
     const rentalCars: RentalCar[] = await window.sqlSelect.rentalCars({ rentalClass: rentalClassSelect.value });
 
     if (rentalCars) {
         await Promise.all(rentalCars.map((rentalCar: RentalCar) => {
             const rentalCarItem: HTMLElement = new RentalCarItem({ rentalCar: rentalCar });
-            vehicleItemsContainer.append(rentalCarItem);
+            rentalCarItemsContainer.append(rentalCarItem);
         }));
     }
 }
 
 const appendCalendarDateElements = async (): Promise<void> => {
+    const dateContainer: HTMLDivElement = document.querySelector("#date-container");
+
     const currentDate: Date = new Date();
     const currentYear: number = currentDate.getFullYear();
     const currentMonthIndex: number = currentDate.getMonth();
@@ -51,6 +55,7 @@ const appendCalendarDateElements = async (): Promise<void> => {
 }
 
 const appendVisualSchedule = (): void => {
+    const visualScheduleContainer: HTMLDivElement = document.querySelector("#visual-schedule-container");
     const calendarDateElements: NodeListOf<Element> = document.querySelectorAll("calendar-date");
 
     const previousMonthDateElement: Element = calendarDateElements[0];
@@ -65,6 +70,8 @@ const appendVisualSchedule = (): void => {
 }
 
 const handleInitialScrollPosition = () => {
+    const dateContainer: HTMLDivElement = document.querySelector("#date-container");
+
     let totalCalendarWidth: number = 0;
     let totalCalendarDays: number = 0;
 
@@ -91,54 +98,171 @@ const handleInitialScrollPosition = () => {
     dateContainer.scrollLeft = centerPosition;
 }
 
+const handleDisplayMonth = () => {
+    const monthDisplay: HTMLDivElement = document.querySelector("#month-display");
+    const dateContainer: HTMLDivElement = document.querySelector("#date-container");
+    const calendarDateElements = dateContainer.children;
+
+    const defineIntersectionObserver = (): IntersectionObserver => {
+        const dateContainerWidth: number = dateContainer.getBoundingClientRect().width;
+
+        const intersectionObserver: IntersectionObserver = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
+            entries.forEach((entry: IntersectionObserverEntry) => {
+                if (entry.isIntersecting) {
+                    const calendarDateElement: Element = entry.target;
+                    const targetCalendarStartTimestamp: number = Number(calendarDateElement.getAttribute("calendar-start-timestamp"));
+                    const targetCalendarStartDate: Date = new Date(targetCalendarStartTimestamp);
+                    monthDisplay.textContent = `${targetCalendarStartDate.getFullYear()}年${targetCalendarStartDate.getMonth() + 1}月`;
+                }
+            });
+        }, {
+            root: dateContainer,
+            rootMargin: `0px -${dateContainerWidth}px 0px 0px`
+        });
+
+        for (let calendarDateElement of calendarDateElements) {
+            intersectionObserver.observe(calendarDateElement);
+        }
+
+        return intersectionObserver;
+    }
+
+    defineIntersectionObserver();
+
+    window.addEventListener("resize", defineIntersectionObserver, false);
+}
+
+const loadScheduleHandler = () => {
+    const previousMonthButton: HTMLButtonElement = document.querySelector("#previous-month-button");
+    const nextMonthButton: HTMLButtonElement = document.querySelector("#next-month-button");
+
+    const loadNextMonth = async () => {
+        const dateContainer: HTMLDivElement = document.querySelector("#date-container");
+        const visualScheduleContainer: HTMLDivElement = document.querySelector("#visual-schedule-container");
+
+        const lastCalendarDateElement: Element = dateContainer.lastChild as Element;
+        const lastCalendarStartTimestamp: number = Number(lastCalendarDateElement.getAttribute("calendar-start-timestamp"));
+        const lastCalendarStartDate: Date = new Date(lastCalendarStartTimestamp);
+        const newCalendarStartDate: Date = new Date(lastCalendarStartDate.getFullYear(), lastCalendarStartDate.getMonth() + 1, 1);
+
+        const newCalendarDate: CalendarDate = new CalendarDate({ dateObject: newCalendarStartDate });
+        dateContainer.append(newCalendarDate);
+
+        await new Promise((resolve) => { setTimeout(resolve, 500) });
+
+        const newVisualSchedule: VisualSchedule = new VisualSchedule({ calendarDateElement: newCalendarDate });
+        visualScheduleContainer.append(newVisualSchedule);
+
+        dateContainer.removeChild(dateContainer.firstChild);
+        visualScheduleContainer.removeChild(visualScheduleContainer.firstChild);
+
+        handleDisplayMonth();
+    }
+
+    const loadPreviousMonth = async () => {
+        const dateContainer: HTMLDivElement = document.querySelector("#date-container");
+        const visualScheduleContainer: HTMLDivElement = document.querySelector("#visual-schedule-container");
+
+        const firstCalendarDateElement: Element = dateContainer.firstChild as Element;
+        const firstCalendarStartTimestamp: number = Number(firstCalendarDateElement.getAttribute("calendar-start-timestamp"));
+        const firstCalendarStartDate: Date = new Date(firstCalendarStartTimestamp);
+        const newCalendarStartDate: Date = new Date(firstCalendarStartDate.getFullYear(), firstCalendarStartDate.getMonth() - 1, 1);
+
+        const newCalendarDate: CalendarDate = new CalendarDate({ dateObject: newCalendarStartDate });
+        dateContainer.prepend(newCalendarDate);
+
+        await new Promise((resolve) => { setTimeout(resolve, 500) });
+
+        const newVisualSchedule: VisualSchedule = new VisualSchedule({ calendarDateElement: newCalendarDate });
+        visualScheduleContainer.prepend(newVisualSchedule);
+
+        dateContainer.removeChild(dateContainer.lastChild);
+        visualScheduleContainer.removeChild(visualScheduleContainer.lastChild);
+
+        handleDisplayMonth();
+    }
+
+    nextMonthButton.addEventListener("click", loadNextMonth, false);
+    previousMonthButton.addEventListener("click", loadPreviousMonth, false);
+}
+
+const handleSynchronousScroll = () => {
+    const dateContainer: HTMLDivElement = document.querySelector("#date-container");
+    const rentalCarItemsContainer: HTMLDivElement = document.querySelector("#rental-car-items-container");
+    const visualScheduleContainer: HTMLDivElement = document.querySelector("#visual-schedule-container");
+
+    const handleDaysContainerScroll = (): void => {
+        const dateContainer: HTMLDivElement = document.querySelector("#date-container");
+
+        const scheduleContainerScrollLeft: number = visualScheduleContainer.scrollLeft;
+        dateContainer.scrollLeft = scheduleContainerScrollLeft;
+
+        if (scheduleContainerScrollLeft >= dateContainer.scrollLeft) {
+            visualScheduleContainer.scrollLeft = dateContainer.scrollLeft;
+        }
+    }
+
+    const handleVehicleItemsContainerScroll = (): void => {
+        const scheduleContainerScrollTop: number = visualScheduleContainer.scrollTop;
+        rentalCarItemsContainer.scrollTop = scheduleContainerScrollTop;
+
+        if (scheduleContainerScrollTop >= rentalCarItemsContainer.scrollTop) {
+            visualScheduleContainer.scrollTop = rentalCarItemsContainer.scrollTop;
+        }
+    }
+
+    const handleScheduleContainerScrollX = (): void => {
+        const dateContainer: HTMLDivElement = document.querySelector("#date-container");
+
+        const daysContainerScrollLeft: number = dateContainer.scrollLeft;
+        visualScheduleContainer.scrollLeft = daysContainerScrollLeft;
+    }
+
+    const handleScheduleContainerScrollY = (): void => {
+        const vehicleItemsContainerScrollTop: number = rentalCarItemsContainer.scrollTop;
+        visualScheduleContainer.scrollTop = vehicleItemsContainerScrollTop;
+    }
+
+    visualScheduleContainer.addEventListener("scroll", handleDaysContainerScroll, false);
+    visualScheduleContainer.addEventListener("scroll", handleVehicleItemsContainerScroll, false);
+    dateContainer.addEventListener("scroll", handleScheduleContainerScrollX, false);
+    rentalCarItemsContainer.addEventListener("scroll", handleScheduleContainerScrollY, false);
+}
+
 const calendarInitializer = async () => {
+    await appendRentalClassOptions();
+    await appendRentalCarItems();
+    await appendCalendarDateElements();
+    appendVisualSchedule();
 
-    // const previousMonthDaysContainerInstance: DaysContainerType = new DaysContainer(previousMonthDate, true);
-    // const currentMonthDaysContainerInstance: DaysContainerType = new DaysContainer(currentDate, true);
-    // const nextMonthDaysContainerInstance: DaysContainerType = new DaysContainer(nextMonthDate, true);
+    handleInitialScrollPosition();
+    handleDisplayMonth();
+    handleSynchronousScroll();
+    loadScheduleHandler();
+}
 
-    // await previousMonthDaysContainerInstance.createDaysContainer();
-    // await currentMonthDaysContainerInstance.createDaysContainer();
-    // await nextMonthDaysContainerInstance.createDaysContainer();
+const calendarUpdater = async () => {
+    const rentalCarItemsContainer: HTMLDivElement = document.querySelector("#rental-car-items-container");
+    const visualScheduleContainer: HTMLDivElement = document.querySelector("#visual-schedule-container");
+    const dateContainer: HTMLDivElement = document.querySelector("#date-container");
 
-    // const previousMonthDaysContainer: HTMLDivElement = previousMonthDaysContainerInstance.daysContainer;
-    // const currentMonthDaysContainer: HTMLDivElement = currentMonthDaysContainerInstance.daysContainer;
-    // const nextMonthDaysContainer: HTMLDivElement = nextMonthDaysContainerInstance.daysContainer;
+    const visualScheduleContainerScrollLeft: number = visualScheduleContainer.scrollLeft;
 
-    // const appendDaysContainers = async (): Promise<void> => {
-    //     for (const container of [
-    //         previousMonthDaysContainer,
-    //         currentMonthDaysContainer,
-    //         nextMonthDaysContainer
-    //     ]) {
-    //         daysContainer.append(container);
-    //     }
-    // }
+    while (rentalCarItemsContainer.firstChild) {
+        rentalCarItemsContainer.removeChild(rentalCarItemsContainer.firstChild);
+    }
 
-    // const handleInitialScrollPosition = (): void => {
-    //     const previousDaysContainerWidth: number = previousMonthDaysContainer.getBoundingClientRect().width;
-    //     const currentDaysContainerWidth: number = currentMonthDaysContainer.getBoundingClientRect().width;
-    //     const nextDaysContainerWidth: number = nextMonthDaysContainer.getBoundingClientRect().width;
-    //     const totalDaysContainerWidth: number = previousDaysContainerWidth + currentDaysContainerWidth + nextDaysContainerWidth;
-    //     const dayWidth: number = totalDaysContainerWidth / totalDays;
-    //     const todayPosition: number = ((previousMonthDate.getDate() + currentDate.getDate()) * dayWidth) - (dayWidth / 2);
-    //     const daysContainerViewWidth: number = daysContainer.getBoundingClientRect().width;
-    //     const centerPosition: number = todayPosition - (daysContainerViewWidth / 2);
-    //     daysContainer.scrollLeft = centerPosition;
-    // }
+    while (visualScheduleContainer.firstChild) {
+        visualScheduleContainer.removeChild(visualScheduleContainer.firstChild);
+    }
 
-    // await appendDaysContainers();
-    // await appendVehicleItems(vehicleAttributesArray);
+    await appendRentalCarItems();
 
-    // appendScheduleContainers(
-    //     previousMonthDaysContainerInstance,
-    //     currentMonthDaysContainerInstance,
-    //     nextMonthDaysContainerInstance
-    // );
+    await new Promise((resolve) => { setTimeout(resolve, 200) });
 
-    // handleInitialScrollPosition();
+    appendVisualSchedule();
 
-    // vehicleStatusHandler();
+    visualScheduleContainer.scrollLeft = visualScheduleContainerScrollLeft;
 }
 
 // const appendScheduleContainers = (
@@ -161,81 +285,83 @@ const calendarInitializer = async () => {
 //     scheduleContainer.append(previousScheduleContainer, currentScheduleContainer, nextScheduleContainer);
 // }
 
-const vehicleStatusHandler = async () => {
-    const vehicleStatusDivs = document.querySelectorAll(".vehicle-status");
-    vehicleStatusDivs.forEach((div: HTMLDivElement) => {
-        if (div) {
-            visualScheduleContainer.removeChild(div);
-        }
-    });
+// const vehicleStatusHandler = async () => {
+//     const vehicleStatusDivs = document.querySelectorAll(".vehicle-status");
+//     vehicleStatusDivs.forEach((div: HTMLDivElement) => {
+//         if (div) {
+//             visualScheduleContainer.removeChild(div);
+//         }
+//     });
 
-    const vehicleStatuses: VehicleStatus[] = await window.sqlSelect.latestVehicleStatuses({});
-    const scheduleContainerWidth: number = visualScheduleContainer.getBoundingClientRect().width;
+//     const vehicleStatuses: VehicleStatus[] = await window.sqlSelect.latestVehicleStatuses({});
+//     const scheduleContainerWidth: number = visualScheduleContainer.getBoundingClientRect().width;
 
-    const vehicleItemDivs = document.querySelectorAll(".vehicle-item");
-    vehicleItemDivs.forEach((vehicleItem) => {
-        const vehicleItemId: number = Number(vehicleItem.getAttribute("data-vehicle-id"));
-        const vehicleItemRect: DOMRect = vehicleItem.getBoundingClientRect();
-        const vehicleItemTop: number = vehicleItemRect.top;
-        const vehicleItemWidth: number = vehicleItemRect.width;
-        const vehicleItemHeight: number = vehicleItemRect.height;
-        vehicleStatuses.forEach(async (vehicleStatus) => {
-            if (vehicleStatus.vehicleId === vehicleItemId) {
-                const vehicleStatusDiv: HTMLDivElement = document.createElement("div");
-                vehicleStatusDiv.className = "vehicle-status";
-                vehicleStatusDiv.setAttribute("data-vehicle-id", String(vehicleStatus.vehicleId));
+//     const vehicleItemDivs = document.querySelectorAll(".vehicle-item");
+//     vehicleItemDivs.forEach((vehicleItem) => {
+//         const vehicleItemId: number = Number(vehicleItem.getAttribute("data-vehicle-id"));
+//         const vehicleItemRect: DOMRect = vehicleItem.getBoundingClientRect();
+//         const vehicleItemTop: number = vehicleItemRect.top;
+//         const vehicleItemWidth: number = vehicleItemRect.width;
+//         const vehicleItemHeight: number = vehicleItemRect.height;
+//         vehicleStatuses.forEach(async (vehicleStatus) => {
+//             if (vehicleStatus.vehicleId === vehicleItemId) {
+//                 const vehicleStatusDiv: HTMLDivElement = document.createElement("div");
+//                 vehicleStatusDiv.className = "vehicle-status";
+//                 vehicleStatusDiv.setAttribute("data-vehicle-id", String(vehicleStatus.vehicleId));
 
-                let currentLocation: string;
-                switch (vehicleStatus.currentLocation) {
-                    case "本店":
-                        currentLocation = "本";
-                        break;
-                    case "空港店":
-                        currentLocation = "空";
-                        break;
-                    case "駅前店":
-                        currentLocation = "駅";
-                        break;
-                    default:
-                        currentLocation = vehicleStatus.currentLocation;
-                }
+//                 let currentLocation: string;
+//                 switch (vehicleStatus.currentLocation) {
+//                     case "本店":
+//                         currentLocation = "本";
+//                         break;
+//                     case "空港店":
+//                         currentLocation = "空";
+//                         break;
+//                     case "駅前店":
+//                         currentLocation = "駅";
+//                         break;
+//                     default:
+//                         currentLocation = vehicleStatus.currentLocation;
+//                 }
 
-                let washState: string;
-                switch (vehicleStatus.washState) {
-                    case "洗車済み":
-                        washState = "";
-                        break;
-                    case "未洗車":
-                        washState = "×";
-                        break;
-                    default:
-                        washState = vehicleStatus.washState;
-                }
+//                 let washState: string;
+//                 switch (vehicleStatus.washState) {
+//                     case "洗車済み":
+//                         washState = "";
+//                         break;
+//                     case "未洗車":
+//                         washState = "×";
+//                         break;
+//                     default:
+//                         washState = vehicleStatus.washState;
+//                 }
 
-                vehicleStatusDiv.textContent = `${currentLocation}${washState}`;
-                visualScheduleContainer.append(vehicleStatusDiv);
+//                 vehicleStatusDiv.textContent = `${currentLocation}${washState}`;
+//                 visualScheduleContainer.append(vehicleStatusDiv);
 
-                const vehicleStatusDivWidth: number = vehicleStatusDiv.getBoundingClientRect().width;
+//                 const vehicleStatusDivWidth: number = vehicleStatusDiv.getBoundingClientRect().width;
 
-                Object.assign(vehicleStatusDiv.style, {
-                    display: "flex",
-                    position: "fixed",
-                    top: `${vehicleItemTop + (vehicleItemHeight / 2)}px`,
-                    left: `${(scheduleContainerWidth / 2) + vehicleItemWidth - (vehicleStatusDivWidth / 2)}px`,
-                    fontSize: "250%",
-                    cursor: "default",
-                    userSelect: "none"
-                });
+//                 Object.assign(vehicleStatusDiv.style, {
+//                     display: "flex",
+//                     position: "fixed",
+//                     top: `${vehicleItemTop + (vehicleItemHeight / 2)}px`,
+//                     left: `${(scheduleContainerWidth / 2) + vehicleItemWidth - (vehicleStatusDivWidth / 2)}px`,
+//                     fontSize: "250%",
+//                     cursor: "default",
+//                     userSelect: "none"
+//                 });
 
-                vehicleStatusDiv.addEventListener("contextmenu", () => {
-                    window.contextmenu.scheduleCell(Number(vehicleItem.getAttribute("data-vehicle-id")));
-                }, false);
-            }
-        });
-    });
-}
+//                 vehicleStatusDiv.addEventListener("contextmenu", () => {
+//                     window.contextmenu.scheduleCell(Number(vehicleItem.getAttribute("data-vehicle-id")));
+//                 }, false);
+//             }
+//         });
+//     });
+// }
 
 const handleVehicleStatusPosition = () => {
+    const visualScheduleContainer: HTMLDivElement = document.querySelector("#visual-schedule-container");
+
     const scheduleContainerWidth = visualScheduleContainer.getBoundingClientRect().width;
     const currentVehicleStatusDivs = document.querySelectorAll(".vehicle-status");
     const currentVehicleItems = document.querySelectorAll(".vehicle-item");
@@ -317,33 +443,7 @@ const handleVehicleStatusPosition = () => {
 //     vehicleStatusHandler();
 // }
 
-const handleDaysContainerScroll = (): void => {
-    const scheduleContainerScrollLeft: number = visualScheduleContainer.scrollLeft;
-    dateContainer.scrollLeft = scheduleContainerScrollLeft;
 
-    if (scheduleContainerScrollLeft >= dateContainer.scrollLeft) {
-        visualScheduleContainer.scrollLeft = dateContainer.scrollLeft;
-    }
-}
-
-const handleVehicleItemsContainerScrollTop = (): void => {
-    const scheduleContainerScrollTop: number = visualScheduleContainer.scrollTop;
-    vehicleItemsContainer.scrollTop = scheduleContainerScrollTop;
-
-    if (scheduleContainerScrollTop >= vehicleItemsContainer.scrollTop) {
-        visualScheduleContainer.scrollTop = vehicleItemsContainer.scrollTop;
-    }
-}
-
-const handleScheduleContainerScrollX = (): void => {
-    const daysContainerScrollLeft: number = dateContainer.scrollLeft;
-    visualScheduleContainer.scrollLeft = daysContainerScrollLeft;
-}
-
-const handleScheduleContainerScrollY = (): void => {
-    const vehicleItemsContainerScrollTop: number = vehicleItemsContainer.scrollTop;
-    visualScheduleContainer.scrollTop = vehicleItemsContainerScrollTop;
-}
 
 // const handleAppendPreviousMonthCalendar = async () => {
 //     DaysContainer.previousMonthDiff--;
@@ -427,55 +527,46 @@ const handleScheduleContainerScrollY = (): void => {
 
 // rentalClassSelect.addEventListener("change", calendarUpdater, false);
 
-visualScheduleContainer.addEventListener("scroll", handleDaysContainerScroll, false);
-visualScheduleContainer.addEventListener("scroll", handleVehicleItemsContainerScrollTop, false);
-dateContainer.addEventListener("scroll", handleScheduleContainerScrollX, false);
-vehicleItemsContainer.addEventListener("scroll", handleScheduleContainerScrollY, false);
-
 // previousMonthButton.addEventListener("click", handleAppendPreviousMonthCalendar, false);
 // nextMonthButton.addEventListener("click", handleAppendNextMonthCalendar, false);
 
-visualScheduleContainer.addEventListener("scroll", handleVehicleStatusPosition, false);
-window.addEventListener("resize", handleVehicleStatusPosition, false);
+// visualScheduleContainer.addEventListener("scroll", handleVehicleStatusPosition, false);
+// window.addEventListener("resize", handleVehicleStatusPosition, false);
 
-window.webSocket.updateVehicleAttributes(async () => {
-    const currentSelectedRentalClass: string = rentalClassSelect.value;
-    const currentScrollPositionX: number = visualScheduleContainer.scrollLeft;
-    const currentScrollPositionY: number = visualScheduleContainer.scrollTop;
+// window.webSocket.updateVehicleAttributes(async () => {
+//     const currentSelectedRentalClass: string = rentalClassSelect.value;
+//     const currentScrollPositionX: number = visualScheduleContainer.scrollLeft;
+//     const currentScrollPositionY: number = visualScheduleContainer.scrollTop;
 
-    // const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: null });
+//     // const rentalClasses: string[] = await window.sqlSelect.rentalClasses({ selectedSmoking: null });
 
-    while (rentalClassSelect.firstChild) {
-        rentalClassSelect.removeChild(rentalClassSelect.firstChild);
-    }
+//     while (rentalClassSelect.firstChild) {
+//         rentalClassSelect.removeChild(rentalClassSelect.firstChild);
+//     }
 
-    // rentalClasses.forEach((rentalClass: string) => {
-    //     const option = document.createElement("option");
-    //     option.textContent = rentalClass;
-    //     rentalClassSelect.append(option);
-    // });
+//     // rentalClasses.forEach((rentalClass: string) => {
+//     //     const option = document.createElement("option");
+//     //     option.textContent = rentalClass;
+//     //     rentalClassSelect.append(option);
+//     // });
 
-    const allOption = document.createElement("option");
-    allOption.textContent = "全て";
-    rentalClassSelect.append(allOption);
+//     const allOption = document.createElement("option");
+//     allOption.textContent = "全て";
+//     rentalClassSelect.append(allOption);
 
-    rentalClassSelect.value = currentSelectedRentalClass;
+//     rentalClassSelect.value = currentSelectedRentalClass;
 
-    // await calendarUpdater();
+//     // await calendarUpdater();
 
-    visualScheduleContainer.scrollLeft = currentScrollPositionX;
-    visualScheduleContainer.scrollTop = currentScrollPositionY;
-});
+//     visualScheduleContainer.scrollLeft = currentScrollPositionX;
+//     visualScheduleContainer.scrollTop = currentScrollPositionY;
+// });
 
-window.webSocket.updateVehicleStatus(async () => {
-    vehicleStatusHandler()
-});
+// window.webSocket.updateVehicleStatus(async () => {
+//     vehicleStatusHandler()
+// });
 
 (async () => {
-    await appendRentalClassOptions();
-    await appendRentalCarItems();
-    await appendCalendarDateElements();
-    appendVisualSchedule();
-
-    handleInitialScrollPosition();
+    await calendarInitializer();
+    rentalClassSelect.addEventListener("change", calendarUpdater, false);
 })();

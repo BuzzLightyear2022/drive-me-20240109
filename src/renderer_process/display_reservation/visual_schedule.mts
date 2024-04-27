@@ -1,5 +1,4 @@
 import { Reservation } from "../../@types/types";
-import { RentalCarItem } from "./rentalCar_item.mjs";
 import { ScheduleCell } from "./schedule_cell.mjs";
 import { ScheduleBar } from "./schedule_bar.mjs";
 

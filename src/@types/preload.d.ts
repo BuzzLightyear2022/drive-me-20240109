@@ -30,7 +30,7 @@ export interface fetchJson {
 }
 
 export interface sqlSelect {
-    rentalCars: (args: { rentalClass?: string }) => Promise<RentalCar[]>;
+    rentalCars: (args: { rentalClass?: string | null }) => Promise<RentalCar[]>;
     existingRentalClasses: (args: { selectedSmoking?: string }) => Promise<string[]>;
     vehicleAttributesById: (args: { vehicleId: number }) => Promise<VehicleAttributes>;
     vehicleAttributesByRentalClass: (args: { rentalClass: string }) => Promise<VehicleAttributes>;

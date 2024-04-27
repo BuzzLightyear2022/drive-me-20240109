@@ -1,11 +1,13 @@
 export class ScheduleCell extends HTMLElement {
+    rentalCarId: string;
+
     constructor(args: { rentalCarItem: Element }) {
         super();
 
         const { rentalCarItem } = args;
 
-        const rentalCarItemId: string = rentalCarItem.getAttribute("data-vehicle-id");
-        this.setAttribute("data-vehicle-id", rentalCarItemId);
+        this.rentalCarId = rentalCarItem.getAttribute("data-vehicle-id");
+        this.setAttribute("data-vehicle-id", this.rentalCarId);
 
         const rentalCarItemHeight: number = rentalCarItem.getBoundingClientRect().height;
 
@@ -22,6 +24,8 @@ export class ScheduleCell extends HTMLElement {
         });
 
         this.appendInnerScheduleCells();
+
+        this.addEventListener("contextmenu", this.contextmenuHandler, false);
     }
 
     appendInnerScheduleCells = (): void => {
@@ -41,6 +45,12 @@ export class ScheduleCell extends HTMLElement {
         maintenanceScheduleCell.setAttribute("schedule-category", "maintenance");
 
         this.append(rentalScheduleCell, maintenanceScheduleCell);
+    }
+
+    contextmenuHandler = {
+        handleEvent: (event: Event) => {
+            window.contextmenu.scheduleCell(Number(this.rentalCarId));
+        }
     }
 }
 

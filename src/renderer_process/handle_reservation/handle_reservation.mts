@@ -1,4 +1,4 @@
-import { appendOptions, setRadioValue, getRadioValue, convertToKatakana, replaceFullWidthNumToHalfWidthNum, asyncAppendOptionElements, formatDateForInput } from "../common_modules.mjs";
+import { appendOptions, setRadioValue, getRadioValue, convertToKatakana, replaceFullWidthNumToHalfWidthNum, asyncAppendOptionElements, formatDateForInput, formatDatetimeForInput } from "../common_modules.mjs";
 import { updateCarOptions, appendCarOptions } from "./handle_reservation_module.mjs";
 import { RentalCar, Reservation, LicensePlate, CarCatalog, SelectOptions } from "../../@types/types";
 
@@ -89,7 +89,9 @@ returnDatetimeInput.addEventListener("change", () => {
         returnDatetimeInput.parentElement.appendChild(invalidFeedbackDiv);
     } else {
         const warningElement = document.querySelector(".alert");
-        warningElement.remove();
+        if (warningElement) {
+            warningElement.remove();
+        }
     }
 }, false);
 
@@ -214,7 +216,10 @@ returnDatetimeInput.addEventListener("change", () => {
             const existingReservationData: Reservation = await window.sqlSelect.reservationDataById({ reservationId: crudArgs.reservationId });
 
             isRepliedCheck.checked = existingReservationData.isReplied;
-            receptionDateInput.value = String(existingReservationData.receptionDate);
+
+            const receptionDateObject: Date = new Date(existingReservationData.receptionDate);
+            const receptionDateString: string = formatDateForInput({ dateObject: receptionDateObject });
+            receptionDateInput.value = receptionDateString;
 
             if (existingReservationData.isReplied) {
                 repliedDateInput.disabled = false;
@@ -256,14 +261,14 @@ returnDatetimeInput.addEventListener("change", () => {
             pickupLocationSelect.value = existingReservationData.pickupLocation;
             returnLocationSelect.value = existingReservationData.returnLocation;
 
-            const pickupDatetimeString: string = formatDateForInput({ dateObject: new Date(existingReservationData.pickupDatetime) });
+            const pickupDatetimeString: string = formatDatetimeForInput({ dateObject: new Date(existingReservationData.pickupDatetime) });
             pickupDatetimeInput.value = pickupDatetimeString;
 
             arrivalFlightCarrierSelect.value = existingReservationData.arrivalFlightCarrier;
             arrivalFlightNumberInput.value = String(existingReservationData.arrivalFlightNumber);
             arrivalFlightTimeInput.value = existingReservationData.arrivalFlightTime;
 
-            const returnDatetimeString: string = formatDateForInput({ dateObject: new Date(existingReservationData.returnDatetime) });
+            const returnDatetimeString: string = formatDatetimeForInput({ dateObject: new Date(existingReservationData.returnDatetime) });
             returnDatetimeInput.value = returnDatetimeString;
             departureFlightCarrierSelect.value = existingReservationData.departureFlightCarrier;
             departureFlightNumberInput.value = String(existingReservationData.departureFlightNumber);

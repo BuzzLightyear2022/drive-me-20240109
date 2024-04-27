@@ -144,7 +144,7 @@ export const asyncAppendOptionElements = async (args: { selectElement: HTMLSelec
     }));
 }
 
-export const formatDateForInput = (args: { dateObject: Date }): string => {
+export const formatDatetimeForInput = (args: { dateObject: Date }): string => {
     const { dateObject } = args;
 
     const year: number = dateObject.getFullYear();
@@ -157,6 +157,18 @@ export const formatDateForInput = (args: { dateObject: Date }): string => {
     return dateString;
 }
 
+export const formatDateForInput = (args: { dateObject: Date }): string => {
+    const { dateObject } = args;
+
+    const year: number = dateObject.getFullYear();
+    const month: string = String(dateObject.getMonth() + 1).padStart(2, "0");
+    const date: string = String(dateObject.getDate()).padStart(2, "0");
+
+    const dateString = `${year}-${month}-${date}`;
+
+    return dateString;
+}
+
 export const getTimeString = (args: { dateObject: Date }): string => {
     const { dateObject } = args;
 
@@ -165,5 +177,5 @@ export const getTimeString = (args: { dateObject: Date }): string => {
 
     const minutesString: string = String(minutes).padStart(2, "0");
 
-    return `${hours}:${minutes}`;
+    return `${hours}:${minutesString}`;
 }
