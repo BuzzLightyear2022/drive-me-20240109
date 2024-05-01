@@ -32,6 +32,17 @@ export class ScheduleBar extends HTMLElement {
     scheduleBarStyle = (args: { calendarDateElement: Element, reservation: Reservation }) => {
         const { calendarDateElement, reservation } = args;
 
+        const commonStyle = {
+            display: "flex",
+            flexDirection: "row",
+            position: "relative",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            border: "none",
+            cursor: "default",
+            userSelect: "none"
+        }
+
         const calendarStartTimestamp: number = Number(calendarDateElement.getAttribute("calendar-start-timestamp"));
         const calendarEndTimestamp: number = Number(calendarDateElement.getAttribute("calendar-end-timestamp"));
 
@@ -41,23 +52,38 @@ export class ScheduleBar extends HTMLElement {
         const returnDatetimeMs: number = new Date(reservation.returnDatetime).getTime();
 
         const diffInTimeOfReservation: number = returnDatetimeMs - pickupDatetimeMs;
-
         const diffFromStart = `${((pickupDatetimeMs - calendarStartTimestamp) / totalMsOfCalendar) * 100}%`;
         const relativeWidth = `${(diffInTimeOfReservation / totalMsOfCalendar) * 100}%`;
 
-        return {
-            display: "flex",
-            flexDirection: "row",
-            position: "relative",
-            left: diffFromStart,
-            width: relativeWidth,
-            height: "100%",
-            backgroundColor: "green",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            border: "none",
-            cursor: "default",
-            userSelect: "none"
+        if (pickupDatetimeMs >= calendarStartTimestamp && returnDatetimeMs <= calendarEndTimestamp) {
+            return {
+                ...commonStyle,
+                left: diffFromStart,
+                width: relativeWidth,
+                height: "100%",
+                backgroundColor: "green"
+            }
+        } else if (pickupDatetimeMs >= calendarStartTimestamp && returnDatetimeMs >= calendarEndTimestamp) {
+            return {
+                ...commonStyle,
+                left: diffFromStart,
+                width: `calc(100% - ${diffFromStart})`,
+                backgroundColor: "yellow"
+            }
+        } else if (pickupDatetimeMs <= calendarStartTimestamp && returnDatetimeMs <= calendarEndTimestamp) {
+            return {
+                ...commonStyle,
+                left: "0%",
+                width: `calc(${relativeWidth} + ${diffFromStart})`,
+                backgroundColor: "red"
+            }
+        } else {
+            return {
+                ...commonStyle,
+                left: "0%",
+                width: "100%",
+                backgroundColor: "blue"
+            }
         }
     }
 
