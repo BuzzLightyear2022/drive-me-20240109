@@ -3,6 +3,7 @@ import { getTimeString } from "../common_modules.mjs";
 
 export class ScheduleBar extends HTMLElement {
     reservationId: string;
+    reservation: Reservation;
 
     constructor(args: { calendarDateElement: Element, reservation: Reservation }) {
         super();
@@ -10,12 +11,13 @@ export class ScheduleBar extends HTMLElement {
         const { calendarDateElement, reservation } = args;
 
         this.reservationId = reservation.id;
+        this.reservation = reservation
 
         const scheduleBarStyle = this.scheduleBarStyle({ calendarDateElement: calendarDateElement, reservation: reservation });
         Object.assign(this.style, scheduleBarStyle);
         this.className = "card";
 
-        const scheduleBarLabel: HTMLDivElement = this.scheduleBarLabel({ reservation: reservation });
+        const scheduleBarLabel: HTMLDivElement = this.scheduleBarLabel();
         this.append(scheduleBarLabel);
 
         this.addEventListener("contextmenu", this.contextmenuHandler, false);
@@ -59,19 +61,28 @@ export class ScheduleBar extends HTMLElement {
         }
     }
 
-    scheduleBarLabel = (args: { reservation: Reservation }): HTMLDivElement => {
-        const { reservation } = args;
-
+    scheduleBarLabel = (): HTMLDivElement => {
         const scheduleBarLabel: HTMLDivElement = document.createElement("div");
         Object.assign(scheduleBarLabel.style, {
             display: "flex",
             flexDirection: "row",
-            height: "100%"
+            height: "100%",
+            alignItems: "center",
+            margin: "auto 0"
         });
 
+        const timeAndLocationContainer: HTMLDivElement = this.timeAndLocationContainer();
+        const reservationNameContainer: HTMLDivElement = this.reservationNameContainer();
+
+        scheduleBarLabel.append(timeAndLocationContainer, reservationNameContainer);
+
+        return scheduleBarLabel;
+    }
+
+    timeAndLocationContainer = (): HTMLDivElement => {
         const timeAndLocationContainer: HTMLDivElement = document.createElement("div");
         Object.assign(timeAndLocationContainer.style, {
-            display: "grid"
+            display: "grid",
         });
 
         const pickupTimeDiv: HTMLDivElement = document.createElement("div");
@@ -80,7 +91,7 @@ export class ScheduleBar extends HTMLElement {
             gridColumn: "1",
             gridRow: "1",
         });
-        const pickupTimeDateObject: Date = new Date(reservation.pickupDatetime);
+        const pickupTimeDateObject: Date = new Date(this.reservation.pickupDatetime);
         const pickupTimeString: string = getTimeString({ dateObject: pickupTimeDateObject });
         pickupTimeDiv.textContent = pickupTimeString;
 
@@ -89,9 +100,9 @@ export class ScheduleBar extends HTMLElement {
             display: "flex",
             gridColumn: "2",
             gridRow: "1",
-            paddingLeft: "5px"
+            marginLeft: "5px"
         });
-        pickupLocationDiv.textContent = reservation.pickupLocation;
+        pickupLocationDiv.textContent = this.reservation.pickupLocation;
 
         const returnTimeDiv: HTMLDivElement = document.createElement("div");
         Object.assign(returnTimeDiv.style, {
@@ -99,7 +110,7 @@ export class ScheduleBar extends HTMLElement {
             gridColumn: "1",
             gridRow: "2"
         });
-        const returnDateObject: Date = new Date(reservation.returnDatetime);
+        const returnDateObject: Date = new Date(this.reservation.returnDatetime);
         const returnTimeString: string = getTimeString({ dateObject: returnDateObject });
         returnTimeDiv.textContent = returnTimeString;
 
@@ -108,22 +119,25 @@ export class ScheduleBar extends HTMLElement {
             display: "flex",
             gridColumn: "2",
             gridRow: "2",
-            paddingLeft: "5px"
+            marginLeft: "5px"
         });
-        returnLocationDiv.textContent = reservation.returnLocation;
-
-        const reservationNameDiv: HTMLDivElement = document.createElement("div");
-        Object.assign(reservationNameDiv.style, {
-            display: "flex",
-            padding: "1em"
-        });
-        reservationNameDiv.textContent = `${reservation.userName} 様`;
+        returnLocationDiv.textContent = this.reservation.returnLocation;
 
         timeAndLocationContainer.append(pickupTimeDiv, pickupLocationDiv, returnTimeDiv, returnLocationDiv);
 
-        scheduleBarLabel.append(timeAndLocationContainer, reservationNameDiv);
+        return timeAndLocationContainer;
+    }
 
-        return scheduleBarLabel;
+    reservationNameContainer = (): HTMLDivElement => {
+        const reservationNameContainer: HTMLDivElement = document.createElement("div");
+        Object.assign(reservationNameContainer.style, {
+            display: "flex",
+            marginLeft: "5px"
+        });
+
+        reservationNameContainer.textContent = `${this.reservation.userName} 様`;
+
+        return reservationNameContainer;
     }
 }
 

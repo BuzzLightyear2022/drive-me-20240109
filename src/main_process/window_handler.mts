@@ -97,7 +97,7 @@ export class WindowHandler {
         }
     }
 
-    static createHandleReservationWindow = (args: { vehicleId?: number, reservationId?: number, crudAction: string }): void => {
+    static createHandleReservationWindow = (args: { rentalCarId?: string, reservationId?: string, crudAction: string }): void => {
         const win: BrowserWindow = new BrowserWindow({
             width: 1000,
             height: 800,
@@ -178,7 +178,7 @@ export class WindowHandler {
         win.maximize();
     }
 
-    static createEditVehicleAttributesWindow = (vehicleId: number): void => {
+    static createEditVehicleAttributesWindow = (vehicleId: string): void => {
         const { height } = screen.getPrimaryDisplay().workAreaSize;
 
         if (!WindowHandler.windows.editVehicleAttributesWindow) {
@@ -234,7 +234,7 @@ export class WindowHandler {
         }
     }
 
-    static createInsertVehicleStatusWindow = (vehicleId: number) => {
+    static createInsertVehicleStatusWindow = (rentalCarId: string) => {
         if (!WindowHandler.windows.insertVehicleStatusWindow) {
             const win: BrowserWindow = new BrowserWindow({
                 width: 800,
@@ -249,7 +249,7 @@ export class WindowHandler {
             win.menuBarVisible = false;
 
             win.webContents.on("dom-ready", () => {
-                win.webContents.send("contextmenu:getVehicleId", vehicleId);
+                win.webContents.send("contextmenu:getRentalCarId", rentalCarId);
             });
 
             win.on("closed", () => {

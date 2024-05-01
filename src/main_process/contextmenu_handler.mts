@@ -49,18 +49,18 @@ export class ContextmenuHandler {
     }
 
     static displayScheduleCellMenu = () => {
-        ipcMain.on("contextmenu:schedule-cell", (event: Electron.IpcMainEvent, vehicleId: number) => {
+        ipcMain.on("contextmenu:schedule-cell", (event: Electron.IpcMainEvent, rentalCarId: string) => {
             const menuTemplate = Menu.buildFromTemplate([
                 {
                     label: "ステータス",
                     click: async () => {
-                        WindowHandler.createInsertVehicleStatusWindow(vehicleId);
+                        WindowHandler.createInsertVehicleStatusWindow(rentalCarId);
                     }
                 },
                 {
                     label: "新規予約",
                     click: async () => {
-                        WindowHandler.createHandleReservationWindow({ vehicleId: vehicleId, crudAction: "create" });
+                        WindowHandler.createHandleReservationWindow({ rentalCarId: rentalCarId, crudAction: "create" });
                     },
                 },
                 {
@@ -80,7 +80,7 @@ export class ContextmenuHandler {
             const contextMenu = Menu.buildFromTemplate([
                 {
                     label: "予約変更",
-                    click: async () => WindowHandler.createHandleReservationWindow({ reservationId: Number(reservationId), crudAction: "update" })
+                    click: async () => WindowHandler.createHandleReservationWindow({ reservationId: reservationId, crudAction: "update" })
                 },
                 {
                     label: "キャンセル",
@@ -94,7 +94,7 @@ export class ContextmenuHandler {
     }
 
     static displayVehicleItemMenu = () => {
-        ipcMain.on("contextmenu:vehicleAttributesItem", (event: Electron.IpcMainEvent, vehicleId: number) => {
+        ipcMain.on("contextmenu:vehicleAttributesItem", (event: Electron.IpcMainEvent, vehicleId: string) => {
             const menuTemplate = Menu.buildFromTemplate([
                 {
                     label: "ステータス",

@@ -10,8 +10,8 @@ const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST;
 const port: string = import.meta.env.VITE_HTTPS_PORT;
 
 (async () => {
-    ipcMain.handle("sqlSelect:vehicleAttributesById", async (event: Electron.IpcMainEvent, args: { vehicleId: string }) => {
-        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleAttributesById`;
+    ipcMain.handle("sqlSelect:rentalCarById", async (event: Electron.IpcMainEvent, args: { vehicleId: string }) => {
+        const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/rentalCarById`;
         try {
             const response: AxiosResponse = await axios.post(serverEndPoint, args, {
                 headers: {
@@ -65,7 +65,7 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
 })();
 
 (async () => {
-    ipcMain.handle("sqlSelect:carModels", async (event: Electron.IpcMainInvokeEvent, args: { selectedSmoking: string, selectedRentalClass: string }) => {
+    ipcMain.handle("sqlSelect:carModels", async (event: Electron.IpcMainInvokeEvent, args: { smoking: string, rentalClass: string }) => {
         const serverEndPoint = `https://${serverHost}:${port}/sqlSelect/vehicleAttributes/carModels`;
         try {
             const response: AxiosResponse = await axios.post(serverEndPoint, args, {

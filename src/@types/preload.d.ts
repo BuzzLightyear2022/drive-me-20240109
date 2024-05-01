@@ -32,10 +32,10 @@ export interface fetchJson {
 export interface sqlSelect {
     rentalCars: (args: { rentalClass?: string | null }) => Promise<RentalCar[]>;
     existingRentalClasses: (args: { selectedSmoking?: string }) => Promise<string[]>;
-    vehicleAttributesById: (args: { vehicleId: number }) => Promise<VehicleAttributes>;
+    rentalCarById: (args: { rentalCarId: string }) => Promise<RentalCar>;
     vehicleAttributesByRentalClass: (args: { rentalClass: string }) => Promise<VehicleAttributes>;
-    carModels: (args: { selectedSmoking: string, selectedRentalClass: string }) => Promise<string[]>;
-    licensePlates: (args: { selectedSmoking: string, selectedCarModel: string }) => Promise<LicensePlatesData>;
+    carModels: (args: { smoking?: string, rentalClass: string }) => Promise<string[]>;
+    licensePlates: (args: { smoking?: string, carModel: string }) => Promise<LicensePlatesData>;
     reservations: (args: { startDate?: Date, endDate?: Date }) => Promise<Reservation[]>;
     reservationDataById: (args: { reservationId: number }) => Promise<ReservationData>;
     latestVehicleStatuses: (args: { rentalClass?: string }) => Promise<any>;
@@ -55,7 +55,7 @@ export interface sqlUpdate {
 export interface contextmenu {
     scheduleBar: (reservationId: string) => Promise<void>;
     vehicleAttributesItem: (vehicleId: number) => Promise<void>;
-    scheduleCell: (vehicleId: number) => Promise<void>;
+    scheduleCell: (args: { rentalCarId: string }) => Promise<void>;
     getReservationId: () => Promise<number>;
     getVehicleId: () => Promise<number>;
     updateReservationData: (callback: () => void) => void;

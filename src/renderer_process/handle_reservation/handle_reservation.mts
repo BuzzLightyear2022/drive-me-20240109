@@ -1,6 +1,6 @@
-import { appendOptions, setRadioValue, getRadioValue, convertToKatakana, replaceFullWidthNumToHalfWidthNum, asyncAppendOptionElements, formatDateForInput, formatDatetimeForInput } from "../common_modules.mjs";
-import { updateCarOptions, appendCarOptions } from "./handle_reservation_module.mjs";
-import { RentalCar, Reservation, LicensePlate, CarCatalog, SelectOptions } from "../../@types/types";
+import { Reservation, CarCatalog, SelectOptions } from "../../@types/types";
+import { setRadioValue, getRadioValue, convertToKatakana, replaceFullWidthNumToHalfWidthNum, asyncAppendOptionElements, formatDateForInput, formatDatetimeForInput } from "../common_modules.mjs";
+import { rentalCarOptionsHandler } from "./rentalCar_options_handler.mjs";
 
 const isRepliedCheck: HTMLInputElement = document.querySelector("#replied-check");
 const receptionDateInput: HTMLInputElement = document.querySelector("#reception-date");
@@ -32,68 +32,80 @@ const departureFlightNumberInput: HTMLInputElement = document.querySelector("#de
 const departureFlightTimeInput: HTMLInputElement = document.querySelector("#departure-flight-time");
 const rentalClassSelect: HTMLSelectElement = document.querySelector("#rental-class");
 const carModelSelect: HTMLSelectElement = document.querySelector("#car-model");
-const vehicleIdSelect: HTMLSelectElement = document.querySelector("#license-plate");
+const rentalCarIdSelect: HTMLSelectElement = document.querySelector("#rentalCar-id");
 const commentTextArea: HTMLTextAreaElement = document.querySelector("#comment-textarea");
 
 const submitButton: HTMLButtonElement = document.querySelector("#submit-button");
 
-isRepliedCheck.checked ? repliedDateInput.disabled = false : repliedDateInput.disabled = true;
-isRepliedCheck.addEventListener("change", () => {
-    isRepliedCheck.checked ? repliedDateInput.disabled = false : repliedDateInput.disabled = true;
-}, false);
+const isRepliedCheckHandler = () => {
+    const checkboxDisabledController = {
+        handleEvent: () => {
+            isRepliedCheck.checked ? repliedDateInput.disabled = false : repliedDateInput.disabled = true;
+        }
+    }
 
+    checkboxDisabledController.handleEvent();
+    isRepliedCheck.addEventListener("change", checkboxDisabledController, false);
+}
+
+const validateDateInput = () => {
+    pickupDatetimeInput.addEventListener("input", () => {
+        const pickupDatetimeValue = pickupDatetimeInput.value;
+        const returnDatetimeValue = returnDatetimeInput.value;
+
+        if (returnDatetimeValue < pickupDatetimeValue) {
+            const invalidFeedbackDiv = document.createElement("div");
+            invalidFeedbackDiv.className = "alert alert-danger";
+            invalidFeedbackDiv.role = "alert";
+            invalidFeedbackDiv.textContent = "貸出日時より過去の日付を指定することはできません";
+
+            const existingError = document.querySelector(".alert");
+            if (existingError) {
+                existingError.remove();
+            }
+
+            returnDatetimeInput.parentElement.appendChild(invalidFeedbackDiv);
+        } else {
+            const warningElement = document.querySelector(".alert");
+            if (warningElement) {
+                warningElement.remove();
+            }
+        }
+    }, false);
+
+    returnDatetimeInput.addEventListener("input", () => {
+        const pickupDatetimeValue = pickupDatetimeInput.value;
+        const returnDatetimeValue = returnDatetimeInput.value;
+
+        if (returnDatetimeValue < pickupDatetimeValue) {
+            const invalidFeedbackDiv = document.createElement("div");
+            invalidFeedbackDiv.className = "alert alert-danger";
+            invalidFeedbackDiv.role = "alert";
+            invalidFeedbackDiv.textContent = "貸出日時より過去の日付を指定することはできません";
+
+            const existingError = document.querySelector(".alert");
+            if (existingError) {
+                existingError.remove();
+            }
+
+            returnDatetimeInput.parentElement.appendChild(invalidFeedbackDiv);
+        } else {
+            const warningElement = document.querySelector(".alert");
+            if (warningElement) {
+                warningElement.remove();
+            }
+        }
+    }, false);
+}
+
+isRepliedCheckHandler();
 replaceFullWidthNumToHalfWidthNum({ element: zipCodeFirstInput, limitDigits: 3 });
 replaceFullWidthNumToHalfWidthNum({ element: zipCodeLastInput, limitDigits: 4 });
 replaceFullWidthNumToHalfWidthNum({ element: phoneNumberInput });
+validateDateInput();
 replaceFullWidthNumToHalfWidthNum({ element: arrivalFlightNumberInput, limitDigits: 4 })
 replaceFullWidthNumToHalfWidthNum({ element: departureFlightNumberInput, limitDigits: 4 });
 convertToKatakana(furiganaInput);
-
-pickupDatetimeInput.addEventListener("change", () => {
-    const pickupDatetimeValue = pickupDatetimeInput.value;
-    const returnDatetimeValue = returnDatetimeInput.value;
-
-    if (returnDatetimeValue < pickupDatetimeValue) {
-        const invalidFeedbackDiv = document.createElement("div");
-        invalidFeedbackDiv.className = "alert alert-danger";
-        invalidFeedbackDiv.role = "alert";
-        invalidFeedbackDiv.textContent = "貸出日時より過去の日付を指定することはできません";
-
-        const existingError = document.querySelector(".alert");
-        if (existingError) {
-            existingError.remove();
-        }
-
-        returnDatetimeInput.parentElement.appendChild(invalidFeedbackDiv);
-    } else {
-        const warningElement = document.querySelector(".alert");
-        warningElement.remove();
-    }
-}, false);
-
-returnDatetimeInput.addEventListener("change", () => {
-    const pickupDatetimeValue = pickupDatetimeInput.value;
-    const returnDatetimeValue = returnDatetimeInput.value;
-
-    if (returnDatetimeValue < pickupDatetimeValue) {
-        const invalidFeedbackDiv = document.createElement("div");
-        invalidFeedbackDiv.className = "alert alert-danger";
-        invalidFeedbackDiv.role = "alert";
-        invalidFeedbackDiv.textContent = "貸出日時より過去の日付を指定することはできません";
-
-        const existingError = document.querySelector(".alert");
-        if (existingError) {
-            existingError.remove();
-        }
-
-        returnDatetimeInput.parentElement.appendChild(invalidFeedbackDiv);
-    } else {
-        const warningElement = document.querySelector(".alert");
-        if (warningElement) {
-            warningElement.remove();
-        }
-    }
-}, false);
 
 (async () => {
     const crudArgs = await window.contextmenu.getCrudArgs();
@@ -175,42 +187,13 @@ returnDatetimeInput.addEventListener("change", () => {
         preferredCarModelSelect.append(newCarModelNoneSpecificationOption);
     }, false);
 
-    updateCarOptions();
-
     switch (crudArgs.crudAction) {
         case "create":
-            const today: Date = new Date();
-            const year: number = today.getFullYear();
-            const month: string = String(today.getMonth() + 1);
-            const date: string = String(today.getDate());
-            const todayString: string = `${year}-${month.padStart(2, "0")}-${date.padStart(2, "0")}`;
+            const now: Date = new Date();
+            const todayString: string = formatDateForInput({ dateObject: now });
             receptionDateInput.value = todayString;
 
-            if (crudArgs.vehicleId) {
-                const vehicleAttributes: RentalCar = await window.sqlSelect.vehicleAttributesById({ vehicleId: crudArgs.vehicleId });
-
-                const rentalClassOption: HTMLOptionElement = document.createElement("option");
-                rentalClassOption.textContent = vehicleAttributes.rentalClass;
-                rentalClassOption.value = vehicleAttributes.rentalClass;
-                rentalClassSelect.append(rentalClassOption);
-                rentalClassSelect.disabled = true;
-
-                const carModelOption: HTMLOptionElement = document.createElement("option");
-                carModelOption.textContent = vehicleAttributes.carModel;
-                carModelOption.value = vehicleAttributes.carModel;
-                carModelSelect.append(carModelOption);
-                carModelSelect.disabled = true;
-
-                const vehicleIdOption: HTMLOptionElement = document.createElement("option");
-                const licensePlateString: string = `${vehicleAttributes.licensePlateRegion} ${vehicleAttributes.licensePlateCode} ${vehicleAttributes.licensePlateHiragana} ${vehicleAttributes.licensePlateNumber}`;
-                const nonSmokingString: string = vehicleAttributes.nonSmoking ? "禁煙" : "喫煙";
-                vehicleIdOption.textContent = `${licensePlateString} (${nonSmokingString})`;
-                vehicleIdSelect.append(vehicleIdOption);
-                vehicleIdOption.value = String(vehicleAttributes.id);
-                vehicleIdSelect.disabled = true;
-            } else {
-                await appendCarOptions({});
-            }
+            await rentalCarOptionsHandler({ rentalCarId: crudArgs.rentalCarId });
             break;
         case "update":
             const existingReservationData: Reservation = await window.sqlSelect.reservationDataById({ reservationId: crudArgs.reservationId });
@@ -226,7 +209,7 @@ returnDatetimeInput.addEventListener("change", () => {
             }
 
             if (existingReservationData.repliedDatetime) {
-                const repliedDateString: string = formatDateForInput({ dateObject: new Date(existingReservationData.repliedDatetime) });
+                const repliedDateString: string = formatDatetimeForInput({ dateObject: new Date(existingReservationData.repliedDatetime) });
                 repliedDateInput.value = repliedDateString;
             }
 
@@ -274,7 +257,7 @@ returnDatetimeInput.addEventListener("change", () => {
             departureFlightNumberInput.value = String(existingReservationData.departureFlightNumber);
             departureFlightTimeInput.value = existingReservationData.departureFlightTime;
 
-            appendCarOptions({ existingReservationData: existingReservationData });
+            await rentalCarOptionsHandler({ rentalCarId: existingReservationData.selectedVehicleId });
             break;
     }
 
@@ -283,6 +266,7 @@ returnDatetimeInput.addEventListener("change", () => {
         const repliedDatetime = isRepliedCheck.checked ? new Date(repliedDateInput.value) : null;
 
         const reservationData: Reservation = {
+            id: crudArgs.reservationId,
             isReplied: isRepliedCheck.checked,
             receptionDate: new Date(receptionDateInput.value),
             repliedDatetime: repliedDatetime,
@@ -312,7 +296,7 @@ returnDatetimeInput.addEventListener("change", () => {
             departureFlightTime: departureFlightTimeInput.value,
             selectedRentalClass: rentalClassSelect.value,
             selectedCarModel: carModelSelect.value,
-            selectedVehicleId: vehicleIdSelect.value,
+            selectedVehicleId: rentalCarIdSelect.value,
             comment: commentTextArea.value,
             isCanceled: false,
             createdAt: null,

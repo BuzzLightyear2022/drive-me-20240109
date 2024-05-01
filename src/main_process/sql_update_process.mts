@@ -2,7 +2,7 @@ import { ipcMain } from "electron";
 import axios, { AxiosResponse } from "axios";
 import FormData from "form-data";
 import { makeImageFileName } from "./common_modules.mjs";
-import { VehicleAttributes, ReservationData } from "../@types/types";
+import { RentalCar, Reservation } from "../@types/types";
 import { accessToken } from "./login_process.mjs";
 import { WindowHandler } from "./window_handler.mjs";
 import dotenv from "dotenv";
@@ -14,15 +14,15 @@ const serverHost: string = import.meta.env.VITE_EC2_SERVER_HOST;
 const port: string = import.meta.env.VITE_HTTPS_PORT;
 
 (async () => {
-    ipcMain.on("sqlUpdate:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent, args: { vehicleAttributes: VehicleAttributes }) => {
-        const { vehicleAttributes } = args;
+    ipcMain.on("sqlUpdate:vehicleAttributes", async (event: Electron.IpcMainInvokeEvent, args: { rentalCar: RentalCar }) => {
+        const { rentalCar } = args;
         const serverEndPoint = `https://${serverHost}:${port}/sqlUpdate/vehicleAttributes`;
 
         const postData: FormData = new FormData();
 
-        const imageFileName: string = makeImageFileName(vehicleAttributes);
+        const imageFileName: string = makeImageFileName(rentalCar);
         if (imageFileName) {
-            const imageUrl: string | null = vehicleAttributes.imageFileName;
+            const imageUrl: string | null = rentalCar.imageFileName;
             if (imageUrl) {
                 const base64Image: string = imageUrl.split(";base64").pop();
                 const bufferImage: Buffer = Buffer.from(base64Image, "base64");
@@ -31,14 +31,14 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
         }
 
         const textData: {
-            [key in keyof VehicleAttributes]:
+            [key in keyof RentalCar]:
             | string
             | number
             | boolean
             | Date
             | null
         } = {} as {
-            [key in keyof VehicleAttributes]:
+            [key in keyof RentalCar]:
             | string
             | number
             | boolean
@@ -46,9 +46,9 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
             | null
         };
 
-        for (const key in vehicleAttributes) {
+        for (const key in rentalCar) {
             if (key !== "imageFileName") {
-                textData[key as keyof VehicleAttributes] = vehicleAttributes[key as keyof VehicleAttributes];
+                textData[key as keyof RentalCar] = rentalCar[key as keyof RentalCar];
             }
         }
 
@@ -75,8 +75,8 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
 })();
 
 (async () => {
-    ipcMain.on("sqlUpdate:reservationData", async (event: Electron.IpcMainInvokeEvent, data: ReservationData) => {
-        const serverEndPoint = `https://${serverHost}:${port}/sqlUpdate/reservationData`;
+    ipcMain.on("sqlUpdate:reservationData", async (event: Electron.IpcMainInvokeEvent, data: Reservation) => {
+        const serverEndPoint = `https://${serverHost}:${port}/sqlUpdate/reservation`;
 
         const postData: FormData = new FormData();
         postData.append("data", JSON.stringify(data));
