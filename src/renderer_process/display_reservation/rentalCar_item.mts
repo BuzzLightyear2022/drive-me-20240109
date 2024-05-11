@@ -15,7 +15,7 @@ export const RentalCarItem = class extends HTMLElement {
 
         RentalCarItem.instances.push(this);
 
-        this.setAttribute("data-vehicle-id", String(rentalCar.id));
+        this.setAttribute("data-rentalCar-id", String(rentalCar.id));
 
         Object.assign(this.style, {
             display: "flex",

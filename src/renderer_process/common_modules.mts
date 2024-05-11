@@ -179,3 +179,13 @@ export const getTimeString = (args: { dateObject: Date }): string => {
 
     return `${hours}:${minutesString}`;
 }
+
+export const getDateString = (args: { dateObject: Date }): string => {
+    const { dateObject } = args;
+
+    const monthIndex: number = dateObject.getMonth();
+    const date: number = dateObject.getDate();
+    const dayIndex: number = dateObject.getDay();
+
+    return `${monthIndex + 1}月${date}日`;
+}

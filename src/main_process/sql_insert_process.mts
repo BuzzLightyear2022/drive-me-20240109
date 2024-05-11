@@ -1,7 +1,7 @@
 import { ipcMain } from "electron";
 import axios, { AxiosResponse } from "axios";
 import FormData from "form-data";
-import { VehicleAttributes, ReservationData, VehicleStatus } from "../@types/types";
+import { RentalCar, Reservation, RentalCarStatus } from "../@types/types";
 import { makeImageFileName } from "./common_modules.mjs";
 import { accessToken } from "./login_process.mjs";
 import { WindowHandler } from "./window_handler.mjs";
@@ -74,8 +74,8 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
 })();
 
 (async () => {
-    ipcMain.handle("sqlInsert:reservationData", async (event: Electron.IpcMainInvokeEvent, data: ReservationData) => {
-        const serverEndPoint = `https://${serverHost}:${port}/sqlInsert/reservationData`;
+    ipcMain.handle("sqlInsert:reservation", async (event: Electron.IpcMainInvokeEvent, data: Reservation) => {
+        const serverEndPoint = `https://${serverHost}:${port}/sqlInsert/reservation`;
 
         const postData: FormData = new FormData();
         postData.append("data", JSON.stringify(data));
@@ -89,7 +89,7 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
                 withCredentials: true
             });
 
-            // WindowHandler.windows.insertReservationWindow.close();
+            WindowHandler.windows.insertReservationWindow.close();
 
             return response.status;
         } catch (error: unknown) {
@@ -99,11 +99,11 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
 })();
 
 (async () => {
-    ipcMain.handle("sqlInsert:vehicleStatus", async (event: Electron.IpcMainEvent, args: { vehicleStatus: VehicleStatus }) => {
-        const serverEndPoint = `https://${serverHost}:${port}/sqlInsert/vehicleStatus`;
+    ipcMain.handle("sqlInsert:rentalCarStatus", async (event: Electron.IpcMainEvent, args: { rentalCarStatus: RentalCarStatus }) => {
+        const serverEndPoint = `https://${serverHost}:${port}/sqlInsert/rentalCarStatus`;
 
         try {
-            WindowHandler.windows.insertVehicleStatusWindow.close();
+            WindowHandler.windows.statusOfRentalCarHandlerWindow.close();
 
             const response: AxiosResponse = await axios.post(serverEndPoint, args, {
                 headers: {

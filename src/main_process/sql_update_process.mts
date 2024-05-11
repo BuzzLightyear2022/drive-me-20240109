@@ -75,7 +75,7 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
 })();
 
 (async () => {
-    ipcMain.on("sqlUpdate:reservationData", async (event: Electron.IpcMainInvokeEvent, data: Reservation) => {
+    ipcMain.on("sqlUpdate:reservation", async (event: Electron.IpcMainInvokeEvent, data: Reservation) => {
         const serverEndPoint = `https://${serverHost}:${port}/sqlUpdate/reservation`;
 
         const postData: FormData = new FormData();
@@ -90,10 +90,10 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
                 withCredentials: true
             });
 
-            // WindowHandler.windows.editReservationWindow.close();
-            // WindowHandler.windows.editReservationWindow = undefined;
-
-            return response.status;
+            if (response.status === 200) {
+                WindowHandler.windows.handleReservationWindow.close();
+                WindowHandler.windows.handleReservationWindow = undefined;
+            }
         } catch (error: unknown) {
             return `Failed to update reservation data ${error}`;
         }

@@ -17,8 +17,10 @@ export class VisualSchedule extends HTMLElement {
             whiteSpace: "nowrap"
         });
 
-        this.appendScheduleCells();
-        this.appendScheduleBars({ calendarDateElement: calendarDateElement });
+        (async () => {
+            this.appendScheduleCells();
+            await this.appendScheduleBars({ calendarDateElement: calendarDateElement });
+        })();
     }
 
     appendScheduleCells = (): void => {
@@ -41,27 +43,16 @@ export class VisualSchedule extends HTMLElement {
         const monthReservations: Reservation[] = await window.sqlSelect.reservations({ startDate: calendarStartDate, endDate: calendarEndDate });
         const scheduleCells: HTMLCollection = this.children;
 
-        monthReservations.forEach((reservation: Reservation) => {
+        await Promise.all(monthReservations.map((reservation: Reservation) => {
             const selectedVehicleId: number = Number(reservation.selectedVehicleId);
-            const pickupTimestamp: number = new Date(reservation.pickupDatetime).getTime();
-            const returnTimestamp: number = new Date(reservation.returnDatetime).getTime();
-
             for (let scheduleCell of scheduleCells) {
-                const scheduleCellVehicleId: number = Number(scheduleCell.getAttribute("data-vehicle-id"));
-
-                if (selectedVehicleId === scheduleCellVehicleId) {
-                    // if (pickupTimestamp >= calendarStartTimestamp && returnTimestamp <= calendarEndTimestamp) {
-                    //     const scheduleBar: ScheduleBar = new ScheduleBar({ calendarDateElement: calendarDateElement, reservation: reservation });
-                    //     scheduleCell.append(scheduleBar);
-                    // } else if (pickupTimestamp ) {
-
-                    // }
-
+                const scheduleCellRentalCarId: number = Number(scheduleCell.getAttribute("data-rentalCar-id"));
+                if (selectedVehicleId === scheduleCellRentalCarId && !reservation.isCanceled) {
                     const scheduleBar: ScheduleBar = new ScheduleBar({ calendarDateElement: calendarDateElement, reservation: reservation });
                     scheduleCell.appendChild(scheduleBar);
                 }
             }
-        });
+        }));
     }
 }
 

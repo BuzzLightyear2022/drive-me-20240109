@@ -37,18 +37,18 @@ export interface sqlSelect {
     carModels: (args: { smoking?: string, rentalClass: string }) => Promise<string[]>;
     licensePlates: (args: { smoking?: string, carModel: string }) => Promise<LicensePlatesData>;
     reservations: (args: { startDate?: Date, endDate?: Date }) => Promise<Reservation[]>;
-    reservationDataById: (args: { reservationId: number }) => Promise<ReservationData>;
-    latestVehicleStatuses: (args: { rentalClass?: string }) => Promise<any>;
+    reservationById: (args: { reservationId: string }) => Promise<Reservation>;
+    latestStatusOfRentalCars: (args: { rentalClass?: string }) => Promise<StatusOfRentalCar[]>;
 }
 
 export interface sqlInsert {
-    vehicleAttributes: (args: { vehicleAttributes: VehicleAttributes }) => Promise<string>;
-    reservationData: (reservationData: ReservationData) => Promise<string>;
-    vehicleStatus: (args: { vehicleStatus: VehicleStatus }) => Promise<void>;
+    rentalCar: (args: { rentalCar: RentalCar }) => Promise<string>;
+    reservation: (reservation: Reservation) => Promise<string>;
+    rentalCarStatus: (args: { rentalCarStatus: RentalCarStatus }) => Promise<void>;
 }
 
 export interface sqlUpdate {
-    reservationData: (reservationData: ReservationData) => Promise<void>;
+    reservation: (reservation: Reservation) => Promise<void>;
     vehicleAttributes: (args: { vehicleAttributes: VehicleAttributes }) => Promise<void>
 }
 
@@ -56,8 +56,8 @@ export interface contextmenu {
     scheduleBar: (reservationId: string) => Promise<void>;
     vehicleAttributesItem: (vehicleId: number) => Promise<void>;
     scheduleCell: (args: { rentalCarId: string }) => Promise<void>;
-    getReservationId: () => Promise<number>;
-    getVehicleId: () => Promise<number>;
+    getReservationId: () => Promise<string>;
+    getRentalCarId: () => Promise<string>;
     updateReservationData: (callback: () => void) => void;
     updateVehicleAttributes: (callback: () => void) => void;
     getCrudArgs: () => any;

@@ -7,10 +7,10 @@ export type Windows = {
     insertVehicleAttributesWindow: BrowserWindow,
     insertReservationWindow: BrowserWindow,
     displayReservationWindow: BrowserWindow,
-    editReservationWindow: BrowserWindow,
+    handleReservationWindow: BrowserWindow,
     editVehicleAttributesWindow: BrowserWindow,
     editCarCatalogWindow: BrowserWindow,
-    insertVehicleStatusWindow: BrowserWindow
+    statusOfRentalCarHandlerWindow: BrowserWindow
 }
 
 export type CarCatalog = {
@@ -54,7 +54,8 @@ export type RentalCar = {
     hasJAFCard: boolean,
     JAFCardNumber?: string,
     JAFCardExp?: Date,
-    otherFeatures?: string
+    otherFeatures?: string,
+    RentalCarStatuses?: RentalCarStatus[]
 }
 
 export type Reservation = {
@@ -90,7 +91,8 @@ export type Reservation = {
     selectedCarModel: string,
     selectedVehicleId: string,
     comment: string,
-    isCanceled: boolean
+    isCanceled: boolean,
+    cancelComment: string,
     createdAt: datetime,
     updatedAt: datetime
 }
@@ -127,9 +129,9 @@ export type CarLocation = {
     location: string[];
 }
 
-export type VehicleStatus = {
+export type RentalCarStatus = {
     id?: number,
-    vehicleId: number,
+    rentalCarId: string,
     currentLocation: string,
     washState: string,
     comment: string,

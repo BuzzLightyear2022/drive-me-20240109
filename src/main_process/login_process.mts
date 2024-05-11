@@ -25,7 +25,7 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
             const response: AxiosResponse = await axios.post(serverEndPoint, loginData);
             const sessionData: string = response.data;
             accessToken = sessionData;
-            console.log(sessionData);
+            // console.log(sessionData);
             WindowHandler.createDisplayReservationWindow();
             WindowHandler.windows.loginWindow.close();
             WindowHandler.windows.loginWindow = undefined;

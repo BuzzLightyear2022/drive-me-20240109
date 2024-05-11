@@ -1,5 +1,5 @@
 import { Reservation } from "../../@types/types";
-import { getTimeString } from "../common_modules.mjs";
+import { getTimeString, getDateString } from "../common_modules.mjs";
 
 export class ScheduleBar extends HTMLElement {
     reservationId: string;
@@ -11,21 +11,34 @@ export class ScheduleBar extends HTMLElement {
         const { calendarDateElement, reservation } = args;
 
         this.reservationId = reservation.id;
-        this.reservation = reservation
+        this.reservation = reservation;
+        this.setAttribute("data-reservation-id", this.reservationId);
 
         const scheduleBarStyle = this.scheduleBarStyle({ calendarDateElement: calendarDateElement, reservation: reservation });
         Object.assign(this.style, scheduleBarStyle);
-        this.className = "card";
 
         const scheduleBarLabel: HTMLDivElement = this.scheduleBarLabel();
         this.append(scheduleBarLabel);
 
         this.addEventListener("contextmenu", this.contextmenuHandler, false);
+        this.addEventListener("click", this.reservationDetailsModalHandler, false);
     }
 
     contextmenuHandler = {
         handleEvent: (event: Event) => {
             window.contextmenu.scheduleBar(this.reservationId);
+        }
+    }
+
+    reservationDetailsModalHandler = {
+        handleEvent: (event: MouseEvent) => {
+            const body: HTMLBodyElement = document.querySelector("body");
+
+            const modalBackground: HTMLDivElement = this.modalBackground();
+            const reservationDetails: HTMLDivElement = this.reservationDetails({ event });
+
+            modalBackground.append(reservationDetails);
+            body.append(modalBackground);
         }
     }
 
@@ -38,7 +51,6 @@ export class ScheduleBar extends HTMLElement {
             position: "relative",
             whiteSpace: "nowrap",
             overflow: "hidden",
-            border: "none",
             cursor: "default",
             userSelect: "none"
         }
@@ -60,7 +72,7 @@ export class ScheduleBar extends HTMLElement {
                 ...commonStyle,
                 left: diffFromStart,
                 width: relativeWidth,
-                height: "100%",
+                borderRadius: "5px",
                 backgroundColor: "green"
             }
         } else if (pickupDatetimeMs >= calendarStartTimestamp && returnDatetimeMs >= calendarEndTimestamp) {
@@ -68,6 +80,8 @@ export class ScheduleBar extends HTMLElement {
                 ...commonStyle,
                 left: diffFromStart,
                 width: `calc(100% - ${diffFromStart})`,
+                borderTopLeftRadius: "5px",
+                borderBottomLeftRadius: "5px",
                 backgroundColor: "yellow"
             }
         } else if (pickupDatetimeMs <= calendarStartTimestamp && returnDatetimeMs <= calendarEndTimestamp) {
@@ -75,6 +89,8 @@ export class ScheduleBar extends HTMLElement {
                 ...commonStyle,
                 left: "0%",
                 width: `calc(${relativeWidth} + ${diffFromStart})`,
+                borderTopRightRadius: "5px",
+                borderBottomRightRadius: "5px",
                 backgroundColor: "red"
             }
         } else {
@@ -105,7 +121,7 @@ export class ScheduleBar extends HTMLElement {
         return scheduleBarLabel;
     }
 
-    timeAndLocationContainer = (): HTMLDivElement => {
+    timeAndLocationContainer = (date: boolean = false): HTMLDivElement => {
         const timeAndLocationContainer: HTMLDivElement = document.createElement("div");
         Object.assign(timeAndLocationContainer.style, {
             display: "grid",
@@ -118,8 +134,9 @@ export class ScheduleBar extends HTMLElement {
             gridRow: "1",
         });
         const pickupTimeDateObject: Date = new Date(this.reservation.pickupDatetime);
+        const pickupDateString: string = getDateString({ dateObject: pickupTimeDateObject });
         const pickupTimeString: string = getTimeString({ dateObject: pickupTimeDateObject });
-        pickupTimeDiv.textContent = pickupTimeString;
+        pickupTimeDiv.textContent = date ? `${pickupDateString} ${pickupTimeString}` : pickupTimeString;
 
         const pickupLocationDiv: HTMLDivElement = document.createElement("div");
         Object.assign(pickupLocationDiv.style, {
@@ -137,8 +154,9 @@ export class ScheduleBar extends HTMLElement {
             gridRow: "2"
         });
         const returnDateObject: Date = new Date(this.reservation.returnDatetime);
+        const returnDateString: string = getDateString({ dateObject: returnDateObject });
         const returnTimeString: string = getTimeString({ dateObject: returnDateObject });
-        returnTimeDiv.textContent = returnTimeString;
+        returnTimeDiv.textContent = date ? `${returnDateString} ${returnTimeString}` : returnTimeString;
 
         const returnLocationDiv: HTMLDivElement = document.createElement("div");
         Object.assign(returnLocationDiv.style, {
@@ -164,6 +182,51 @@ export class ScheduleBar extends HTMLElement {
         reservationNameContainer.textContent = `${this.reservation.userName} 様`;
 
         return reservationNameContainer;
+    }
+
+    modalBackground = (): HTMLDivElement => {
+        const modalBackground: HTMLDivElement = document.createElement("div");
+
+        Object.assign(modalBackground.style, {
+            display: "block",
+            width: "100%",
+            height: "100%",
+            left: "0",
+            top: "0",
+            position: "fixed",
+            zIndex: "1",
+        });
+
+        modalBackground.addEventListener("click", () => {
+            modalBackground.parentElement.removeChild(modalBackground);
+        });
+
+        return modalBackground
+    }
+
+    reservationDetails = (args: { event: MouseEvent }): HTMLDivElement => {
+        const { event } = args;
+
+        const reservationDetails: HTMLDivElement = document.createElement("div");
+        Object.assign(reservationDetails.style, {
+            display: "flex",
+            position: "absolute",
+            flexDirection: "column",
+            border: "solid",
+            borderRadius: "5px",
+            left: `${event.x}px`,
+            top: `${event.y}px`,
+            backgroundColor: "green",
+            zIndex: "2"
+        });
+
+        const reservationNameContainer: HTMLDivElement = this.reservationNameContainer();
+
+        const timeAndLocationContainer: HTMLDivElement = this.timeAndLocationContainer(true);
+
+        reservationDetails.append(reservationNameContainer, timeAndLocationContainer);
+
+        return reservationDetails;
     }
 }
 

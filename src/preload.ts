@@ -6,7 +6,7 @@ import {
     LicensePlate,
     Reservation,
     CarLocation,
-    VehicleStatus
+    RentalCarStatus
 } from "./@types/types";
 import { generateUniqueId } from "./renderer_process/common_modules.mjs";
 
@@ -100,14 +100,14 @@ contextBridge.exposeInMainWorld(
         reservations: async (args: { startDate?: Date, endDate?: Date }) => {
             return await ipcRenderer.invoke("sqlSelect:reservations", args);
         },
-        reservationDataById: async (args: { reservationId: number }) => {
-            return await ipcRenderer.invoke("sqlSelect:reservationDataById", args);
+        reservationById: async (args: { reservationId: string }) => {
+            return await ipcRenderer.invoke("sqlSelect:reservationById", args);
         },
         rentalCarById: async (args: { rentalCarId: string }) => {
             return await ipcRenderer.invoke("sqlSelect:rentalCarById", args);
         },
-        latestVehicleStatuses: async (args: { rentalClass: string }) => {
-            return await ipcRenderer.invoke("sqlSelect:latestVehicleStatuses", args);
+        latestStatusOfRentalCars: async (args: { rentalClass?: string }) => {
+            return await ipcRenderer.invoke("sqlSelect:latestStatusOfRentalCars", args);
         }
     }
 );
@@ -115,14 +115,14 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "sqlInsert",
     {
-        vehicleAttributes: async (args: { vehicleAttributes: VehicleAttributes }): Promise<string> => {
-            return await ipcRenderer.invoke("sqlInsert:vehicleAttributes", args);
+        rentalCar: async (args: { rentalCar: RentalCar }): Promise<string> => {
+            return await ipcRenderer.invoke("sqlInsert:rentalCar", args);
         },
-        reservationData: async (reservationData: ReservationData): Promise<string> => {
-            return await ipcRenderer.invoke("sqlInsert:reservationData", reservationData);
+        reservation: async (reservation: Reservation): Promise<string> => {
+            return await ipcRenderer.invoke("sqlInsert:reservation", reservation);
         },
-        vehicleStatus: async (args: { vehicleStatus: VehicleStatus }) => {
-            return await ipcRenderer.invoke("sqlInsert:vehicleStatus", args);
+        rentalCarStatus: async (args: { rentalCarStatus: RentalCarStatus }) => {
+            return await ipcRenderer.invoke("sqlInsert:rentalCarStatus", args);
         }
     }
 );
@@ -130,8 +130,8 @@ contextBridge.exposeInMainWorld(
 contextBridge.exposeInMainWorld(
     "sqlUpdate",
     {
-        reservationData: async (reservationData: ReservationData): Promise<void> => {
-            ipcRenderer.send("sqlUpdate:reservationData", reservationData);
+        reservation: async (reservation: Reservation): Promise<void> => {
+            ipcRenderer.send("sqlUpdate:reservation", reservation);
         },
         vehicleAttributes: async (args: { vehicleAttributes: VehicleAttributes }): Promise<void> => {
             ipcRenderer.send("sqlUpdate:vehicleAttributes", args);
@@ -145,11 +145,11 @@ contextBridge.exposeInMainWorld(
         scheduleBar: async (reservationId: string) => {
             ipcRenderer.send("contextmenu:schedule-bar", reservationId);
         },
-        vehicleAttributesItem: async (vehicleId: number) => {
-            ipcRenderer.send("contextmenu:vehicleAttributesItem", vehicleId);
+        vehicleAttributesItem: async (args: { rentalCarId: string }) => {
+            ipcRenderer.send("contextmenu:rentalCarItem", args);
         },
-        scheduleCell: async (vehicleId: number) => {
-            ipcRenderer.send("contextmenu:schedule-cell", vehicleId)
+        scheduleCell: async (args: { rentalCarId: string }) => {
+            ipcRenderer.send("contextmenu:schedule-cell", args);
         },
         getCrudArgs: async () => {
             return new Promise((resolve, reject) => {
@@ -169,11 +169,11 @@ contextBridge.exposeInMainWorld(
                 });
             });
         },
-        getVehicleId: async () => {
+        getRentalCarId: async (): Promise<string> => {
             return new Promise((resolve, reject) => {
-                ipcRenderer.on("contextmenu:getVehicleId", (event: Electron.IpcRendererEvent, vehicleId: number) => {
-                    if (vehicleId) {
-                        resolve(vehicleId);
+                ipcRenderer.on("contextmenu:getRentalCarId", (event: Electron.IpcRendererEvent, rentalCarId: string) => {
+                    if (rentalCarId) {
+                        resolve(rentalCarId);
                     } else {
                         resolve(null);
                     }

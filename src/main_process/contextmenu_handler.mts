@@ -49,12 +49,14 @@ export class ContextmenuHandler {
     }
 
     static displayScheduleCellMenu = () => {
-        ipcMain.on("contextmenu:schedule-cell", (event: Electron.IpcMainEvent, rentalCarId: string) => {
+        ipcMain.on("contextmenu:schedule-cell", (event: Electron.IpcMainEvent, args: { rentalCarId: string }) => {
+            const { rentalCarId } = args;
+
             const menuTemplate = Menu.buildFromTemplate([
                 {
                     label: "ステータス",
                     click: async () => {
-                        WindowHandler.createInsertVehicleStatusWindow(rentalCarId);
+                        WindowHandler.createStatusOfRentalCarHandlerWindow({ rentalCarId: rentalCarId });
                     }
                 },
                 {
@@ -80,13 +82,15 @@ export class ContextmenuHandler {
             const contextMenu = Menu.buildFromTemplate([
                 {
                     label: "予約変更",
-                    click: async () => WindowHandler.createHandleReservationWindow({ reservationId: reservationId, crudAction: "update" })
+                    click: async () => {
+                        if (!WindowHandler.windows.handleReservationWindow) {
+                            WindowHandler.createHandleReservationWindow({ reservationId: reservationId, crudAction: "update" });
+                        }
+                    }
                 },
                 {
                     label: "キャンセル",
-                    click: () => {
-                        // console.log("cancel", reservationId);
-                    }
+                    click: async () => WindowHandler.createHandleReservationWindow({ reservationId: reservationId, crudAction: "cancel" })
                 }
             ]);
             contextMenu.popup(WindowHandler.windows.displayReservationWindow);
@@ -94,18 +98,18 @@ export class ContextmenuHandler {
     }
 
     static displayVehicleItemMenu = () => {
-        ipcMain.on("contextmenu:vehicleAttributesItem", (event: Electron.IpcMainEvent, vehicleId: string) => {
+        ipcMain.on("contextmenu:vehicleAttributesItem", (event: Electron.IpcMainEvent, rentalCarId: string) => {
             const menuTemplate = Menu.buildFromTemplate([
                 {
                     label: "ステータス",
                     click: async () => {
-                        WindowHandler.createInsertVehicleStatusWindow(vehicleId);
+                        WindowHandler.createStatusOfRentalCarHandlerWindow({ rentalCarId: rentalCarId });
                     }
                 },
                 {
                     label: "車両情報更新",
                     click: async () => {
-                        WindowHandler.createEditVehicleAttributesWindow(vehicleId);
+                        WindowHandler.createEditVehicleAttributesWindow(rentalCarId);
                     }
                 },
                 {

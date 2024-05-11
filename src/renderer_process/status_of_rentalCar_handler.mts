@@ -1,8 +1,8 @@
 import { loadImage } from "./common_modules.mjs";
-import { CarLocation, VehicleAttributes, VehicleStatus } from "../@types/types";
+import { CarLocation, RentalCarStatus, RentalCar, LicensePlate } from "../@types/types";
 
 const licensePlatePlace = document.querySelector("#license-plate-place");
-const vehicleImageDiv = document.querySelector("#vehicle-image-div");
+const rentalCarImageDiv = document.querySelector("#rentalCar-image-div");
 const currentLocationSelect: HTMLSelectElement = document.querySelector("#parking-location-select");
 const washStateSelect: HTMLSelectElement = document.querySelector("#wash-state-select");
 const commentTextarea: HTMLTextAreaElement = document.querySelector("#comment-textarea");
@@ -20,22 +20,23 @@ const submitButton = document.querySelector("#submit-button");
 })();
 
 (async () => {
-    const vehicleId: number = await window.contextmenu.getVehicleId();
-    const vehicleAttributes: VehicleAttributes = await window.sqlSelect.vehicleAttributesById({ vehicleId: vehicleId });
+    const rentalCarId: string = await window.contextmenu.getRentalCarId();
 
-    const licensePlate: string = `${vehicleAttributes.licensePlateRegion} ${vehicleAttributes.licensePlateCode} ${vehicleAttributes.licensePlateHiragana} ${vehicleAttributes.licensePlateNumber}`;
-    licensePlatePlace.textContent = licensePlate;
+    const rentalCar: RentalCar = await window.sqlSelect.rentalCarById({ rentalCarId: rentalCarId });
+
+    const licensePlateString = `${rentalCar.licensePlateRegion} ${rentalCar.licensePlateCode} ${rentalCar.licensePlateHiragana} ${rentalCar.licensePlateNumber}`;
+    licensePlatePlace.textContent = licensePlateString;
 
     const imgElm = await loadImage({
-        fileName: vehicleAttributes.imageFileName,
-        width: "400px",
-        height: "400px"
+        fileName: rentalCar.imageFileName,
+        width: "300px",
+        height: "300px"
     });
-    vehicleImageDiv.append(imgElm);
+    rentalCarImageDiv.append(imgElm);
 
     submitButton.addEventListener("click", async () => {
-        const vehicleStatus: VehicleStatus = {
-            vehicleId: vehicleId,
+        const rentalCarStatus: RentalCarStatus = {
+            rentalCarId: rentalCarId,
             currentLocation: currentLocationSelect.value,
             washState: washStateSelect.value,
             comment: commentTextarea.value,
@@ -43,6 +44,6 @@ const submitButton = document.querySelector("#submit-button");
             updatedAt: null
         }
 
-        await window.sqlInsert.vehicleStatus({ vehicleStatus: vehicleStatus });
+        await window.sqlInsert.rentalCarStatus({ rentalCarStatus: rentalCarStatus });
     }, false);
 })();

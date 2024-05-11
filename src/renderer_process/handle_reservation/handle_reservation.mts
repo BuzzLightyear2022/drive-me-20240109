@@ -2,6 +2,7 @@ import { Reservation, CarCatalog, SelectOptions } from "../../@types/types";
 import { setRadioValue, getRadioValue, convertToKatakana, replaceFullWidthNumToHalfWidthNum, asyncAppendOptionElements, formatDateForInput, formatDatetimeForInput } from "../common_modules.mjs";
 import { rentalCarOptionsHandler } from "./rentalCar_options_handler.mjs";
 
+const titleElement: HTMLElement = document.querySelector("#title-element");
 const isRepliedCheck: HTMLInputElement = document.querySelector("#replied-check");
 const receptionDateInput: HTMLInputElement = document.querySelector("#reception-date");
 const repliedDateInput: HTMLInputElement = document.querySelector("#replied-date");
@@ -96,6 +97,118 @@ const validateDateInput = () => {
             }
         }
     }, false);
+}
+
+const populateFormInputs = async (args: { reservationId: string, carCatalog: CarCatalog }) => {
+    const { reservationId, carCatalog } = args;
+    const existingReservationData: Reservation = await window.sqlSelect.reservationById({ reservationId: reservationId });
+
+    isRepliedCheck.checked = existingReservationData.isReplied;
+
+    const receptionDateObject: Date = new Date(existingReservationData.receptionDate);
+    const receptionDateString: string = formatDateForInput({ dateObject: receptionDateObject });
+    receptionDateInput.value = receptionDateString;
+
+    if (existingReservationData.isReplied) {
+        repliedDateInput.disabled = false;
+    }
+
+    if (existingReservationData.repliedDatetime) {
+        const repliedDateString: string = formatDatetimeForInput({ dateObject: new Date(existingReservationData.repliedDatetime) });
+        repliedDateInput.value = repliedDateString;
+    }
+
+    salesBranchSelect.value = existingReservationData.salesBranch;
+    orderHandlerSelect.value = existingReservationData.orderHandler;
+    orderSourceSelect.value = existingReservationData.orderSource;
+    furiganaInput.value = existingReservationData.userNameFurigana;
+    setRadioValue({ radios: nonSmokingRadios, checkedValue: existingReservationData.nonSmoking });
+    userNameInput.value = existingReservationData.userName;
+    preferredRentalClassSelect.value = existingReservationData.preferredRentalClass;
+    isElevatableCheck.checked = existingReservationData.isElevatable;
+    isClassSpecifiedCheck.checked = existingReservationData.isClassSpecified;
+    applicantNameInput.value = existingReservationData.applicantName;
+
+    while (preferredCarModelSelect.firstChild) {
+        preferredCarModelSelect.removeChild(preferredCarModelSelect.firstChild);
+    }
+    await asyncAppendOptionElements({ selectElement: preferredCarModelSelect, appendedOptionStrings: Object.keys(carCatalog.rentalClasses[existingReservationData.preferredRentalClass]) });
+    preferredCarModelSelect.value = existingReservationData.preferredCarModel;
+
+    if (existingReservationData.applicantZipCode) {
+        zipCodeFirstInput.value = String(existingReservationData.applicantZipCode).slice(0, 3);
+        zipCodeLastInput.value = String(existingReservationData.applicantZipCode).slice(-4);
+    }
+
+    addressInput.value = existingReservationData.applicantAddress;
+
+    if (existingReservationData.applicantPhoneNumber) {
+        phoneNumberInput.value = String(existingReservationData.applicantPhoneNumber);
+    }
+
+    pickupLocationSelect.value = existingReservationData.pickupLocation;
+    returnLocationSelect.value = existingReservationData.returnLocation;
+
+    const pickupDatetimeString: string = formatDatetimeForInput({ dateObject: new Date(existingReservationData.pickupDatetime) });
+    pickupDatetimeInput.value = pickupDatetimeString;
+
+    arrivalFlightCarrierSelect.value = existingReservationData.arrivalFlightCarrier;
+    arrivalFlightNumberInput.value = String(existingReservationData.arrivalFlightNumber);
+    arrivalFlightTimeInput.value = existingReservationData.arrivalFlightTime;
+
+    const returnDatetimeString: string = formatDatetimeForInput({ dateObject: new Date(existingReservationData.returnDatetime) });
+    returnDatetimeInput.value = returnDatetimeString;
+    departureFlightCarrierSelect.value = existingReservationData.departureFlightCarrier;
+    departureFlightNumberInput.value = String(existingReservationData.departureFlightNumber);
+    departureFlightTimeInput.value = existingReservationData.departureFlightTime;
+
+    await rentalCarOptionsHandler({ rentalCarId: existingReservationData.selectedVehicleId });
+}
+
+const getSubmitData = (args: { crudArgs: any }): Reservation => {
+    const { crudArgs } = args;
+
+    const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-specification" });
+    const repliedDatetime = isRepliedCheck.checked ? new Date(repliedDateInput.value) : null;
+
+    return {
+        id: crudArgs.reservationId,
+        isReplied: isRepliedCheck.checked,
+        receptionDate: new Date(receptionDateInput.value),
+        repliedDatetime: repliedDatetime,
+        salesBranch: salesBranchSelect.value,
+        orderHandler: orderHandlerSelect.value,
+        orderSource: orderSourceSelect.value,
+        userNameFurigana: furiganaInput.value,
+        nonSmoking: selectedSmoking,
+        userName: userNameInput.value,
+        preferredRentalClass: preferredRentalClassSelect.value,
+        isElevatable: isElevatableCheck.checked,
+        isClassSpecified: isClassSpecifiedCheck.checked,
+        applicantName: applicantNameInput.value,
+        preferredCarModel: preferredCarModelSelect.value,
+        applicantZipCode: `${zipCodeFirstInput.value}${zipCodeLastInput.value}`,
+        applicantAddress: addressInput.value,
+        applicantPhoneNumber: phoneNumberInput.value,
+        pickupLocation: pickupLocationSelect.value,
+        returnLocation: returnLocationSelect.value,
+        pickupDatetime: new Date(pickupDatetimeInput.value),
+        arrivalFlightCarrier: arrivalFlightCarrierSelect.value,
+        arrivalFlightNumber: arrivalFlightNumberInput.value,
+        arrivalFlightTime: arrivalFlightTimeInput.value,
+        returnDatetime: new Date(returnDatetimeInput.value),
+        departureFlightCarrier: departureFlightCarrierSelect.value,
+        departureFlightNumber: departureFlightNumberInput.value,
+        departureFlightTime: departureFlightTimeInput.value,
+        selectedRentalClass: rentalClassSelect.value,
+        selectedCarModel: carModelSelect.value,
+        selectedVehicleId: rentalCarIdSelect.value,
+        comment: commentTextArea.value,
+        isCanceled: false,
+        cancelComment: null,
+        createdAt: null,
+        updatedAt: null
+    }
 }
 
 isRepliedCheckHandler();
@@ -196,126 +309,100 @@ convertToKatakana(furiganaInput);
             await rentalCarOptionsHandler({ rentalCarId: crudArgs.rentalCarId });
             break;
         case "update":
-            const existingReservationData: Reservation = await window.sqlSelect.reservationDataById({ reservationId: crudArgs.reservationId });
+            await populateFormInputs({ reservationId: crudArgs.reservationId, carCatalog: carCatalog });
+            submitButton.textContent = "変更確定";
+            break;
+        case "cancel":
+            const cancelCommentTextareaRow = (): HTMLDivElement => {
+                const rowDiv: HTMLDivElement = document.createElement("div");
+                rowDiv.className = "row";
 
-            isRepliedCheck.checked = existingReservationData.isReplied;
+                const colDiv: HTMLDivElement = document.createElement("div");
+                colDiv.className = "col";
 
-            const receptionDateObject: Date = new Date(existingReservationData.receptionDate);
-            const receptionDateString: string = formatDateForInput({ dateObject: receptionDateObject });
-            receptionDateInput.value = receptionDateString;
+                const formFloatingDiv: HTMLDivElement = document.createElement("div");
+                formFloatingDiv.className = "form-floating";
 
-            if (existingReservationData.isReplied) {
-                repliedDateInput.disabled = false;
+                const cancelCommentTextarea: HTMLTextAreaElement = document.createElement("textarea");
+                cancelCommentTextarea.className = "form-control";
+                cancelCommentTextarea.id = "cancel-comment-textarea";
+
+                const label: HTMLLabelElement = document.createElement("label");
+                label.textContent = "キャンセル理由";
+
+                formFloatingDiv.append(cancelCommentTextarea, label);
+                colDiv.append(formFloatingDiv);
+                rowDiv.append(colDiv);
+
+                return rowDiv;
             }
+            titleElement.textContent = "キャンセル理由を入力してください";
+            submitButton.remove();
 
-            if (existingReservationData.repliedDatetime) {
-                const repliedDateString: string = formatDatetimeForInput({ dateObject: new Date(existingReservationData.repliedDatetime) });
-                repliedDateInput.value = repliedDateString;
-            }
+            await populateFormInputs({ reservationId: crudArgs.reservationId, carCatalog: carCatalog });
+            const inputElements: NodeListOf<HTMLInputElement> = document.querySelectorAll("input");
+            inputElements.forEach((inputElement: HTMLInputElement) => {
+                inputElement.disabled = true;
+            });
+            const selectElements: NodeListOf<HTMLSelectElement> = document.querySelectorAll("select");
+            selectElements.forEach((selectElement: HTMLSelectElement) => {
+                selectElement.disabled = true;
+            });
+            commentTextArea.disabled = true;
 
-            salesBranchSelect.value = existingReservationData.salesBranch;
-            orderHandlerSelect.value = existingReservationData.orderHandler;
-            orderSourceSelect.value = existingReservationData.orderSource;
-            furiganaInput.value = existingReservationData.userNameFurigana;
-            setRadioValue({ radios: nonSmokingRadios, checkedValue: existingReservationData.nonSmoking });
-            userNameInput.value = existingReservationData.userName;
-            preferredRentalClassSelect.value = existingReservationData.preferredRentalClass;
-            isElevatableCheck.checked = existingReservationData.isElevatable;
-            isClassSpecifiedCheck.checked = existingReservationData.isClassSpecified;
-            applicantNameInput.value = existingReservationData.applicantName;
+            const newCancelCommentTextareaRow = cancelCommentTextareaRow();
+            titleElement.after(newCancelCommentTextareaRow);
 
-            while (preferredCarModelSelect.firstChild) {
-                preferredCarModelSelect.removeChild(preferredCarModelSelect.firstChild);
-            }
-            await asyncAppendOptionElements({ selectElement: preferredCarModelSelect, appendedOptionStrings: Object.keys(carCatalog.rentalClasses[existingReservationData.preferredRentalClass]) });
-            preferredCarModelSelect.value = existingReservationData.preferredCarModel;
+            const cancelSubmitButton: HTMLButtonElement = document.createElement("button");
+            cancelSubmitButton.className = "btn btn-danger m-1";
+            cancelSubmitButton.id = "cancel-submit-button";
+            cancelSubmitButton.textContent = "予約キャンセル確定";
 
-            if (existingReservationData.applicantZipCode) {
-                zipCodeFirstInput.value = String(existingReservationData.applicantZipCode).slice(0, 3);
-                zipCodeLastInput.value = String(existingReservationData.applicantZipCode).slice(-4);
-            }
+            newCancelCommentTextareaRow.after(cancelSubmitButton);
 
-            addressInput.value = existingReservationData.applicantAddress;
+            const hrElement: HTMLHRElement = document.createElement("hr");
+            cancelSubmitButton.after(hrElement);
 
-            if (existingReservationData.applicantPhoneNumber) {
-                phoneNumberInput.value = String(existingReservationData.applicantPhoneNumber);
-            }
-
-            pickupLocationSelect.value = existingReservationData.pickupLocation;
-            returnLocationSelect.value = existingReservationData.returnLocation;
-
-            const pickupDatetimeString: string = formatDatetimeForInput({ dateObject: new Date(existingReservationData.pickupDatetime) });
-            pickupDatetimeInput.value = pickupDatetimeString;
-
-            arrivalFlightCarrierSelect.value = existingReservationData.arrivalFlightCarrier;
-            arrivalFlightNumberInput.value = String(existingReservationData.arrivalFlightNumber);
-            arrivalFlightTimeInput.value = existingReservationData.arrivalFlightTime;
-
-            const returnDatetimeString: string = formatDatetimeForInput({ dateObject: new Date(existingReservationData.returnDatetime) });
-            returnDatetimeInput.value = returnDatetimeString;
-            departureFlightCarrierSelect.value = existingReservationData.departureFlightCarrier;
-            departureFlightNumberInput.value = String(existingReservationData.departureFlightNumber);
-            departureFlightTimeInput.value = existingReservationData.departureFlightTime;
-
-            await rentalCarOptionsHandler({ rentalCarId: existingReservationData.selectedVehicleId });
             break;
     }
 
     submitButton.addEventListener("click", async () => {
-        const selectedSmoking: string = getRadioValue({ radios: nonSmokingRadios, defaultValue: "none-specification" });
-        const repliedDatetime = isRepliedCheck.checked ? new Date(repliedDateInput.value) : null;
-
-        const reservationData: Reservation = {
-            id: crudArgs.reservationId,
-            isReplied: isRepliedCheck.checked,
-            receptionDate: new Date(receptionDateInput.value),
-            repliedDatetime: repliedDatetime,
-            salesBranch: salesBranchSelect.value,
-            orderHandler: orderHandlerSelect.value,
-            orderSource: orderSourceSelect.value,
-            userNameFurigana: furiganaInput.value,
-            nonSmoking: selectedSmoking,
-            userName: userNameInput.value,
-            preferredRentalClass: preferredRentalClassSelect.value,
-            isElevatable: isElevatableCheck.checked,
-            isClassSpecified: isClassSpecifiedCheck.checked,
-            applicantName: applicantNameInput.value,
-            preferredCarModel: preferredCarModelSelect.value,
-            applicantZipCode: `${zipCodeFirstInput.value}${zipCodeLastInput.value}`,
-            applicantAddress: addressInput.value,
-            applicantPhoneNumber: phoneNumberInput.value,
-            pickupLocation: pickupLocationSelect.value,
-            returnLocation: returnLocationSelect.value,
-            pickupDatetime: new Date(pickupDatetimeInput.value),
-            arrivalFlightCarrier: arrivalFlightCarrierSelect.value,
-            arrivalFlightNumber: arrivalFlightNumberInput.value,
-            arrivalFlightTime: arrivalFlightTimeInput.value,
-            returnDatetime: new Date(returnDatetimeInput.value),
-            departureFlightCarrier: departureFlightCarrierSelect.value,
-            departureFlightNumber: departureFlightNumberInput.value,
-            departureFlightTime: departureFlightTimeInput.value,
-            selectedRentalClass: rentalClassSelect.value,
-            selectedCarModel: carModelSelect.value,
-            selectedVehicleId: rentalCarIdSelect.value,
-            comment: commentTextArea.value,
-            isCanceled: false,
-            createdAt: null,
-            updatedAt: null
-        }
+        const reservation: Reservation = getSubmitData({ crudArgs: crudArgs });
 
         switch (crudArgs.crudAction) {
             case "create":
                 try {
-                    await window.sqlInsert.reservationData(reservationData);
+                    await window.sqlInsert.reservation(reservation);
                 } catch (error: unknown) {
                     console.error(`Failed to invoke reservationData: ${error}`);
                 }
             case "update":
                 try {
-                    await window.sqlUpdate.reservationData(reservationData);
+                    await window.sqlUpdate.reservation(reservation);
                 } catch (error: unknown) {
                     console.error(`Failed to update reservationData: ${error}`)
                 }
         }
-    }, false)
+    }, false);
+
+    const cancelSubmitButton: HTMLButtonElement = document.querySelector("#cancel-submit-button");
+    const cancelEventHandler = {
+        handleEvent: async () => {
+            const reservation: Reservation = getSubmitData({ crudArgs: crudArgs });
+            reservation.isCanceled = true;
+
+            const cancelCommentTextarea: HTMLTextAreaElement = document.querySelector("#cancel-comment-textarea");
+            const cancelComment: string = cancelCommentTextarea.value;
+            reservation.cancelComment = cancelComment;
+
+            try {
+                await window.sqlUpdate.reservation(reservation);
+            } catch (error: unknown) {
+                console.error(error);
+            }
+        }
+    }
+    if (cancelSubmitButton) {
+        cancelSubmitButton.addEventListener("click", cancelEventHandler, false);
+    }
 })();

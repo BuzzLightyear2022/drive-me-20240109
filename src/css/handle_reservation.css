@@ -15,7 +15,8 @@
     width: 9em;
 }
 
-#comment-textarea {
+#comment-textarea,
+#cancel-comment-textarea {
     max-width: 100%;
     height: 10em;
 }
@@ -24,6 +25,6 @@ label {
     user-select: none;
 }
 
-.btn {
+/* .btn {
     width: 5em;
-}
+} */

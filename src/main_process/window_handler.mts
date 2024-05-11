@@ -14,10 +14,10 @@ export class WindowHandler {
         insertVehicleAttributesWindow: undefined,
         insertReservationWindow: undefined,
         displayReservationWindow: undefined,
-        editReservationWindow: undefined,
+        handleReservationWindow: undefined,
         editVehicleAttributesWindow: undefined,
         editCarCatalogWindow: undefined,
-        insertVehicleStatusWindow: undefined
+        statusOfRentalCarHandlerWindow: undefined
     }
 
     static createLoginWindow = () => {
@@ -110,46 +110,20 @@ export class WindowHandler {
 
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
             win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/handle_reservation.html`);
-            WindowHandler.windows.insertReservationWindow = win;
+            WindowHandler.windows.handleReservationWindow = win;
         } else {
             win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/handle_reservation.html`));
-            WindowHandler.windows.insertReservationWindow = win;
+            WindowHandler.windows.handleReservationWindow = win;
         }
 
         win.webContents.on("dom-ready", () => {
             win.webContents.send("contextmenu:getCrudArgs", args);
         });
+
+        win.on("close", () => {
+            WindowHandler.windows.handleReservationWindow = undefined;
+        });
     }
-
-    // static createEditReservationWindow = (reservationId: string): void => {
-    //     if (!WindowHandler.windows.editReservationWindow) {
-    //         const win: BrowserWindow = new BrowserWindow({
-    //             width: 1000,
-    //             height: 800,
-    //             webPreferences: {
-    //                 preload: WindowHandler.preloadScript
-    //             },
-    //         });
-
-    //         win.webContents.openDevTools();
-
-    //         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    //             win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/edit_reservation.html`);
-    //             WindowHandler.windows.editReservationWindow = win;
-    //         } else {
-    //             win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/edit_reservation.html`));
-    //             WindowHandler.windows.editReservationWindow = win;
-    //         }
-
-    //         win.webContents.on("dom-ready", () => {
-    //             win.webContents.send("contextmenu:getReservationId", reservationId);
-    //         });
-
-    //         win.on("closed", () => {
-    //             WindowHandler.windows.editReservationWindow = undefined;
-    //         });
-    //     }
-    // }
 
     static createDisplayReservationWindow = () => {
         const win: BrowserWindow = new BrowserWindow({
@@ -234,8 +208,10 @@ export class WindowHandler {
         }
     }
 
-    static createInsertVehicleStatusWindow = (rentalCarId: string) => {
-        if (!WindowHandler.windows.insertVehicleStatusWindow) {
+    static createStatusOfRentalCarHandlerWindow = (args: { rentalCarId: string }) => {
+        const { rentalCarId } = args;
+
+        if (!WindowHandler.windows.statusOfRentalCarHandlerWindow) {
             const win: BrowserWindow = new BrowserWindow({
                 width: 800,
                 height: 600,
@@ -244,7 +220,7 @@ export class WindowHandler {
                 }
             });
 
-            // win.webContents.openDevTools();
+            win.webContents.openDevTools();
 
             win.menuBarVisible = false;
 
@@ -253,15 +229,15 @@ export class WindowHandler {
             });
 
             win.on("closed", () => {
-                WindowHandler.windows.insertVehicleStatusWindow = undefined;
+                WindowHandler.windows.statusOfRentalCarHandlerWindow = undefined;
             });
 
             if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-                win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/insert_vehicle_status.html`);
-                WindowHandler.windows.insertVehicleStatusWindow = win;
+                win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/status_of_rentalCar_handler.html`);
+                WindowHandler.windows.statusOfRentalCarHandlerWindow = win;
             } else {
-                win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/insert_vehicle_status.html`));
-                WindowHandler.windows.insertVehicleStatusWindow = win;
+                win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/status_of_rentalCar_handler.html`));
+                WindowHandler.windows.statusOfRentalCarHandlerWindow = win;
             }
         }
     }
