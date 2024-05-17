@@ -89,7 +89,10 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
                 withCredentials: true
             });
 
-            WindowHandler.windows.insertReservationWindow.close();
+            if (response.status === 200) {
+                WindowHandler.windows.handleReservationWindow.close();
+                WindowHandler.windows.handleReservationWindow = undefined;
+            }
 
             return response.status;
         } catch (error: unknown) {
@@ -103,8 +106,6 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
         const serverEndPoint = `https://${serverHost}:${port}/sqlInsert/rentalCarStatus`;
 
         try {
-            WindowHandler.windows.statusOfRentalCarHandlerWindow.close();
-
             const response: AxiosResponse = await axios.post(serverEndPoint, args, {
                 headers: {
                     "Content-Type": "application/json",
@@ -113,7 +114,10 @@ const port: string = import.meta.env.VITE_HTTPS_PORT;
                 withCredentials: true
             });
 
-            return response.status;
+            if (response.status === 200) {
+                WindowHandler.windows.statusOfRentalCarHandlerWindow.close();
+                WindowHandler.windows.statusOfRentalCarHandlerWindow = undefined;
+            }
         } catch (error: unknown) {
             console.error(error);
         }

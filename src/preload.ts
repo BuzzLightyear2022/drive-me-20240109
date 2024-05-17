@@ -223,9 +223,9 @@ contextBridge.exposeInMainWorld(
 
             return eventId;
         },
-        updateVehicleStatus: (callback: () => void) => {
+        updateRentalCarStatus: (callback: () => void) => {
             const eventId: number = generateUniqueId();
-            const eventName: string = "wssUpdate:vehicleStatus";
+            const eventName: string = "wssUpdate:rentalCarStatus";
 
             const listener = () => {
                 callback();

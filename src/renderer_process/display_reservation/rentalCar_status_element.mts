@@ -1,7 +1,5 @@
 import { RentalCarStatus } from "../../@types/types";
 
-const visualScheduleContainer: HTMLDivElement = document.querySelector("#visual-schedule-container");
-
 export class RentalCarStatusElement extends HTMLElement {
     constructor(args: { rentalCarStatus: RentalCarStatus, style: any }) {
         super();
@@ -37,7 +35,18 @@ export class RentalCarStatusElement extends HTMLElement {
                 washState = rentalCarStatus.washState;
         }
 
-        this.textContent = currentLocation + washState;
+        if (rentalCarStatus.washState === "貸出中") {
+            this.textContent = rentalCarStatus.washState;
+        } else {
+            this.textContent = currentLocation + washState;
+        }
+
+        const contextmenuHandler = {
+            handleEvent: () => {
+                window.contextmenu.scheduleCell({ rentalCarId: rentalCarStatus.rentalCarId });
+            }
+        }
+        this.addEventListener("contextmenu", contextmenuHandler, false);
     }
 }
 

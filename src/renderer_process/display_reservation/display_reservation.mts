@@ -335,7 +335,7 @@ const calendarInitializer = async () => {
     await appendCalendarDateElements();
     await appendRentalCarItems({ rentalCars: rentalCars });
 
-    await new Promise((resolve) => { setTimeout(resolve, 500) });
+    await new Promise((resolve) => { setTimeout(resolve, 1000) });
 
     await appendVisualSchedule();
 
@@ -352,4 +352,5 @@ const calendarInitializer = async () => {
     rentalClassSelect.addEventListener("change", calendarUpdater, false);
 
     window.webSocket.updateReservationData(calendarUpdater);
+    window.webSocket.updateRentalCarStatus(calendarUpdater);
 })();
