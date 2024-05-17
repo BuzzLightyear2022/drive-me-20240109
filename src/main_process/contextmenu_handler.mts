@@ -1,4 +1,4 @@
-import { ipcMain, Menu } from "electron";
+import { ipcMain, Menu, BrowserWindow } from "electron";
 import { WindowHandler } from "./window_handler.mjs";
 
 export class ContextmenuHandler {
@@ -73,13 +73,13 @@ export class ContextmenuHandler {
                 }
             ]);
 
-            menuTemplate.popup(WindowHandler.windows.displayReservationWindow);
+            menuTemplate.popup();
         });
     }
 
     static displayScheduleBarMenu = () => {
         ipcMain.on("contextmenu:schedule-bar", (event: Electron.IpcMainEvent, reservationId: string) => {
-            const contextMenu = Menu.buildFromTemplate([
+            const menuTemplate = Menu.buildFromTemplate([
                 {
                     label: "予約変更",
                     click: async () => {
@@ -93,7 +93,7 @@ export class ContextmenuHandler {
                     click: async () => WindowHandler.createHandleReservationWindow({ reservationId: reservationId, crudAction: "cancel" })
                 }
             ]);
-            contextMenu.popup(WindowHandler.windows.displayReservationWindow);
+            menuTemplate.popup();
         });
     }
 
