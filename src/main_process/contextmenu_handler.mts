@@ -79,12 +79,14 @@ export class ContextmenuHandler {
 
     static displayScheduleBarMenu = () => {
         ipcMain.on("contextmenu:schedule-bar", (event: Electron.IpcMainEvent, reservationId: string) => {
+            console.log(event);
             const menuTemplate = Menu.buildFromTemplate([
                 {
                     label: "予約変更",
                     click: async () => {
                         if (!WindowHandler.windows.handleReservationWindow) {
                             WindowHandler.createHandleReservationWindow({ reservationId: reservationId, crudAction: "update" });
+                            console.log(true);
                         }
                     }
                 },
@@ -93,6 +95,7 @@ export class ContextmenuHandler {
                     click: async () => WindowHandler.createHandleReservationWindow({ reservationId: reservationId, crudAction: "cancel" })
                 }
             ]);
+
             menuTemplate.popup();
         });
     }

@@ -26,6 +26,7 @@ export class ScheduleBar extends HTMLElement {
 
     contextmenuHandler = {
         handleEvent: (event: Event) => {
+            event.stopPropagation();
             window.contextmenu.scheduleBar(this.reservationId);
         }
     }
