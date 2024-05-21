@@ -8,8 +8,8 @@ import { WindowHandler } from "./window_handler.mjs";
 })();
 
 (async () => {
-    ipcMain.on("openWindow:reservationInputWindow", (): void => {
-        WindowHandler.createInsertReservationWindow();
+    ipcMain.on("openWindow:handleReservationWindow", (): void => {
+        WindowHandler.createHandleReservationWindow({});
     });
 })();
 

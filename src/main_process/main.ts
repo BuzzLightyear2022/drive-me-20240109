@@ -6,6 +6,7 @@ import "./sql_select_process.mjs";
 import "./sql_update_process.mjs"
 import "./fetch_json_process.mjs";
 import "./dialog_process.mjs"
+import "./auto_update_process.mjs";
 import dotenv from "dotenv";
 dotenv.config();
 
