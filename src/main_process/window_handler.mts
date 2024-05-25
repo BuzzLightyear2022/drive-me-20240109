@@ -125,6 +125,34 @@ export class WindowHandler {
         });
     }
 
+    static createLoanerRentalHandlerWindow = (args: {}) => {
+        const win: BrowserWindow = new BrowserWindow({
+            width: 1000,
+            height: 800,
+            webPreferences: {
+                preload: WindowHandler.preloadScript
+            }
+        });
+
+        win.webContents.openDevTools();
+
+        if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+            win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/html/loaner_rental_handler.html`);
+            WindowHandler.windows.handleReservationWindow = win;
+        } else {
+            win.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/html/loaner_rental_handler.html`));
+            WindowHandler.windows.handleReservationWindow = win;
+        }
+
+        win.webContents.on("dom-ready", () => {
+            win.webContents.send("contextmenu:getCrudArgs", args);
+        });
+
+        win.on("close", () => {
+            WindowHandler.windows.handleReservationWindow = undefined;
+        });
+    }
+
     static createDisplayReservationWindow = () => {
         const win: BrowserWindow = new BrowserWindow({
             width: 1000,

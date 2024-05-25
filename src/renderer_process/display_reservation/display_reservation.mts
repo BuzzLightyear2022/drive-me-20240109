@@ -172,6 +172,7 @@ const handleDisplayMonth = () => {
 
     const defineIntersectionObserver = (): IntersectionObserver => {
         const dateContainerWidth: number = dateContainer.getBoundingClientRect().width;
+        const rootMargin = `0px -${dateContainerWidth}px 0px 0px`;
 
         const intersectionObserver: IntersectionObserver = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
             entries.forEach((entry: IntersectionObserverEntry) => {
@@ -184,10 +185,10 @@ const handleDisplayMonth = () => {
             });
         }, {
             root: dateContainer,
-            rootMargin: `0px -${dateContainerWidth}px 0px 0px`
+            rootMargin: `0px -${Math.round(dateContainerWidth)}px 0px 0px`
         });
 
-        for (let calendarDateElement of calendarDateElements) {
+        for (const calendarDateElement of calendarDateElements) {
             intersectionObserver.observe(calendarDateElement);
         }
 

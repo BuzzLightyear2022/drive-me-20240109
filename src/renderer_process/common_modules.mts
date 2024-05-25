@@ -124,13 +124,43 @@ export const loadImage = async (args: { fileName: string, width: string, height:
 }
 
 export const convertToKatakana = (inputElement: HTMLInputElement): void => {
+    let isComposing = false;
+
+    inputElement.addEventListener("compositionstart", () => {
+        isComposing = true;
+    });
+
+    inputElement.addEventListener("compositionend", () => {
+        isComposing = false;
+        convertValue();
+    });
+
+    inputElement.addEventListener("compositionupdate", (event) => {
+        convertValue(true);
+    });
+
     inputElement.addEventListener("input", () => {
-        const convertedValue: string = inputElement.value.replace(/[\u3041-\u3096]/g, (match: string) => {
+        if (!isComposing) {
+            convertValue();
+        }
+    });
+
+    const convertValue = (isDuringComposition = false) => {
+        const cursorPosition = inputElement.selectionStart || 0;
+        const beforeCursor = inputElement.value.substring(0, cursorPosition);
+        const afterCursor = inputElement.value.substring(cursorPosition);
+
+        const convertedBeforeCursor = beforeCursor.replace(/[\u3041-\u3096]/g, (match: string) => {
             const chr = match.charCodeAt(0) + 0x60;
             return String.fromCharCode(chr);
         });
-        inputElement.value = convertedValue;
-    }, false);
+
+        inputElement.value = convertedBeforeCursor + afterCursor;
+
+        if (!isDuringComposition) {
+            inputElement.setSelectionRange(cursorPosition, cursorPosition);
+        }
+    };
 }
 
 export const asyncAppendOptionElements = async (args: { selectElement: HTMLSelectElement, appendedOptionStrings: string[] }): Promise<void> => {

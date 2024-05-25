@@ -66,6 +66,12 @@ export class ContextmenuHandler {
                     },
                 },
                 {
+                    label: "新規損保予約",
+                    click: async () => {
+                        WindowHandler.createLoanerRentalHandlerWindow({});
+                    }
+                },
+                {
                     label: "点検修理",
                     click: async () => {
 
@@ -86,7 +92,6 @@ export class ContextmenuHandler {
                     click: async () => {
                         if (!WindowHandler.windows.handleReservationWindow) {
                             WindowHandler.createHandleReservationWindow({ reservationId: reservationId, crudAction: "update" });
-                            console.log(true);
                         }
                     }
                 },
