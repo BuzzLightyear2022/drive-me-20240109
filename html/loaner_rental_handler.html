@@ -16,14 +16,272 @@
 
         <h1 id="title-element" class="title mt-4 mb-4">損保予約情報を入力してください</h1>
 
+        <div class="row">
+            <div class="input-group mb-3">
+                <span class="input-group-text">受注日</span>
+                <input type="date" class="form-control" id="reception-date">
+            </div>
+        </div>
 
+        <div class="row">
+            <div class="col mb-1">
+                <div class="form-floating">
+                    <select name="reception-branch" id="reception-branch-select" class="form-select"></select>
+                    <label for="reception-branch-select">損保受付店舗</label>
+                </div>
+                </class>
+            </div>
+            <div class="col mb-1">
+                <div class="form-floating">
+                    <select name="reception-handler" id="reception-handler-select" class="form-select"></select>
+                    <label for="reception-handler-select">担当</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="form-floating">
+                    <select name="client-name" id="client-name-select" class="form-select"></select>
+                    <label for="client-name-select">依頼先</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">依頼先担当者</span>
+                    <input type="text" class="form-control" id="contact-person-name-input">
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">使用者</span>
+                    <input type="text" class="form-control" id="user-name-input">
+                </div>
+            </div>
+
+            <div class="col mb-1">
+                <div class="input-form mb-3">
+                    <input type="radio" class="btn-check" id="non-smoking-radio" name="non-smoking">
+                    <label for="non-smoking-radio" class="btn btn-outline-success">禁煙車</label>
+                    <input type="radio" class="btn-check" id="ok-smoking-radio" name="non-smoking">
+                    <label for="ok-smoking-radio" class="btn btn-outline-danger">喫煙車</label>
+                </div>
+
+                <div class="form-floating">
+                    <select name="car-model" id="car-model-select" class="form-select"></select>
+                    <label for="car-model-select">使用車種</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-3 mb-1">
+                <div class="form-floating">
+                    <select name="contact-type" id="contact-type-select" class="form-select">
+                        <option value="mobile">携帯</option>
+                        <option value="landline">自宅</option>
+                        <option value="office">職場</option>
+                    </select>
+                    <label for="contact-type-select">使用者連絡先</label>
+                </div>
+            </div>
+
+            <div class="col m-2">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="phone-number-first">
+                    <span class="input-group-text">-</span>
+                    <input type="text" class="form-control" id="phone-number-second">
+                    <span class="input-group-text">-</span>
+                    <input type="text" class="form-control" id="phone-number-third">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">配車日時</span>
+                    <input type="datetime-local" class="form-control" id="dispatch-time-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">配車場所</span>
+                    <input type="text" class="form-control" id="dispatch-location-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="remarks-input">
+                    <label for="remarks-input">その他連絡事項</label>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">損保会社名</span>
+                    <input type="text" class="form-control" id="insurance-provider-input">
+                </div>
+            </div>
+
+            <div class="col-2 mb-1">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="insurance-provider-coordinator-input">
+                    <span class="input-group-text">様</span>
+                </div>
+            </div>
+
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">TEL</span>
+                    <input type="text" class="form-control" id="insurance-provider-phone-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">修理工場</span>
+                    <input type="text" class="form-control" id="repair-facility-input">
+                </div>
+            </div>
+
+            <div class="col-2 mb-1">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="repair-facility-representative-input">
+                    <span class="input-group-text">様</span>
+                </div>
+            </div>
+
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">TEL</span>
+                    <input type="text" class="form-control" id="repair-facility-phone-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">受付番号</span>
+                    <input type="text" class="form-control" id="case-number-input">
+                </div>
+            </div>
+
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">事故日</span>
+                    <input type="date" class="form-control" id="accident-date-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6 mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">契約番号</span>
+                    <input type="text" class="form-control" id="policy-number-input">
+                </div>
+            </div>
+
+            <div class="col mb-1">
+                <select name="coverage-category" class="form-select" id="coverage-category-select">
+                    <option value="property">対物</option>
+                    <option value="collision">車両</option>
+                </select>
+            </div>
+
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">@</span>
+                    <input type="text" class="form-control" id="daily-amount">
+                    <span class="input-group-text">円</span>
+                </div>
+            </div>
+
+            <div class="col m-2">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="recompense-check">
+                    <label for="recompense-check" class="form-check-label">賠償</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">契約者</span>
+                    <input type="text" class="form-control" id="policyholder-name">
+                </div>
+            </div>
+
+            <div class="col mt-2 mb-1">
+                <p>レッカー搬送後特約（レッカーの場合住所記入）</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">使用者</span>
+                    <input type="text" class="form-control" id="user-name">
+                </div>
+            </div>
+
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">引取先</span>
+                    <input type="text" class="form-control" id="pickup-location">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">お客様所有車</span>
+                    <input type="text" class="form-control" id="owned-car-input">
+                </div>
+            </div>
+
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">搬送先</span>
+                    <input type="text" class="form-control" id="transport-location">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col mb-1">
+                <div class="input-group">
+                    <span class="input-group-text">限度日</span>
+                    <input type="date" class="form-control" id="limit-date-input">
+                </div>
+            </div>
+        </div>
+
+        <hr>
 
         <button class="btn btn-primary m-1" id="submit-button">予約確定</button>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
-        </script>
-    <script type="module" src="../src/renderer_process/loaner_rental_handler.mts"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
+            </script>
+        <script type="module" src="../src/renderer_process/loaner_rental_handler.mts"></script>
 </body>
+
 </html>
