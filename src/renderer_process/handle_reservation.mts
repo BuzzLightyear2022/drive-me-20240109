@@ -1,6 +1,6 @@
-import { Reservation, CarCatalog, SelectOptions } from "../../@types/types";
-import { setRadioValue, getRadioValue, convertToKatakana, replaceFullWidthNumToHalfWidthNum, asyncAppendOptionElements, formatDateForInput, formatDatetimeForInput } from "../common_modules.mjs";
-import { rentalCarOptionsHandler } from "./rentalCar_options_handler.mjs";
+import { Reservation, CarCatalog, SelectOptions } from "../@types/types";
+import { setRadioValue, getRadioValue, convertToKatakana, replaceFullWidthNumToHalfWidthNum, asyncAppendOptionElements, formatDateForInput, formatDatetimeForInput } from "./common_modules/common_modules.mjs";
+import { rentalCarOptionsHandler } from "./common_modules/rentalCar_options_handler.mjs";
 
 const titleElement: HTMLElement = document.querySelector("#title-element");
 const isRepliedCheck: HTMLInputElement = document.querySelector("#replied-check");

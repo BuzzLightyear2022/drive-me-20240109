@@ -1,6 +1,7 @@
 const loginForm: HTMLDivElement = document.querySelector("#login-form");
 
 loginForm.addEventListener("submit", async (event) => {
+    console.log("login")
     event.preventDefault();
 
     const usernameInput: HTMLInputElement = document.querySelector("#username");

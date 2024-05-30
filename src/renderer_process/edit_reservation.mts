@@ -1,6 +1,6 @@
-import { appendOptions } from "./common_modules.mjs";
+import { appendOptions } from "./common_modules/common_modules.mjs";
 import { ReservationData, LicensePlatesData, VehicleAttributes } from "../@types/types";
-import { getRadioValue, setRadioValue, convertToSystemTimezone } from "./common_modules.mjs";
+import { getRadioValue, setRadioValue, convertToSystemTimezone } from "./common_modules/common_modules.mjs";
 
 const isRepliedCheck: HTMLInputElement = document.querySelector("#is-replied-check");
 const receptionDateInput: HTMLInputElement = document.querySelector("#reception-date");

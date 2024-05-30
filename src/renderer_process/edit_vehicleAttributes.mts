@@ -1,5 +1,5 @@
 import { CarCatalog, VehicleAttributes, Navigations } from "../@types/types";
-import { appendOptions, replaceFullWidthNumToHalfWidthNum, loadImage } from "./common_modules.mjs";
+import { appendOptions, replaceFullWidthNumToHalfWidthNum, loadImage } from "./common_modules/common_modules.mjs";
 import NoImagePng from "../assets/NoImage.png";
 import squareAndArrowUpCircleFill from "../assets/square.and.arrow.up.circle.fill@2x.png";
 

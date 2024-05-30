@@ -8,7 +8,7 @@ import {
     CarLocation,
     RentalCarStatus
 } from "./@types/types";
-import { generateUniqueId } from "./renderer_process/common_modules.mjs";
+import { generateUniqueId } from "./renderer_process/common_modules/common_modules.mjs";
 
 const wsReservationUpdateListeners: any[] = [];
 const wsVehicleAttributesUpdateListeners: any[] = [];
@@ -133,7 +133,7 @@ contextBridge.exposeInMainWorld(
         reservation: async (reservation: Reservation): Promise<void> => {
             ipcRenderer.send("sqlUpdate:reservation", reservation);
         },
-        vehicleAttributes: async (args: { vehicleAttributes: VehicleAttributes }): Promise<void> => {
+        vehicleAttributes: async (args: { vehicleAttributes: RentalCar }): Promise<void> => {
             ipcRenderer.send("sqlUpdate:vehicleAttributes", args);
         }
     }

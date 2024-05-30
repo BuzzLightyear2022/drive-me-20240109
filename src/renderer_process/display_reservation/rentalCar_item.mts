@@ -1,5 +1,5 @@
 import { RentalCar } from "../../@types/types";
-import { loadImage } from "../common_modules.mjs";
+import { loadImage } from "../common_modules/common_modules.mjs";
 
 // export type VehicleItemType = InstanceType<typeof VehicleItem>;
 

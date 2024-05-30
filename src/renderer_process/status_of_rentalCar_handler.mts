@@ -1,4 +1,4 @@
-import { loadImage } from "./common_modules.mjs";
+import { loadImage } from "./common_modules/common_modules.mjs";
 import { CarLocation, RentalCarStatus, RentalCar, LicensePlate } from "../@types/types";
 
 const licensePlatePlace = document.querySelector("#license-plate-place");

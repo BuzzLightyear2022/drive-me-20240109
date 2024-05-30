@@ -1,5 +1,5 @@
 import { CarCatalog, VehicleAttributes, Navigations } from "../@types/types";
-import { appendOptions } from "./common_modules.mjs";
+import { appendOptions } from "./common_modules/common_modules.mjs";
 import NoFileChosenPng from "../assets/NoFileChosen.png";
 
 const submitButton: HTMLButtonElement = document.querySelector("#submit-button");

@@ -1,4 +1,4 @@
-import { ipcMain, Menu, BrowserWindow } from "electron";
+import { ipcMain, Menu } from "electron";
 import { WindowHandler } from "./window_handler.mjs";
 
 export class ContextmenuHandler {
@@ -68,7 +68,7 @@ export class ContextmenuHandler {
                 {
                     label: "新規損保予約",
                     click: async () => {
-                        WindowHandler.createLoanerRentalHandlerWindow({});
+                        WindowHandler.createLoanerRentalHandlerWindow({ rentalCarId: rentalCarId, crudAction: "create" });
                     }
                 },
                 {

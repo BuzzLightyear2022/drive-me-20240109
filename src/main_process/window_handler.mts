@@ -34,6 +34,9 @@ export class WindowHandler {
 
         loginWindow.menuBarVisible = false;
 
+        loginWindow.maximize();
+        loginWindow.webContents.openDevTools();
+
         if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
             loginWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
             WindowHandler.windows.loginWindow = loginWindow;
@@ -125,7 +128,7 @@ export class WindowHandler {
         });
     }
 
-    static createLoanerRentalHandlerWindow = (args: {}) => {
+    static createLoanerRentalHandlerWindow = (args: { rentalCarId?: string, reservationId?: string, crudAction: string }) => {
         const win: BrowserWindow = new BrowserWindow({
             width: 1000,
             height: 800,

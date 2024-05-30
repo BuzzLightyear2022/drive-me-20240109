@@ -1,5 +1,5 @@
 import { Reservation } from "../../@types/types";
-import { getTimeString, getDateString } from "../common_modules.mjs";
+import { getTimeString, getDateString } from "../common_modules/common_modules.mjs";
 
 export class ScheduleBar extends HTMLElement {
     reservationId: string;

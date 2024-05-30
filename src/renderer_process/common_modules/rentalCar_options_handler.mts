@@ -61,7 +61,6 @@ const rentalCarIdSelectHandler = {
 
 export const rentalCarOptionsHandler = async (args: { rentalCarId?: string }) => {
     const { rentalCarId } = args;
-    console.debug(rentalCarId);
 
     let selectedRentalCar: RentalCar = undefined;
 

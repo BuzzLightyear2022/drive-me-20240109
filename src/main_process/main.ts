@@ -25,6 +25,7 @@ const imageDirectory: string = import.meta.env.VITE_IMAGE_DIRECTORY;
 const systemTimezone: string = import.meta.env.VITE_TZ;
 
 app.on("ready", WindowHandler.createLoginWindow);
+console.log(WindowHandler.preloadScript);
 
 ipcMain.handle("serverInfo:serverHost", (): string => {
     return serverHost;

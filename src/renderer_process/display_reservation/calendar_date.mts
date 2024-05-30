@@ -1,4 +1,4 @@
-import { getDayString } from "../common_modules.mjs";
+import { getDayString } from "../common_modules/common_modules.mjs";
 
 export class CalendarDate extends HTMLElement {
     constructor(args: { dateObject: Date }) {
